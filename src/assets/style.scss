@@ -1,0 +1,121 @@
+@import "bootstrap/scss/bootstrap";
+@import "bootstrap-icons/font/bootstrap-icons.css";
+
+$red: red;
+$yellow: yellow;
+$grey: grey;
+$skyblue: skyblue;
+$blue: blue;
+$purple: purple;
+$white: white;
+$black: black;
+$orange: orange;
+$orangered: orangered;
+$deeppink: deeppink;
+$pink: pink;
+$darkblue: darkblue;
+$deepskyblue: deepskyblue;
+$mediumblue: mediumblue;
+
+.stat_card {
+  border: solid 1px;
+  border-radius: 5px;
+  display: inline-block;
+  width: 1em;
+  @extend .me-1;
+}
+
+.red_card {
+  @extend .stat_card;
+  background-color: $red;
+  border-color: $red;
+}
+
+.yellow_card {
+  @extend .stat_card;
+  background-color: $yellow;
+  border-color: $yellow;
+}
+
+.grey_card {
+  @extend .stat_card;
+  background-color: $grey;
+  border-color: $grey;
+}
+
+.skyblue_card {
+  @extend .stat_card;
+  background-color: $skyblue;
+  border-color: $skyblue;
+}
+
+.blue_card {
+  @extend .stat_card;
+  background-color: $blue;
+  border-color: $blue;
+}
+
+.purple_card {
+  @extend .stat_card;
+  background-color: $purple;
+  border-color: $purple;
+}
+
+.white_card {
+  @extend .stat_card;
+  background-color: $white;
+  border-color: $black;
+}
+
+.icon_pos {
+  font-size: 1.6rem;
+  font-weight: 900;
+  position:absolute;
+  top:-5px;
+}
+
+.red_8 {
+  color: $purple
+}
+
+.red_7 {
+  color: $red
+}
+
+.red_6 {
+  color: $orangered
+}
+
+.red_5 {
+  color: $deeppink
+}
+
+.red_other {
+  color: $pink
+}
+
+.blue_7 {
+  color: $darkblue
+}
+
+.blue_6 {
+  color: $mediumblue
+}
+
+.blue_5 {
+  color: $blue
+}
+
+.blue_4 {
+  color: $deepskyblue
+}
+
+.blue_3 {
+  color: $skyblue
+}
+
+.lv_font {
+  font-size: 1.2rem;
+  margin-left: 0.2rem;
+}
+
