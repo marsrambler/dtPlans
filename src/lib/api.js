@@ -1,7 +1,8 @@
 import axios from "axios";
 import {useApiStore} from "../store/apiStore.js";
+//let currLoc = window.location
+const restBaseUrl = "http://192.168.1.3:8080/dt-plans/"
 
-const restBaseUrl = "http://192.168.43.118:8080/dt-plans/"
 export const axiosInst = axios.create({
     baseURL: restBaseUrl,
     headers: {
