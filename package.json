@@ -13,6 +13,8 @@
     "axios": "^1.4.0",
     "bootstrap": "^5.3.1",
     "bootstrap-icons": "^1.10.5",
+    "highcharts": "^11.1.0",
+    "highcharts-vue": "^1.4.3",
     "pinia": "^2.1.6",
     "sass": "^1.55.0",
     "vue": "^3.3.4",

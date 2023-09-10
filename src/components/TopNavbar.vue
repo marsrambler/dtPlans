@@ -1,93 +1,117 @@
 <template>
-  <nav class="py-2 fixed-top">
-    <div class="container d-flex flex-wrap">
-      <ul class="nav me-auto">
-        <li class="nav-item"><router-link to="/" class="nav-link px-2 active" aria-current="page">Home</router-link></li>
-        <li class="nav-item"><a href="#" class="nav-link px-2">Features</a></li>
-        <li class="nav-item"><a href="#" class="nav-link px-2">Pricing</a></li>
-        <li class="nav-item"><a href="#" class="nav-link px-2">FAQs</a></li>
-        <li class="nav-item"><a href="#" class="nav-link px-2">About</a></li>
-      </ul>
-      <div class="flex-shrink-0 dropdown">
-        <a href="#" class="d-block text-decoration-none" id="dropdownUser2" data-bs-toggle="dropdown" aria-expanded="false" style="margin-top:5px">
-          <img src="/images/user_account_profile_icon.svg" alt="profile" width="24" height="24" class="rounded-circle">
-        </a>
-        <ul class="dropdown-menu text-small shadow" aria-labelledby="dropdownUser2" style="">
-          <li><router-link class="dropdown-item" to="/sign-in/">Sign-in</router-link></li>
-          <li><hr class="dropdown-divider"></li>
-          <li><a class="dropdown-item" href="/register/">Register</a></li>
+  <nav class="navbar fixed-top navbar-expand-sm navbar-dark bg-dark">
+    <div class="container-fluid">
+      <a class="navbar-brand" href="#">
+        <img width=32 height=32 style="border-radius: 16px;" src="/images/poseidon.png">
+      </a>
+      <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav"
+        aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+        <span class="navbar-toggler-icon"></span>
+      </button>
+      <div class="collapse navbar-collapse" id="navbarNav">
+        <ul class="navbar-nav" style="gap: 0.5rem;">
+          <router-link to="/" class="nav-item nav-link">仓库</router-link>
+          <router-link to="/kanban" class="nav-item nav-link">看板</router-link>
+          <router-link to="/composite" class="nav-item nav-link">组合</router-link>
+          <router-link to="/report" class="nav-item nav-link">报告</router-link>
+          <li class="nav-item dropdown">
+            <a class="nav-link dropdown-toggle" href="#" id="navbarDropdownMenuLink" role="button"
+              data-bs-toggle="dropdown" aria-expanded="false">
+              <span v-if="isSynced">已同步</span>
+              <span v-else>未同步</span>
+            </a>
+            <ul class="dropdown-menu" aria-labelledby="navbarDropdownMenuLink"
+              style="background-color: black; padding: 0;">
+              <li>
+                <button style="width: 100%; border-radius: 0;" type="button" class="btn btn-secondary"
+                  @click="runKanban4ui();">运行看板</button>
+              </li>
+              <li>
+                <button style="width: 100%; border-radius: 0;" type="button" class="btn btn-secondary"
+                  @click="syncKanban4ui();">同步看板</button>
+              </li>
+            </ul>
+          </li>
         </ul>
-      </div>
-      <div class="shopping-cart">
-        <router-link to="/cart/" class="d-block text-decoration-none" id="dropdownUser2" aria-expanded="false" style="margin-top:4px">
-          <img src="/images/basket_icon.svg" alt="cart" width="28" class="rounded-circle">
-          <span class="badge bg-primary rounded-pill">{{count}}</span>
-        </router-link>
       </div>
     </div>
   </nav>
+  <div class="modal fade" id="cfmDialog" tabindex="-1">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title">{{cfmDlgTitle}}</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+          <h6>{{cfmDlgCont}}</h6>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">取消</button>
+          <button type="button" class="btn btn-primary" @click.prevent="runOrSyncKanban();">确认</button>
+        </div>
+      </div>
+    </div>
+  </div>
 </template>
 
 <script setup>
-import {useCart} from "../store/cart.js";
-const cart = useCart()
-</script>
+import {onMounted, ref, computed} from 'vue'
+import { getSyncStatus, runKanban, syncKanban } from "../lib/opApi.js";
+import {Modal} from "bootstrap";
 
-<script>
-import {mapState} from 'pinia'
+const cfmDlgTitle = ref("")
+const cfmDlgCont = ref("")
+const cfmDlgType = ref("")
 
-export default {
-  data() {
-    return {};
-  },
-   computed: {
-    ...mapState(useCart, {
-      count: 'count'
-    })
-   },
+const server_status_objs = ref(null) 
+const isSynced = computed(() => {
+  if (server_status_objs.value == null) {
+		return false
+	} else if (server_status_objs.value['curr_date'] === server_status_objs.value['latest_probe_date'] 
+  && server_status_objs.value['curr_date'] === server_status_objs.value['latest_subs_date']) {
+		return true
+	} else {
+		return false
+	}
+})
 
-  methods: {
+const dlgController = ref({cfmDlg: null})
+onMounted(async () => {
+  dlgController.value.cfmDlg = new Modal('#cfmDialog', {})
+  server_status_objs.value = await getSyncStatus()
+})
 
-  }
+function runKanban4ui() {
+  cfmDlgTitle.value = "确认"
+  cfmDlgCont.value = "要在服务器上运行看板吗？"
+  cfmDlgType.value = "run kanban"
+  dlgController.value.cfmDlg.show()
 }
+
+function syncKanban4ui() {
+  cfmDlgTitle.value = "确认"
+  cfmDlgCont.value = "要同步看板数据吗？"
+  cfmDlgType.value = "sync kanban"
+  dlgController.value.cfmDlg.show()
+}
+
+function runOrSyncKanban() {
+  if (cfmDlgType.value === "run kanban") {
+    runKanban()
+  } else if (cfmDlgType.value === "sync kanban") {
+    syncKanban()
+  }
+  dlgController.value.cfmDlg.hide()
+}
+
 </script>
 
 <style scoped>
-#dropdownUser2 {
-  min-width: 40px;
-}
-nav .dropdown .dropdown-menu {
-  margin-left: -85px !important;
-}
-.wrapper .fixed-top {
-  position: sticky;
-  z-index: 2100;
-}
-.wrapper nav {
-  background-color: rgba(0,0,0,.8);
-}
-.wrapper nav a {
-  color: #e1bee7;
-  font-weight: 500;
-}
-.wrapper nav a:hover {
-  color: #f0ad4e;
-}
-nav .dropdown-menu a {
-  color: #222;
-}
-nav .dropdown-menu a:hover {
-  color: #555;
-}
-
-nav .bg-primary {
-  --bs-primary-rgb: 255,190,231;
-  --bs-bg-opacity: .9;
-  color: #0B212B;
-}
-.shopping-cart a .badge {
-  font-size: 11px;
-  margin-top:-3px;
-  padding: 3px 6px;
-}
-</style>
+a.router-link-exact-active {
+  background-color: cyan;
+  color: red;
+  border: solid 1px cyan;
+  /*border-radius: 1px;*/
+  font-weight: 900;
+}</style>

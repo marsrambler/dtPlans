@@ -1,16 +1,19 @@
 <script setup>
 import TopNavbar from "./components/TopNavbar.vue";
-import Cart from './pages/Cart.vue'
-import Home from "./pages/Home.vue";
-import SignIn from "./pages/SignIn.vue"
 
 import {onUpdated} from "vue";
 import {Toast} from 'bootstrap'
 import {useApiStore} from "./store/apiStore.js";
 import {storeToRefs} from 'pinia'
+import { useZsRepoStore } from "./store/zsrepoStore";
+import { useZskbStore } from "./store/zskbStore";
 
 const apiStore = useApiStore()
 const {requestMsgObjs, errorMsgObjs, isApiInProgress} = storeToRefs(apiStore)
+const zsrepoStore = useZsRepoStore()
+const {getZsRepo, getZsRepoHides} = zsrepoStore
+const zskbStore = useZskbStore()
+const {getZskb} = zskbStore
 
 onUpdated(() => {
   const hiddenToasts = errorMsgObjs.value.filter((obj) => {
@@ -33,18 +36,17 @@ onUpdated(() => {
   });
 });
 
+getZsRepo()
+getZsRepoHides()
+getZskb()
+
 </script>
 
 <template>
-  <!--
   <TopNavbar></TopNavbar>
-  -->
-  <!--  <Cart></Cart>-->
-  <!--  <Home></Home>-->
-  <!--  <SignIn></SignIn>-->
   <router-view></router-view>
 
-  <div v-if="isApiInProgress" style="position: absolute; left: 50%; top: 50%;"><!--class="text-center"-->
+  <div v-if="isApiInProgress" style="position: absolute; left: 50%; top: 50%;">
     <div class="spinner-border" role="status">
       <span class="visually-hidden">Loading...</span>
     </div>
@@ -65,7 +67,6 @@ onUpdated(() => {
       <div class="toast-body text-white error-body">{{ item.msg }}</div>
     </div>
   </div>
-
 </template>
 
 <style scoped>

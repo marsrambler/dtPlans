@@ -5,14 +5,12 @@ import {ref} from 'vue'
 export const useZskbStore = defineStore('zskb-store', () => {
     // state
     const zskbObjs = ref([])
-    const sortFieldName = ref('')
-    const sortFieldFlag = ref(true)
 
     // action
     async function getZskb() {
         try {
-            const response = await axiosInst.get("api/kanban/zhi-shu")
-            if (response.status == 200) {
+            const response = await axiosInst.get("dt-plans/api/kanban/zhi-shu")
+            if (response.status === 200) {
                 zskbObjs.value = await response.data;
             } else {
                 console.error("axios get zskb failed: ", response)
@@ -24,98 +22,51 @@ export const useZskbStore = defineStore('zskb-store', () => {
         }
     }
 
-    function sortByField(_field) {
-        if (sortFieldName.value === _field) {
-            sortFieldFlag.value = !sortFieldFlag.value
-        } else {
-            sortFieldName.value = _field
-            sortFieldFlag.value = true
-        }
-        if (_field === 'cluster_id') {
-            if (sortFieldFlag.value) {
-                zskbObjs.value.sort((a, b) => {
-                    return a['statistics']['cluster_id'] - b['statistics']['cluster_id'];
-                });
+    async function removeKanban(_fund_id, _fund_name) {
+        try {
+            const response = await axiosInst.post("dt-plans/api/remove-kanban", {
+                'fund_id': _fund_id,
+                'fund_name': _fund_name
+            })
+            if (response.status === 200) {
+                await getZskb()
+                return true
             } else {
-                zskbObjs.value.sort((a, b) => {
-                    return b['statistics']['cluster_id'] - a['statistics']['cluster_id'];
-                });
+                console.error("axios remove kanban failed: ", response)
+                return false
             }
-        } else if (_field === 'fund_type') {
-            if (sortFieldFlag.value) {
-                zskbObjs.value.sort((a, b) => {
-                    return a['indexType'] - b['indexType'];
-                });
-            } else {
-                zskbObjs.value.sort((a, b) => {
-                    return b['indexType'] - a['indexType'];
-                });
-            }
-        } else if (_field === 'min_earn') {
-            if (sortFieldFlag.value) {
-                zskbObjs.value.sort((a, b) => {
-                    return a['statistics']['min_earn'] + a['statistics']['min_earn_aux'] + a['statistics']['min_earn_tri'] - (
-                        b['statistics']['min_earn'] + b['statistics']['min_earn_aux'] + b['statistics']['min_earn_tri']);
-                });
-            } else {
-                zskbObjs.value.sort((a, b) => {
-                    return b['statistics']['min_earn'] + b['statistics']['min_earn_aux'] + b['statistics']['min_earn_tri'] - (
-                        a['statistics']['min_earn'] + a['statistics']['min_earn_aux'] + a['statistics']['min_earn_tri']);
-                });
-            }
-        } else if (_field === 'avg_earn') {
-            if (sortFieldFlag.value) {
-                zskbObjs.value.sort((a, b) => {
-                    return a['statistics']['avg_earn'] + a['statistics']['avg_earn_aux'] + a['statistics']['avg_earn_tri'] - (
-                        b['statistics']['avg_earn'] + b['statistics']['avg_earn_aux'] + b['statistics']['avg_earn_tri']);
-                });
-            } else {
-                zskbObjs.value.sort((a, b) => {
-                    return b['statistics']['avg_earn'] + b['statistics']['avg_earn_aux'] + b['statistics']['avg_earn_tri'] - (
-                        a['statistics']['avg_earn'] + a['statistics']['avg_earn_aux'] + a['statistics']['avg_earn_tri']);
-                });
-            }
-        } else if (_field === 'max_earn') {
-            if (sortFieldFlag.value) {
-                zskbObjs.value.sort((a, b) => {
-                    return a['statistics']['max_earn'] + a['statistics']['max_earn_aux'] + a['statistics']['max_earn_tri'] - (
-                        b['statistics']['max_earn'] + b['statistics']['max_earn_aux'] + b['statistics']['max_earn_tri']);
-                });
-            } else {
-                zskbObjs.value.sort((a, b) => {
-                    return b['statistics']['max_earn'] + b['statistics']['max_earn_aux'] + b['statistics']['max_earn_tri'] - (
-                        a['statistics']['max_earn'] + a['statistics']['max_earn_aux'] + a['statistics']['max_earn_tri']);
-                });
-            }
-        } else if (_field === 'positive') {
-            if (sortFieldFlag.value) {
-                zskbObjs.value.sort((a, b) => {
-                    return a['positive']['positive_reach_len'] - b['positive']['positive_reach_len'];
-                });
-            } else {
-                zskbObjs.value.sort((a, b) => {
-                    return b['positive']['positive_reach_len'] - a['positive']['positive_reach_len'];
-                });
-            }
-        } else if (_field === 'negative') {
-            if (sortFieldFlag.value) {
-                zskbObjs.value.sort((a, b) => {
-                    return a['negative']['negative_reach_len'] - b['negative']['negative_reach_len'];
-                });
-            } else {
-                zskbObjs.value.sort((a, b) => {
-                    return b['negative']['negative_reach_len'] - a['negative']['negative_reach_len'];
-                });
-            }
+        } catch (error) {
+            console.log("axios remove kanban failed: ", error)
+            return false
         }
     }
 
+    async function addKanban(_fund_id, _fund_name, _index_type, _index_url) {
+        try {
+            const response = await axiosInst.post("dt-plans/api/add-kanban", {
+                'fund_type': 'zhi-shu',
+                'fund_id': _fund_id,
+                'fund_name': _fund_name,
+                'index_type': _index_type,
+                'index_url': _index_url
+            })
+            if (response.status == 200) {
+                await getZskb()
+                return true
+            } else {
+                console.error("axios add kanban failed: ", response)
+                return false
+            }
+        } catch (error) {
+            console.log("axios add kanban failed: ", error)
+            return false
+        }
+    }
 
     return {
         zskbObjs,
-        sortFieldName,
-        sortFieldFlag,
         getZskb,
-        sortByField
+        removeKanban,
+        addKanban
     }
 });

@@ -1,313 +1,638 @@
 <template>
-<div style="position: relative; border: solid 1px blue;">
-  <div style="position: fixed; height: 10em; border: solid 2px green;">
-
-  </div>
-  <div style="height: 100rem; background-color: red;">
-
-  </div>
-  <!--
-  <div style="position: fixed; z-index: 1000;">
-    <div style="height: 3.5rem;">
-    操作面板
+  <div :style="topSecClass">
+    <div id="op_pane" :style="{'height': opPaneHeight + 'rem'}" class="grid_pane">
+      <div>总数:&nbsp;<span class="badge bg-success">{{ currTotNum }}</span>
+      </div>
+      <div style="cursor: pointer;" @click="clearSelected()">
+        选择:&nbsp;<span class="badge bg-warning text-dark">{{ currSelectedNum }}</span>
+      </div>
+      <!--      <div>隐藏:&nbsp;<span class="badge bg-warning text-dark">{{ currSelectedNum }}</span>-->
+      <!--      </div>-->
+      <div class="form-check" style="display: inline-block;">
+        <input class="form-check-input" type="checkbox" v-model="wideIdxOnly">
+        <label class="form-check-label" for="flexCheckDefault">宽基</label>
+      </div>
+      <div class="form-check" style="display: inline-block;">
+        <input class="form-check-input" type="checkbox" v-model="topicIdxOnly">
+        <label class="form-check-label" for="flexCheckChecked">主题</label>
+      </div>
+      <div class="form-check" style="display: inline-block;">
+        <input class="form-check-input" type="checkbox" v-model="indusIdxOnly">
+        <label class="form-check-label" for="flexCheckChecked">行业</label>
+      </div>
+      <input class="btn btn-primary btn-sm" type="button" value="排序" @click="sortByField('selected')">
+      <!--      <input class="btn btn-info btn-sm" type="button" value="隐藏选择">-->
+      <!--      <input class="btn btn-info btn-sm" type="button" value="清除隐藏">-->
+      <input class="btn btn-warning btn-sm" type="button" value="移出">
+      <input class="btn btn-primary btn-sm" type="button" value="报告">
+      <input type="text" class="form-control-plaintext search_box" v-model="searchCond" @keyup.enter="searchByCond()">
+      <input class="btn btn-primary btn-sm" type="button" value="查找" @click="searchByCond()">
     </div>
-    <table class="table table-bordered" style="table-layout: fixed;">
+    <table id="table_header" class="table table-bordered" style="margin-bottom: 0;">
       <thead style="">
-        <tr style="height: 3rem;">
-          <th :style="{'width': colWidMap['col_1'] + 'rem'}">
-            估值
-          </th>
-          <th  :style="{'width': colWidMap['col_2'] + 'rem'}" @click="sortByField('fund_type')">
-            <template v-if="sortFieldName === 'fund_type'">
+      <tr :style="{'height': tabHeaderHeight + 'rem'}">
+        <th :style="{'width': colWidMap['col_1'] + 'rem'}">
+          <!-- <div style="border-bottom: solid 1px whitesmoke;">信息</div> -->
+          <div>
+            <div class="w50_w_br" @click="sortByField('day_xxx_thres')">
+              <template v-if="sortFieldName === 'day_xxx_thres'">
+                <span v-if="sortFieldFlag"><i class="bi bi-arrow-up"></i></span>
+                <span v-else><i class="bi bi-arrow-down"></i></span>
+              </template>
+              <span>趋势</span>
+            </div>
+            <div class="w50_w_br" @click="sortByField('fund_len')" style="border: none;">
+              <template v-if="sortFieldName === 'fund_len'">
+                <span v-if="sortFieldFlag"><i class="bi bi-arrow-up"></i></span>
+                <span v-else><i class="bi bi-arrow-down"></i></span>
+              </template>
+              <span>长度</span>
+            </div>
+          </div>
+        </th>
+        <th :style="{'width': colWidMap['col_2'] + 'rem'}" @click="sortByField('fund_type')">
+          <template v-if="sortFieldName === 'fund_type'">
+            <span v-if="sortFieldFlag"><i class="bi bi-arrow-up"></i></span>
+            <span v-else><i class="bi bi-arrow-down"></i></span>
+          </template><!--
+          --><span>类型</span>
+        </th>
+        <th :style="{'width': colWidMap['col_3'] + 'rem'}" @click="sortByField('cluster_id')">
+          <template v-if="sortFieldName === 'cluster_id'">
             <span v-if="sortFieldFlag"><i class="bi bi-arrow-up"></i></span>
             <span v-else><i class="bi bi-arrow-down"></i></span>
           </template>
-          <span>Type</span>
-          </th>
-          <th :style="{'width': colWidMap['col_3'] + 'rem'}" @click="sortByField('cluster_id')">
-            <template v-if="sortFieldName === 'cluster_id'">
-              <span v-if="sortFieldFlag"><i class="bi bi-arrow-up"></i></span>
-              <span v-else><i class="bi bi-arrow-down"></i></span>
-            </template>
-            <span>Cluster</span>
-          </th>
-          <th :style="{'width': colWidMap['col_4'] + colWidMap['col_5'] + colWidMap['col_6'] + 'rem'}" colspan="3">
-            <div>Statistics</div>
-            <div>
-              <div style="display: inline-block; width: 33.3%;" @click="sortByField('min_earn')">
-                <template v-if="sortFieldName === 'min_earn'">
-                  <span v-if="sortFieldFlag"><i class="bi bi-arrow-up"></i></span>
-                  <span v-else><i class="bi bi-arrow-down"></i></span>
-                </template>
-                <span>最小</span>
-              </div>
-              <div style="display: inline-block; width: 33.3%;" @click="sortByField('avg_earn')">
-                <template v-if="sortFieldName === 'avg_earn'">
-                  <span v-if="sortFieldFlag"><i class="bi bi-arrow-up"></i></span>
-                  <span v-else><i class="bi bi-arrow-down"></i></span>
-                </template>
-                <span>平均</span>
-              </div>
-              <div style="display: inline-block; width: 33.3%;" @click="sortByField('max_earn')">
-                <template v-if="sortFieldName === 'max_earn'">
-                  <span v-if="sortFieldFlag"><i class="bi bi-arrow-up"></i></span>
-                  <span v-else><i class="bi bi-arrow-down"></i></span>
-                </template>
-                <span>最大</span>
-              </div>
+          <span>簇</span>
+        </th>
+        <th :style="{'width': colWidMap['col_4'] + colWidMap['col_5'] + colWidMap['col_6'] + 'rem'}" colspan="3">
+          <!-- <div style="border-bottom: solid 1px whitesmoke;">统计盈利率</div> -->
+          <div>
+            <div class="w33_w_br" @click="sortByField('min_earn')">
+              <template v-if="sortFieldName === 'min_earn'">
+                <span v-if="sortFieldFlag"><i class="bi bi-arrow-up"></i></span>
+                <span v-else><i class="bi bi-arrow-down"></i></span>
+              </template>
+              <span>最小</span>
             </div>
-          </th>
-          <th :style="{'width': colWidMap['col_7'] + colWidMap['col_8'] + 'rem'}" colspan="2">
-            <div>Positive</div>
-            <div>
-              <div style="display: inline-block; width: 50%;" @click="sortByField('positive')">
-                <template v-if="sortFieldName === 'positive'">
-                  <span v-if="sortFieldFlag"><i class="bi bi-arrow-up"></i></span>
-                  <span v-else><i class="bi bi-arrow-down"></i></span>
-                </template>
-                <span>高点</span>
-              </div>
-              <div style="display: inline-block; width: 50%;" @click="sortByField('negative')">
-                <template v-if="sortFieldName === 'negative'">
-                  <span v-if="sortFieldFlag"><i class="bi bi-arrow-up"></i></span>
-                  <span v-else><i class="bi bi-arrow-down"></i></span>
-                </template>
-                <span>低点</span>
-              </div>
-            </div>          
-          </th>
-          <th :style="{'width': colWidMap['col_9'] + colWidMap['col_10'] + colWidMap['col_11'] + 'rem'}"  colspan="3">
-          </th>
-          <th style="cursor:pointer; text-align: center;">
-          </th>
-        </tr>
+            <div class="w33_w_br" @click="sortByField('avg_earn')">
+              <template v-if="sortFieldName === 'avg_earn'">
+                <span v-if="sortFieldFlag"><i class="bi bi-arrow-up"></i></span>
+                <span v-else><i class="bi bi-arrow-down"></i></span>
+              </template>
+              <span>平均</span>
+            </div>
+            <div class="w33_w_br" @click="sortByField('max_earn')" style="border: none;">
+              <template v-if="sortFieldName === 'max_earn'">
+                <span v-if="sortFieldFlag"><i class="bi bi-arrow-up"></i></span>
+                <span v-else><i class="bi bi-arrow-down"></i></span>
+              </template>
+              <span>最大</span>
+            </div>
+          </div>
+        </th>
+        <th :style="{'width': colWidMap['col_7'] + colWidMap['col_8'] + 'rem'}" colspan="2">
+          <!-- <div style="border-bottom: solid 1px whitesmoke;">均线高低点</div> -->
+          <div>
+            <div class="w50_w_br" @click="sortByField('positive')">
+              <template v-if="sortFieldName === 'positive'">
+                <span v-if="sortFieldFlag"><i class="bi bi-arrow-up"></i></span>
+                <span v-else><i class="bi bi-arrow-down"></i></span>
+              </template>
+              <span>高点</span>
+            </div>
+            <div class="w50_w_br" @click="sortByField('negative')" style="border: none;">
+              <template v-if="sortFieldName === 'negative'">
+                <span v-if="sortFieldFlag"><i class="bi bi-arrow-up"></i></span>
+                <span v-else><i class="bi bi-arrow-down"></i></span>
+              </template>
+              <span>低点</span>
+            </div>
+          </div>
+        </th>
+        <th :style="{'width': colWidMap['col_9'] + colWidMap['col_10'] + colWidMap['col_11'] + 'rem'}" colspan="3">
+          <!-- <div style="border-bottom: solid 1px whitesmoke;">推荐估值</div> -->
+          <div>
+            <div class="w33_w_br" @click="sortByField('esti_pe_ding')">
+              <template v-if="sortFieldName === 'esti_pe_ding'">
+                <span v-if="sortFieldFlag"><i class="bi bi-arrow-up"></i></span>
+                <span v-else><i class="bi bi-arrow-down"></i></span>
+              </template>
+              <span>螺丝钉</span>
+            </div>
+            <div class="w33_w_br" @click="sortByField('esti_pe_zhi')">
+              <template v-if="sortFieldName === 'esti_pe_zhi'">
+                <span v-if="sortFieldFlag"><i class="bi bi-arrow-up"></i></span>
+                <span v-else><i class="bi bi-arrow-down"></i></span>
+              </template>
+              <span>支付宝</span>
+            </div>
+            <div class="w33_w_br" @click="sortByField('esti_pe_wei')" style="border: none;">
+              <template v-if="sortFieldName === 'esti_pe_wei'">
+                <span v-if="sortFieldFlag"><i class="bi bi-arrow-up"></i></span>
+                <span v-else><i class="bi bi-arrow-down"></i></span>
+              </template>
+              <span>理财通</span>
+            </div>
+          </div>
+        </th>
+        <th :style="{'width': colWidMap['col_12'] + 'rem'}" @click="sortByField('fund_plan')">
+          <template v-if="sortFieldName === 'fund_plan'">
+            <span v-if="sortFieldFlag"><i class="bi bi-arrow-up"></i></span>
+            <span v-else><i class="bi bi-arrow-down"></i></span>
+          </template><!--
+          --><span>组合</span>
+        </th>
+      </tr>
       </thead>
       <tbody>
       </tbody>
     </table>
   </div>
-  -->
-  <!--
-  <table class="table table-bordered" style="position: absolute; top: 7rem; table-layout: fixed;">
-    <thead style="">
-    <tr>
-      <th :style="{'width': colWidMap['col_1'] + 'rem'}"></th>
-      <th :style="{'width': colWidMap['col_2'] + 'rem'}"></th>
-      <th :style="{'width': colWidMap['col_3'] + 'rem'}"></th>
-      <th :style="{'width': colWidMap['col_4'] + 'rem'}"></th>
-      <th :style="{'width': colWidMap['col_5'] + 'rem'}"></th>
-      <th :style="{'width': colWidMap['col_6'] + 'rem'}"></th>
-      <th :style="{'width': colWidMap['col_7'] + 'rem'}"></th>
-      <th :style="{'width': colWidMap['col_8'] + 'rem'}"></th>
-      <th :style="{'width': colWidMap['col_9'] + 'rem'}"></th>
-      <th :style="{'width': colWidMap['col_10'] + 'rem'}"></th>
-      <th :style="{'width': colWidMap['col_11'] + 'rem'}"></th>
-      <th></th>
-    </tr>
-    </thead>
-    <tbody>
-    <tr v-for="oneRow in zskbObjs" v-bind:id="oneRow.fund_id">
-      <td>
-        <div>
-          {{oneRow.fund_id}}
-        </div>
-        <div>
-          {{oneRow.fund_name}}
-        </div>
-        <div>
-          <span v-bind:class="getCardStyle(oneRow.statistics.day_200_thres)">&nbsp;</span>
-          <span v-bind:class="getCardStyle(oneRow.statistics.day_300_thres)">&nbsp;</span>
-          <span v-bind:class="getCardStyle(oneRow.statistics.day_400_thres)">&nbsp;</span>
-          <span v-bind:class="getCardStyle(oneRow.statistics.day_500_thres)">&nbsp;</span>
-          <span v-bind:class="getCardStyle(oneRow.statistics.day_600_thres)">&nbsp;</span>
-          <span>{{oneRow.statistics.fund_perc_len}}</span>
-        </div>
-      </td>
-      <td style="text-align: center;">
-        {{typeMapObj[oneRow.indexType]}}
-      </td>
-      <td style="text-align: center;">
-        {{oneRow.statistics.cluster_id}}
-      </td>
-      <td style="text-align: center;">
-        <div>
-          {{oneRow.statistics.min_earn_str}}
-        </div>
-        <div>
-          {{oneRow.statistics.min_earn_aux_str}}
-        </div>
-        <div>
-          {{oneRow.statistics.min_earn_tri_str}}
-        </div>
-      </td>
-      <td style="text-align: center;">
-        <div>
-          {{oneRow.statistics.avg_earn_str}}
-        </div>
-        <div>
-          {{oneRow.statistics.avg_earn_aux_str}}
-        </div>
-        <div>
-          {{oneRow.statistics.avg_earn_tri_str}}
-        </div>
-      </td>
-      <td style="text-align: center;">
-        <div>
-          {{oneRow.statistics.max_earn_str}}
-        </div>
-        <div>
-          {{oneRow.statistics.max_earn_aux_str}}
-        </div>
-        <div>
-          {{oneRow.statistics.max_earn_tri_str}}
-        </div>
-      </td>
-      <td style="text-align: center;">
-        <div style="height: 2.2em; position: relative;" v-bind:class="getPosColor(oneRow.positive.positive_reach_len)">
-          <span v-if="oneRow.positive.positive_reach_len >= 4" class="icon_pos">
-          <i class="bi bi-arrow-up-circle-fill"></i>
-          <span class="lv_font">{{oneRow.positive.positive_reach_len}}</span>
-          </span>
-        </div>
-        <div style="height: 2.2em; position: relative;" v-bind:class="getNegColor(oneRow.negative.negative_reach_len)">
-          <span v-if="oneRow.negative.negative_reach_len >= 3" class="icon_pos">
-          <i class="bi bi-arrow-down-circle-fill"></i>
-            <span class="lv_font">{{oneRow.negative.negative_reach_len}}</span>
-          </span>
-        </div>
-      </td>
-      <td style="">
-        <div style="height: 2.2em;">
-          <span v-bind:class="getHitStyle(oneRow.positive.day_5_positive_reach)">&nbsp;</span>
-          <span v-bind:class="getHitStyle(oneRow.positive.day_10_positive_reach)">&nbsp;</span>
-          <span v-bind:class="getHitStyle(oneRow.positive.day_20_positive_reach)">&nbsp;</span>
-          <span v-bind:class="getHitStyle(oneRow.positive.day_60_positive_reach)">&nbsp;</span>
-          <span v-bind:class="getHitStyle(oneRow.positive.day_90_positive_reach)">&nbsp;</span>
-          <span v-bind:class="getHitStyle(oneRow.positive.day_120_positive_reach)">&nbsp;</span>
-          <span v-bind:class="getHitStyle(oneRow.positive.day_160_positive_reach)">&nbsp;</span>
-          <span v-bind:class="getHitStyle(oneRow.positive.day_220_positive_reach)">&nbsp;</span>
-        </div>
-        <div style="height: 2.2em;">
-          <span v-bind:class="getHitStyle(oneRow.negative.day_5_negative_reach)">&nbsp;</span>
-          <span v-bind:class="getHitStyle(oneRow.negative.day_10_negative_reach)">&nbsp;</span>
-          <span v-bind:class="getHitStyle(oneRow.negative.day_20_negative_reach)">&nbsp;</span>
-          <span v-bind:class="getHitStyle(oneRow.negative.day_60_negative_reach)">&nbsp;</span>
-          <span v-bind:class="getHitStyle(oneRow.negative.day_90_negative_reach)">&nbsp;</span>
-          <span v-bind:class="getHitStyle(oneRow.negative.day_120_negative_reach)">&nbsp;</span>
-          <span v-bind:class="getHitStyle(oneRow.negative.day_160_negative_reach)">&nbsp;</span>
-        </div>
-      </td>
-      <td style="text-align: center;">
-        <select class="form-select" v-model="oneRow['esti_pe']['ding']">
-						<option v-for="option in buy_in_esti_sugg_full" v-bind:value="option.source_val">
-						{{option.source_name}}
-					</option>
-				</select>
-      </td>
-      <td style="text-align: center;">
-        <select class="form-select" v-model="oneRow['esti_pe']['zhi']">
-						<option v-for="option in buy_in_esti_sugg_full" v-bind:value="option.source_val">
-						{{option.source_name}}
-					</option>
-				</select>
-      </td>
-      <td style="text-align: center;">
-        <select class="form-select" v-model="oneRow['esti_pe']['wei']">
-						<option v-for="option in buy_in_esti_sugg_full" v-bind:value="option.source_val">
-						{{option.source_name}}
-					</option>
-				</select>
-      </td>
-      <td style="text-align: center;">
-        <select class="form-select">
-						<option v-for="option in buy_in_from_plan" v-bind:value="option.source_val">
-						{{option.source_name}}
-					</option>
-				</select>
-      </td>
-    </tr>
-    </tbody>
-  </table>
--->
-  <!-- <table class="table" style="position: fixed; border: solid 1px red; height: 10rem;">
-    <thead>
+
+  <div style="position: relative;">
+    <table id="table_content" class="table table-bordered"
+           :style="{'position': 'absolute', 'top': tabContTopPos + 'rem', 'min-width': minPaneWidth + 'rem'}">
+      <thead style="">
       <tr>
-        <th>head--1</th>
+        <th :style="{'width': colWidMap['col_1'] + 'rem'}"></th>
+        <th :style="{'width': colWidMap['col_2'] + 'rem'}"></th>
+        <th :style="{'width': colWidMap['col_3'] + 'rem'}"></th>
+        <th :style="{'width': colWidMap['col_4'] + 'rem'}"></th>
+        <th :style="{'width': colWidMap['col_5'] + 'rem'}"></th>
+        <th :style="{'width': colWidMap['col_6'] + 'rem'}"></th>
+        <th :style="{'width': colWidMap['col_7'] + 'rem'}"></th>
+        <th :style="{'width': colWidMap['col_8'] + 'rem'}"></th>
+        <th :style="{'width': colWidMap['col_9'] + 'rem'}"></th>
+        <th :style="{'width': colWidMap['col_10'] + 'rem'}"></th>
+        <th :style="{'width': colWidMap['col_11'] + 'rem'}"></th>
+        <th :style="{'width': colWidMap['col_12'] + 'rem'}"></th>
       </tr>
-    </thead>
-    <tbody>
-      <tr>
-        <td>td--1</td>
-      </tr>
-    </tbody>
-  </table>
-  <table class="table" style="position: absolute; border: solid 1px green; top: 10rem;">
-    <thead>
-      <tr>
-        <th>head--2</th>
-      </tr>
-    </thead>
-    <tbody>
-      <tr>
-        <td>td--2</td>
-      </tr>
-    </tbody>
-  </table> -->
-</div>
+      </thead>
+      <tbody>
+      <template v-for="oneRow in zskbViewObjs">
+        <tr v-bind:id="oneRow.fund_id" style="cursor: pointer;" @click="selOrDesRow(oneRow)"
+            v-bind:class="{sel_row: oneRow['currSelected']}" :ref="(el) => (rowElements[oneRow.fund_id] = el)">
+          <td v-bind:class="{sel_row: oneRow['currSelected']}">
+            <div>
+              {{ oneRow.fund_id }}
+            </div>
+            <div>
+              {{ oneRow.fund_name }}
+            </div>
+            <div>
+              <span v-bind:class="getCardStyle(oneRow.statistics.day_200_thres)">&nbsp;</span>
+              <span v-bind:class="getCardStyle(oneRow.statistics.day_300_thres)">&nbsp;</span>
+              <span v-bind:class="getCardStyle(oneRow.statistics.day_400_thres)">&nbsp;</span>
+              <span v-bind:class="getCardStyle(oneRow.statistics.day_500_thres)">&nbsp;</span>
+              <span v-bind:class="getCardStyle(oneRow.statistics.day_600_thres)">&nbsp;</span>
+              <span>{{ oneRow.statistics.fund_perc_len }}</span>
+            </div>
+          </td>
+          <td v-bind:class="{sel_row: oneRow['currSelected']}">
+            {{ typeMapObj[oneRow.indexType] }}
+          </td>
+          <td v-bind:class="{sel_row: oneRow['currSelected']}">
+            {{ oneRow.statistics.cluster_id }}
+          </td>
+          <td v-bind:class="{sel_row: oneRow['currSelected']}">
+            <div>
+              {{ oneRow.statistics.min_earn_str }}
+            </div>
+            <div>
+              {{ oneRow.statistics.min_earn_aux_str }}
+            </div>
+            <div>
+              {{ oneRow.statistics.min_earn_tri_str }}
+            </div>
+          </td>
+          <td v-bind:class="{sel_row: oneRow['currSelected']}">
+            <div>
+              {{ oneRow.statistics.avg_earn_str }}
+            </div>
+            <div>
+              {{ oneRow.statistics.avg_earn_aux_str }}
+            </div>
+            <div>
+              {{ oneRow.statistics.avg_earn_tri_str }}
+            </div>
+          </td>
+          <td v-bind:class="{sel_row: oneRow['currSelected']}">
+            <div>
+              {{ oneRow.statistics.max_earn_str }}
+            </div>
+            <div>
+              {{ oneRow.statistics.max_earn_aux_str }}
+            </div>
+            <div>
+              {{ oneRow.statistics.max_earn_tri_str }}
+            </div>
+          </td>
+          <td style="text-align: left;" v-bind:class="{sel_row: oneRow['currSelected']}">
+            <div style="height: 2.2em; position: relative;"
+                 v-bind:class="getPosColor(oneRow.positive.positive_reach_len)">
+                <span v-if="oneRow.positive.positive_reach_len >= 4" class="icon_pos">
+                <i class="bi bi-arrow-up-circle-fill"></i>
+                <span class="lv_font">{{ oneRow.positive.positive_reach_len }}</span>
+                </span>
+            </div>
+            <div style="height: 2.2em; position: relative;"
+                 v-bind:class="getNegColor(oneRow.negative.negative_reach_len)">
+              <span v-if="oneRow.negative.negative_reach_len >= 3" class="icon_pos">
+              <i class="bi bi-arrow-down-circle-fill"></i>
+                <span class="lv_font">{{ oneRow.negative.negative_reach_len }}</span>
+              </span>
+            </div>
+          </td>
+          <td v-bind:class="{sel_row: oneRow['currSelected']}">
+            <div style="height: 2.2em;">
+              <span v-bind:class="getHitStyle(oneRow.positive.day_5_positive_reach)">&nbsp;</span>
+              <span v-bind:class="getHitStyle(oneRow.positive.day_10_positive_reach)">&nbsp;</span>
+              <span v-bind:class="getHitStyle(oneRow.positive.day_20_positive_reach)">&nbsp;</span>
+              <span v-bind:class="getHitStyle(oneRow.positive.day_60_positive_reach)">&nbsp;</span>
+              <span v-bind:class="getHitStyle(oneRow.positive.day_90_positive_reach)">&nbsp;</span>
+              <span v-bind:class="getHitStyle(oneRow.positive.day_120_positive_reach)">&nbsp;</span>
+              <span v-bind:class="getHitStyle(oneRow.positive.day_160_positive_reach)">&nbsp;</span>
+              <span v-bind:class="getHitStyle(oneRow.positive.day_220_positive_reach)">&nbsp;</span>
+            </div>
+            <div style="height: 2.2em;">
+              <span v-bind:class="getHitStyle(oneRow.negative.day_5_negative_reach)">&nbsp;</span>
+              <span v-bind:class="getHitStyle(oneRow.negative.day_10_negative_reach)">&nbsp;</span>
+              <span v-bind:class="getHitStyle(oneRow.negative.day_20_negative_reach)">&nbsp;</span>
+              <span v-bind:class="getHitStyle(oneRow.negative.day_60_negative_reach)">&nbsp;</span>
+              <span v-bind:class="getHitStyle(oneRow.negative.day_90_negative_reach)">&nbsp;</span>
+              <span v-bind:class="getHitStyle(oneRow.negative.day_120_negative_reach)">&nbsp;</span>
+              <span v-bind:class="getHitStyle(oneRow.negative.day_160_negative_reach)">&nbsp;</span>
+            </div>
+          </td>
+          <td class="nr_td" colspan="3" v-bind:class="{sel_row: oneRow['currSelected']}">
+            <div class="grid_r3">
+              <select class="form-select nr_select" v-model="oneRow['esti_pe']['ding']" @click.stop>
+                <option v-for="option in buy_in_esti_sugg_full" v-bind:value="option.source_val">
+                  {{ option.source_name }}
+                </option>
+              </select>
+              <select class="form-select nr_select" v-model="oneRow['esti_pe']['zhi']" @click.stop>
+                <option v-for="option in buy_in_esti_sugg_full" v-bind:value="option.source_val">
+                  {{ option.source_name }}
+                </option>
+              </select>
+              <select class="form-select nr_select" v-model="oneRow['esti_pe']['wei']" @click.stop>
+                <option v-for="option in buy_in_esti_sugg_full" v-bind:value="option.source_val">
+                  {{ option.source_name }}
+                </option>
+              </select>
+              <div></div>
+              <div></div>
+              <div class="right_pad">
+                <button type="button" class="btn btn-outline-dark mw4_ctl" @click="saveEstiPe($event, oneRow)">保存
+                </button>
+              </div>
+            </div>
+          </td>
+          <td class="nr_td" v-bind:class="{sel_row: oneRow['currSelected']}">
+            <div class="grid_1">
+              <select class="form-select nr_select" @click.stop>
+                <option v-for="option in buy_in_from_plan" v-bind:value="option.source_val">
+                  {{ option.source_name }}
+                </option>
+              </select>
+              <div class="right_pad">
+                <button type="button" class="btn btn-outline-dark mw4_ctl" @click="changePlan($event, oneRow)">
+                  详情
+                </button>
+              </div>
+            </div>
+          </td>
+        </tr>
+        <tr v-if="oneRow['showPlanDtl']">
+          <td colspan="12">
+            <div class="op_pane" style="height: 6rem;">
+            </div>
+          </td>
+        </tr>
+      </template>
+      </tbody>
+    </table>
+  </div>
 </template>
 
 <script setup>
 import '../assets/style.scss'
 import '../style.css'
+import {
+  opPaneHeight,
+  tabHeaderHeight,
+  tabContTopPos,
+  minPaneWidth,
+  getCardStyle,
+  typeMapObj,
+  topSecClass
+} from "../lib/commonUtils.js"
+import {computed, nextTick, ref, watch} from "vue";
 import {storeToRefs} from 'pinia'
 import {useZskbStore} from "../store/zskbStore.js";
+
 const zskbStore = useZskbStore()
-const {zskbObjs, sortFieldName, sortFieldFlag} = storeToRefs(zskbStore)
-const {sortByField, getZskb} = zskbStore
-const typeMapObj = ['宽指', '主题', '行业', 'QDII']
+const {zskbObjs} = storeToRefs(zskbStore)
 
 const buy_in_esti_sugg_full = [
-				{'source_name': '未知', 'source_val': -2},
-				{'source_name': '持有', 'source_val': 0},
-				{'source_name': '买入', 'source_val': 1},
-				{'source_name': '卖出', 'source_val': -1}
-			]
+  {'source_name': '未知', 'source_val': -2},
+  {'source_name': '持有', 'source_val': 0},
+  {'source_name': '买入', 'source_val': 1},
+  {'source_name': '卖出', 'source_val': -1}
+]
 
 const buy_in_from_plan = [
-				{'source_name': '无计划', 'source_val': 0},
-				{'source_name': '橄榄树', 'source_val': 1},
-				{'source_name': '三叉戟', 'source_val': 2},
-        {'source_name': '海豚', 'source_val': 3}
-			]
+  {'source_name': '无计划', 'source_val': 0},
+  {'source_name': '橄榄树', 'source_val': 1},
+  {'source_name': '三叉戟', 'source_val': 2},
+  {'source_name': '海豚', 'source_val': 3}
+]
 
 const colWidMap = {
   'col_1': 8,
-  'col_2': 3,
-  'col_3': 2,
+  'col_2': 4,
+  'col_3': 3,
   'col_4': 4,
   'col_5': 4,
   'col_6': 4,
   'col_7': 3,
-  'col_8': 12,
-  'col_9': 3,
-  'col_10': 3,
-  'col_11': 3,
-  'col_12': 4
+  'col_8': 11,
+  'col_9': 4.5,
+  'col_10': 4.5,
+  'col_11': 4.5,
+  'col_12': 5
 }
 
-getZskb();
+const zskbViewObjs = ref([])
+const wideIdxOnly = ref(true)
+const topicIdxOnly = ref(true)
+const indusIdxOnly = ref(true)
 
-function getCardStyle(_val) {
-  if (_val <= 0.2) {
-    return 'blue_card';
-  } else if (_val <= 0.4) {
-    return 'skyblue_card';
-  } else if (_val <= 0.6) {
-    return 'grey_card';
-  } else if (_val <= 0.8) {
-    return 'yellow_card';
+watch([zskbObjs, wideIdxOnly, topicIdxOnly, indusIdxOnly], () => {
+  if (wideIdxOnly.value && topicIdxOnly.value && indusIdxOnly.value) {
+    zskbViewObjs.value = zskbObjs.value
   } else {
-    return 'red_card';
+    zskbViewObjs.value = []
+    if (wideIdxOnly.value) {
+      zskbObjs.value.forEach(elem => {
+        if (elem['indexType'] === 0) {
+          zskbViewObjs.value.push(elem)
+        }
+      })
+    }
+    if (topicIdxOnly.value) {
+      zskbObjs.value.forEach(elem => {
+        if (elem['indexType'] === 1) {
+          zskbViewObjs.value.push(elem)
+        }
+      })
+    }
+    if (indusIdxOnly.value) {
+      zskbObjs.value.forEach(elem => {
+        if (elem['indexType'] === 2) {
+          zskbViewObjs.value.push(elem)
+        }
+      })
+    }
+  }
+}, {immediate: true})
+
+const currTotNum = computed(() => {
+  return zskbViewObjs.value.length
+})
+
+function saveEstiPe(event, oneRowObj) {
+  event.stopPropagation()
+}
+
+function changePlan(event, oneRowObj) {
+  event.stopPropagation()
+  if (oneRowObj.hasOwnProperty('showPlanDtl')) {
+    oneRowObj['showPlanDtl'] = !oneRowObj['showPlanDtl']
+  } else {
+    oneRowObj['showPlanDtl'] = true
+  }
+}
+
+function selOrDesRow(oneRowObj) {
+  if (oneRowObj.hasOwnProperty('currSelected')) {
+    oneRowObj['currSelected'] = !oneRowObj['currSelected']
+  } else {
+    oneRowObj['currSelected'] = true
+  }
+}
+
+function clearSelected() {
+  zskbViewObjs.value.forEach((elem) => elem['currSelected'] = false)
+}
+
+const currSelectedNum = ref(0)
+
+watch(zskbObjs, () => {
+  let _filtered = zskbObjs.value.filter((elem => elem['currSelected']))
+  currSelectedNum.value = _filtered.length
+}, {
+  deep: true
+})
+
+const sortFieldName = ref('')
+const sortFieldFlag = ref(true)
+
+function sortByField(_field) {
+  if (sortFieldName.value === _field) {
+    sortFieldFlag.value = !sortFieldFlag.value
+  } else {
+    sortFieldName.value = _field
+    sortFieldFlag.value = true
+  }
+  if (_field === 'cluster_id') {
+    if (sortFieldFlag.value) {
+      zskbViewObjs.value.sort((a, b) => {
+        return a['statistics']['cluster_id'] - b['statistics']['cluster_id'];
+      });
+    } else {
+      zskbViewObjs.value.sort((a, b) => {
+        return b['statistics']['cluster_id'] - a['statistics']['cluster_id'];
+      });
+    }
+  } else if (_field === 'fund_type') {
+    if (sortFieldFlag.value) {
+      zskbViewObjs.value.sort((a, b) => {
+        return a['indexType'] - b['indexType'];
+      });
+    } else {
+      zskbViewObjs.value.sort((a, b) => {
+        return b['indexType'] - a['indexType'];
+      });
+    }
+  } else if (_field === 'min_earn') {
+    if (sortFieldFlag.value) {
+      zskbViewObjs.value.sort((a, b) => {
+        return a['statistics']['min_sort_tot_earn'] - b['statistics']['min_sort_tot_earn'];
+      });
+    } else {
+      zskbViewObjs.value.sort((a, b) => {
+        return b['statistics']['min_sort_tot_earn'] - a['statistics']['min_sort_tot_earn'];
+      });
+    }
+  } else if (_field === 'avg_earn') {
+    if (sortFieldFlag.value) {
+      zskbViewObjs.value.sort((a, b) => {
+        return a['statistics']['avg_sort_tot_earn'] - b['statistics']['avg_sort_tot_earn'];
+      });
+    } else {
+      zskbViewObjs.value.sort((a, b) => {
+        return b['statistics']['avg_sort_tot_earn'] - a['statistics']['avg_sort_tot_earn'];
+      });
+    }
+  } else if (_field === 'max_earn') {
+    if (sortFieldFlag.value) {
+      zskbViewObjs.value.sort((a, b) => {
+        return a['statistics']['max_sort_tot_earn'] - b['statistics']['max_sort_tot_earn'];
+      });
+    } else {
+      zskbViewObjs.value.sort((a, b) => {
+        return b['statistics']['max_sort_tot_earn'] - a['statistics']['max_sort_tot_earn'];
+      });
+    }
+  } else if (_field === 'positive') {
+    if (sortFieldFlag.value) {
+      zskbViewObjs.value.sort((a, b) => {
+        return a['positive']['positive_reach_len'] - b['positive']['positive_reach_len'];
+      });
+    } else {
+      zskbViewObjs.value.sort((a, b) => {
+        return b['positive']['positive_reach_len'] - a['positive']['positive_reach_len'];
+      });
+    }
+  } else if (_field === 'negative') {
+    if (sortFieldFlag.value) {
+      zskbViewObjs.value.sort((a, b) => {
+        return a['negative']['negative_reach_len'] - b['negative']['negative_reach_len'];
+      });
+    } else {
+      zskbViewObjs.value.sort((a, b) => {
+        return b['negative']['negative_reach_len'] - a['negative']['negative_reach_len'];
+      });
+    }
+  } else if (_field === 'day_xxx_thres') {
+    if (sortFieldFlag.value) {
+      zskbViewObjs.value.sort((a, b) => {
+        return a['statistics']['day_sort_tot_thres'] - b['statistics']['day_sort_tot_thres'];
+      });
+    } else {
+      zskbViewObjs.value.sort((a, b) => {
+        return b['statistics']['day_sort_tot_thres'] - a['statistics']['day_sort_tot_thres'];
+      });
+    }
+  } else if (_field === 'fund_len') {
+    if (sortFieldFlag.value) {
+      zskbViewObjs.value.sort((a, b) => {
+        return a['statistics']['fund_perc_len'] - b['statistics']['fund_perc_len'];
+      });
+    } else {
+      zskbViewObjs.value.sort((a, b) => {
+        return b['statistics']['fund_perc_len'] - a['statistics']['fund_perc_len'];
+      });
+    }
+  } else if (_field === 'esti_pe_ding') {
+    if (sortFieldFlag.value) {
+      zskbViewObjs.value.sort((a, b) => {
+        return a['esti_pe']['ding'] - b['esti_pe']['ding'];
+      });
+    } else {
+      zskbViewObjs.value.sort((a, b) => {
+        return b['esti_pe']['ding'] - a['esti_pe']['ding'];
+      });
+    }
+  } else if (_field === 'esti_pe_zhi') {
+    if (sortFieldFlag.value) {
+      zskbViewObjs.value.sort((a, b) => {
+        return a['esti_pe']['zhi'] - b['esti_pe']['zhi'];
+      });
+    } else {
+      zskbViewObjs.value.sort((a, b) => {
+        return b['esti_pe']['zhi'] - a['esti_pe']['zhi'];
+      });
+    }
+  } else if (_field === 'esti_pe_wei') {
+    if (sortFieldFlag.value) {
+      zskbViewObjs.value.sort((a, b) => {
+        return a['esti_pe']['wei'] - b['esti_pe']['wei'];
+      });
+    } else {
+      zskbViewObjs.value.sort((a, b) => {
+        return b['esti_pe']['wei'] - a['esti_pe']['wei'];
+      });
+    }
+  } else if (_field === 'selected') {
+    zskbViewObjs.value.sort((a, b) => {
+      if (a.hasOwnProperty('currSelected') && b.hasOwnProperty('currSelected')) {
+        if (a['currSelected'] && b['currSelected']) {
+          return 0
+        } else if (a['currSelected']) {
+          return -1
+        }
+        return 1
+      } else if (!a.hasOwnProperty('currSelected')) {
+        return 1
+      } else {
+        return -1
+      }
+    });
+  }
+  // TODO: fund_plan sort
+  scrollViewBySelection()
+}
+
+function scrollViewBySelection() {
+  nextTick(() => {
+    if (currSelectedNum.value >= 1) {
+      zskbViewObjs.value.forEach((elem) => {
+        if (elem['currSelected']) {
+          rowElements.value[elem['fund_id']].scrollIntoView({block: "center", behavior: "smooth"})
+          return
+        }
+      })
+    } else {
+      let _fund_id = zskbViewObjs.value[0]['fund_id']
+      rowElements.value[_fund_id].scrollIntoView({block: "center", behavior: "smooth"})
+    }
+  })
+}
+
+const rowElements = ref({})
+
+const searchCond = ref("")
+
+function searchByCond() {
+  if (searchCond.value.trim() === '') {
+    clearSelected()
+    return
+  }
+  let _foundCnt = 0
+  let arr = searchCond.value.trim().split(" ")
+  zskbViewObjs.value.forEach((elem) => {
+    if (arr.length === 1) {
+      let _cond_1 = arr[0].trim()
+      if (elem['fund_name'].indexOf(_cond_1) !== -1) {
+        elem['currSelected'] = true
+        _foundCnt += 1
+      }
+    } else if (arr.length === 2) {
+      let _cond_1 = arr[0].trim()
+      let _cond_2 = arr[1].trim()
+      if (elem['fund_name'].indexOf(_cond_1) !== -1 && elem['fund_name'].indexOf(_cond_2) !== -1) {
+        elem['currSelected'] = true
+        _foundCnt += 1
+      }
+    }
+  })
+  if (_foundCnt > 0) {
+    scrollViewBySelection()
+  } else {
+    searchCond.value = ""
   }
 }
 
@@ -347,10 +672,40 @@ function getNegColor(_val) {
     return 'blue_3';
   }
 }
+
 </script>
 
 <style scoped>
-table {
-  table-layout: fixed;
+.nr_select {
+  width: 100%;
+  padding: 0.5rem 0.1rem 0.5rem 0.1rem;
+}
+
+.nr_td {
+  text-align: left;
+  padding-left: 0.1rem !important;
+  padding-right: 0.1rem !important;
+}
+
+.grid_r3 {
+  display: grid;
+  justify-content: space-between;
+  grid-template-columns: repeat(auto-fill, 33%);
+  align-items: baseline;
+  row-gap: 0.5rem;
+  column-gap: 0;
+}
+
+.grid_1 {
+  display: grid;
+  justify-content: space-between;
+  grid-template-columns: repeat(auto-fill, 100%);
+  align-items: baseline;
+  row-gap: 0.5rem;
+  column-gap: 0;
+}
+
+.mw4_ctl {
+  max-width: 4rem;
 }
 </style>

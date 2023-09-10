@@ -1,35 +1,29 @@
 import {createRouter} from 'vue-router'
 import {createWebHistory} from 'vue-router'
-import Homepage from '../pages/Home.vue';
-import SignInComponent from '../pages/SignIn.vue';
-import Cart from '../pages/Cart.vue';
 import Zskb from "../pages/Zskb.vue";
+import Zsrepo from "../pages/Zsrepo.vue";
+import Compose from "../pages/Compose.vue";
+import Report from "../pages/Report.vue";
 
 const routes = [
     {
         path: '/',
+        component: Zsrepo
+    },
+    {
+        path: '/kanban/',
         component: Zskb
-        // component: Homepage
     },
-
     {
-        path: '/sign-in/',
-        component: SignInComponent
+        path: '/composite/',
+        component: Compose
     },
-
     {
-        path: '/cart/',
-        component: Cart
-    },
+        path: '/report/',
+        component: Report
+    }
 ]
 
 export default createRouter({
     history: createWebHistory(),
     routes})
-
-// export default function (history) {
-//     return createRouter({
-//         history,
-//         routes
-//     })
-// }
