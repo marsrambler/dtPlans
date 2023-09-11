@@ -17,8 +17,8 @@
           <li class="nav-item dropdown">
             <a class="nav-link dropdown-toggle" href="#" id="navbarDropdownMenuLink" role="button"
               data-bs-toggle="dropdown" aria-expanded="false">
-              <span v-if="isSynced">已同步</span>
-              <span v-else>未同步</span>
+              <span v-if="isSynced" style="color: lime;">已同步</span>
+              <span v-else style="color: darkgray;">未同步</span>
             </a>
             <ul class="dropdown-menu" aria-labelledby="navbarDropdownMenuLink"
               style="background-color: black; padding: 0;">

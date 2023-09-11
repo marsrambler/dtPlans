@@ -18,7 +18,9 @@
       <input class="btn btn-info btn-sm" type="button" value="隐藏选择">
       <input class="btn btn-info btn-sm" type="button" value="清除隐藏">
       -->
-      <input type="text" class="form-control-plaintext search_box" v-model="searchCond" @keyup.enter="searchByCond()">
+      <input type="text" class="form-control-plaintext search_box" 
+      style="grid-column: 6 / span 2;"
+      v-model="searchCond" @keyup.enter="searchByCond()">
       <input class="btn btn-primary btn-sm" type="button" value="查找" @click="searchByCond()">
     </div>
     <table id="table_header" class="table table-bordered" style="margin-bottom: 0;">

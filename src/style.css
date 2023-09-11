@@ -108,10 +108,19 @@ table {
     justify-content: space-evenly;
 }
 
-.btn_nr {
+.from_ctl_nr {
     display: inline-block;
     margin-left: 0.2rem;
     margin-right: 0.2rem;
-    padding-left: 0.1rem;
-    padding-right: 0.1rem;
+    padding: 0.2rem;
+    /* padding-right: 0.1rem; */
+}
+
+.flex_act_pane {
+    display: flex;
+    height: 3rem;
+    flex-direction: row;
+    justify-content: flex-start;
+    gap: 0.5rem;
+    align-items: center;
 }
