@@ -30,12 +30,26 @@ export const useApiStore = defineStore('api-store', () => {
         errorMsgObjs.value.push({id: errorMsgObjs.value.length, 'type': _error_type, 'msg': _error_msg})
     }
 
+    const isAlertVisible = ref(false)
+    const alertMsg = ref("")
+    function pop_alert_msg(_msg) {
+        alertMsg.value = _msg
+        isAlertVisible.value = true
+        setTimeout(function() {
+            alertMsg.value = ""
+            isAlertVisible.value = false
+        }, 5000)
+    }
+
     return {
         requestMsgObjs,
         errorMsgObjs,
         isApiInProgress,
+        isAlertVisible,
+        alertMsg,
         push_request_url,
         push_response_url,
-        push_error_msg
+        push_error_msg,
+        pop_alert_msg
     };
 });

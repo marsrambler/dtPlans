@@ -33,6 +33,12 @@
             </ul>
           </li>
         </ul>
+        <span class="text-bg-dark">{{uptTime}}</span>
+        <span style="cursor: pointer; margin-left: 1rem;">
+          <a href="../" class="text-info">
+            去综合门户
+          </a>
+        </span>
       </div>
     </div>
   </nav>
@@ -56,9 +62,14 @@
 </template>
 
 <script setup>
-import {onMounted, ref, computed} from 'vue'
+import {onMounted, ref, computed, watch} from 'vue'
 import { getSyncStatus, runKanban, syncKanban } from "../lib/opApi.js";
 import {Modal} from "bootstrap";
+import { useZskbStore } from "../store/zskbStore";
+import {storeToRefs} from 'pinia'
+
+const zskbStore = useZskbStore()
+const {rtRates} = storeToRefs(zskbStore)
 
 const cfmDlgTitle = ref("")
 const cfmDlgCont = ref("")
@@ -75,6 +86,19 @@ const isSynced = computed(() => {
 		return false
 	}
 })
+
+const uptTime = ref("")
+watch(rtRates, () => {
+  if (rtRates.value.hasOwnProperty('current_time') && rtRates.value.hasOwnProperty('kanban_time')) {
+    if (rtRates.value['current_time'] > rtRates.value['kanban_time']) {
+      uptTime.value = rtRates.value['current_time']
+    } else {
+      uptTime.value = rtRates.value['kanban_time']
+    }
+  } else {
+    uptTime.value = ""
+  }
+}, {immediate: true})
 
 const dlgController = ref({cfmDlg: null})
 onMounted(async () => {

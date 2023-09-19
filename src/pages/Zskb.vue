@@ -20,14 +20,12 @@
         <input class="form-check-input" type="checkbox" v-model="indusIdxOnly">
         <label class="form-check-label" for="flexCheckChecked">行业</label>
       </div>
-      <input class="btn btn-primary btn-sm" type="button" value="排序" @click="sortByField('selected')">
-      <!--      <input class="btn btn-info btn-sm" type="button" value="隐藏选择">-->
-      <!--      <input class="btn btn-info btn-sm" type="button" value="清除隐藏">-->
-      <input class="btn btn-warning btn-sm" type="button" value="移出">
+      <input class="btn btn-primary btn-sm" type="button" value="前移选择" @click="sortByField('selected')">
       <input type="text" class="form-control-plaintext search_box" 
-      style="grid-column: 8 / span 2;"
+      style="grid-column: 7 / span 2;"
       v-model="searchCond" @keyup.enter="searchByCond()">
       <input class="btn btn-primary btn-sm" type="button" value="查找" @click="searchByCond()">
+      <input class="btn btn-warning btn-sm" type="button" value="刷新" @click="getZskb()">
     </div>
     <table id="table_header" class="table table-bordered" style="margin-bottom: 0;">
       <thead style="">
@@ -335,6 +333,7 @@ import {useZskbStore} from "../store/zskbStore.js";
 
 const zskbStore = useZskbStore()
 const {zskbObjs} = storeToRefs(zskbStore)
+const {getZskb} = zskbStore
 
 const buy_in_esti_sugg_full = [
   {'source_name': '未知', 'source_val': -2},
@@ -590,12 +589,12 @@ function sortByField(_field) {
 function scrollViewBySelection() {
   nextTick(() => {
     if (currSelectedNum.value >= 1) {
-      zskbViewObjs.value.forEach((elem) => {
-        if (elem['currSelected']) {
-          rowElements.value[elem['fund_id']].scrollIntoView({block: "center", behavior: "smooth"})
-          return
-        }
-      })
+      const func = elem => elem['currSelected']
+      let _idx = zskbViewObjs.value.findIndex(func)
+      if (_idx != -1) {
+        let _rowObj = zskbViewObjs.value[_idx]
+        rowElements.value[_rowObj['fund_id']].scrollIntoView({block: "center", behavior: "smooth"})
+      }
     } else {
       let _fund_id = zskbViewObjs.value[0]['fund_id']
       rowElements.value[_fund_id].scrollIntoView({block: "center", behavior: "smooth"})
@@ -631,7 +630,7 @@ function searchByCond() {
     }
   })
   if (_foundCnt > 0) {
-    scrollViewBySelection()
+    sortByField('selected')
   } else {
     searchCond.value = ""
   }

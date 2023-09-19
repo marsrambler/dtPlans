@@ -1,4 +1,5 @@
 import {axiosInst} from "../lib/api.js";
+import { useApiStore } from "../store/apiStore.js";
 
 async function getSyncStatus() {
     try {
@@ -20,6 +21,7 @@ async function runKanban() {
     try {
         const response = await axiosInst.post("dt-plans/api/run-kanban", {})
         if (response.status == 200) {
+            useApiStore().pop_alert_msg("发送运行看板成功")
             return true
         } else {
             console.error("run kanban failed: ", response)
@@ -35,6 +37,7 @@ async function syncKanban() {
     try {
         const response = await axiosInst.get("api/sync-server")
         if (response.status == 200) {
+            useApiStore().pop_alert_msg("同步看板成功，请刷新页面")
             return true
         } else {
             console.error("sync kanban failed: ", response)

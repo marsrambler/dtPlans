@@ -5,7 +5,7 @@
       <input type="text" v-model="requireFundIds" class="form-control-plaintext search_box"
         style="grid-column: 2 / span 2; padding-left: 0.5rem;">
       <input class="btn btn-primary btn-sm" type="button" value="请求" @click="requireDynValues4ui();">
-      <input class="btn btn-warning btn-sm" type="button" value="刷新">
+      <input class="btn btn-warning btn-sm" type="button" value="刷新" @click="getRecordsAndRates();">
     </div>
     <table id="table_header" class="table table-bordered" style="margin-bottom: 0;">
       <thead style="">
@@ -70,7 +70,7 @@
             <td>
               <div>{{ oneRow.fund_id }}</div>
               <div>{{ oneRow.fund_name }}</div>
-              <div>净值日:&nbsp;{{ oneRow.statistics?.latest_price_date }}</div>
+              <div>净值日:&nbsp;<span class="text-bg-danger">{{ oneRow.statistics?.latest_price_date }}</span></div>
             </td>
             <td>
               <template v-if="zskbViewObjs && zskbViewObjs[oneRow.fund_id]">
@@ -99,8 +99,9 @@
             </td>
             <td>
               <template v-if="oneRow.soldHistoryWrapper">
-                <div v-for="one_sold in oneRow.soldHistoryWrapper">
-                  {{ one_sold?.date_str }}
+                <div v-for="(one_sold, index) in oneRow.soldHistoryWrapper">
+                  <span v-if="index === oneRow.soldHistoryWrapper.length - 1" class="text-bg-danger">{{ one_sold?.date_str }}</span>
+                  <span v-else>{{ one_sold?.date_str }}</span>
                 </div>
               </template>
             </td>
@@ -111,7 +112,7 @@
               <div>减:&nbsp;{{ oneRow.statistics?.desc_money_times }}</div>
             </td>
             <td>
-              <div>卖:&nbsp;{{ oneRow.statistics?.last_sold_profit?.currStatistics?.tot_profit_perc_str }}</div>
+              <div class="text-bg-danger">卖:&nbsp;{{ oneRow.statistics?.last_sold_profit?.currStatistics?.tot_profit_perc_str }}</div>
               <template v-if="oneRow.statistics &&
                 oneRow.statistics.last_sold_wide_profit &&
                 oneRow.statistics.last_sold_wide_profit.length > 4">
@@ -142,7 +143,7 @@
                 <button type="button" class="btn btn-secondary" @click="requireDynValues(oneRow['fund_id'])">
                   刷新
                 </button>
-                <button type="button" class="btn btn-warning" @click="removeLocalDynvalue(oneRow['fund_id'])">
+                <button type="button" class="btn btn-warning" @click="removeLocalDynvalue(oneRow['fund_id'], oneRow['fund_name'])">
                   删除
                 </button>
               </div>
@@ -169,13 +170,17 @@
                 <button type="button" class="btn btn-secondary from_ctl_nr" @click="picHeightAdjVal -= 20;">
                   减小高
                 </button>
-                <input type="text" class="from_ctl_nr" style="width: 7rem;" v-model="oneRow['remove_asc_date']">
+                <input type="text" class="from_ctl_nr" style="width: 6.5rem;" v-model="oneRow['remove_asc_date']">
                 <button type="button" class="btn btn-secondary from_ctl_nr" @click="removeAscDate(oneRow)">
                   移除+
                 </button>
-                <input type="text" class="from_ctl_nr" style="width: 7rem;" v-model="oneRow['remove_desc_date']">
+                <input type="text" class="from_ctl_nr" style="width: 6.5rem;" v-model="oneRow['remove_desc_date']">
                 <button type="button" class="btn btn-secondary from_ctl_nr" @click="removeDescDate(oneRow)">
                   移除-
+                </button>
+                <input type="text" class="from_ctl_nr" style="width: 6.5rem;" v-model="oneRow['cut_buy_date']">
+                <button type="button" class="btn btn-secondary from_ctl_nr" @click="cutBuyDate(oneRow)">
+                  截取
                 </button>
                 <button type="button" class="btn btn-primary from_ctl_nr" @click="genTextReport()">
                   文档
@@ -264,7 +269,7 @@ watch(zskbObjs, () => {
 const cfmDlgTitle = ref("")
 const cfmDlgCont = ref("")
 const cfmDlgType = ref("")
-const dlgController = ref({ reportDlg: null, reportAlert: null})
+const dlgController = ref({ reportDlg: null })
 
 onMounted(() => {
   dlgController.value.reportDlg = new Modal('#reportDialog', {})
@@ -340,6 +345,13 @@ const chartOptions = ref({
         // lineColor: ''
         fillColor: 'red',
         enabled: true
+      },
+      events: {
+        click: function (e) {
+          let _date_str = new Date(e.point.category).toISOString().split("T")[0]
+          console.log("buy series click: ", e.point.category, " date_str: ", _date_str)
+          fillInBuyDate(_date_str)
+        }
       }
     },
     {
@@ -355,6 +367,11 @@ const chartOptions = ref({
         // lineColor: ''
         fillColor: 'darkgreen',
         enabled: true
+      },
+      events: {
+        click: function (e) {
+          console.log("sold points series click: ", e)
+        }
       }
     },
     {
@@ -370,6 +387,13 @@ const chartOptions = ref({
       style: {
         color: 'purple',
         fontSize: 15
+      },
+      events: {
+        click: function (e) {
+          let _date_str = new Date(e.point.category).toISOString().split("T")[0]
+          console.log("asc flags series click: ", e.point.category, " date_str: ", _date_str)
+          fillInAscDate(_date_str)
+        }
       }
     },
     {
@@ -387,6 +411,13 @@ const chartOptions = ref({
         fontSize: 15
         // borderWidth: 3,
         // borderColor: 'red'
+      },
+      events: {
+        click: function (e) {
+          let _date_str = new Date(e.point.category).toISOString().split("T")[0]
+          console.log("desc flags series click: ", e.point.category, " date_str: ", _date_str)
+          fillInDescDate(_date_str)
+        }
       }
     },
     {
@@ -401,6 +432,11 @@ const chartOptions = ref({
       color: 'red',
       style: {
         color: 'red'
+      },
+      events: {
+        click: function (e) {
+          console.log("buy flags series click: ", e)
+        }
       }
     },
     {
@@ -415,6 +451,11 @@ const chartOptions = ref({
       color: 'darkgreen',
       style: {
         color: 'darkgreen'
+      },
+      events: {
+        click: function (e) {
+          console.log("sold flags series click: ", e)
+        }
       }
     }
   ]
@@ -512,36 +553,90 @@ watch(currDynValue, () => {
   deep: true
 })
 
-function removeAscDate(oneRow) {
-  if (!oneRow['remove_asc_date'] || !currDynValue.value) {
+function fillInAscDate(_date_str) {
+  if (!currDynValue.value) {
     return
   }
+  currDynValue.value['remove_asc_date'] = _date_str
+  currDynValue.value['remove_desc_date'] = ""
+  currDynValue.value['cut_buy_date'] = ""
+}
+
+function fillInDescDate(_date_str) {
+  if (!currDynValue.value) {
+    return
+  }
+  currDynValue.value['remove_desc_date'] = _date_str
+  currDynValue.value['remove_asc_date'] = ""
+  currDynValue.value['cut_buy_date'] = ""
+}
+
+function fillInBuyDate(_date_str) {
+  if (!currDynValue.value) {
+    return
+  }
+  currDynValue.value['cut_buy_date'] = _date_str
+  currDynValue.value['remove_desc_date'] = ""
+  currDynValue.value['remove_asc_date'] = ""
+}
+
+function removeAscDateByStr(_date_str, oneRow, _equal = true) {
   let moneyAscChange4draw = currDynValue.value['moneyAscChange4draw']
-  const date_match = (elem) => elem['date_str'] === oneRow['remove_asc_date'].trim()
+  const date_match = _equal? (elem) => elem['date_str'] === _date_str : (elem) => elem['date_str'] >= _date_str
   let _idx = moneyAscChange4draw.findIndex(date_match)
   if (_idx === -1) {
-    return
+    return false
   }
   moneyAscChange4draw.splice(_idx, 1)
   oneRow['statistics']['adjust_money_times'] -= 1
   oneRow['statistics']['asc_money_times'] -= 1
   oneRow['statistics']['asc_money_dates'].splice(_idx, 1)
+  return true
+}
+
+function removeAscDate(oneRow) {
+  if (!oneRow['remove_asc_date'] || !currDynValue.value) {
+    return
+  }
+  removeAscDateByStr(oneRow['remove_asc_date'].trim(), oneRow)
+}
+
+function removeDescDateByStr(_date_str, oneRow, _equal = true) {
+  let moneyDescChange4draw = currDynValue.value['moneyDescChange4draw']
+  const date_match = _equal? (elem) => elem['date_str'] === _date_str : (elem) => elem['date_str'] >= _date_str
+  let _idx = moneyDescChange4draw.findIndex(date_match)
+  if (_idx === -1) {
+    return false
+  }
+  moneyDescChange4draw.splice(_idx, 1)
+  oneRow['statistics']['adjust_money_times'] -= 1
+  oneRow['statistics']['desc_money_times'] -= 1
+  oneRow['statistics']['desc_money_dates'].splice(_idx, 1)
+  return true
 }
 
 function removeDescDate(oneRow) {
   if (!oneRow['remove_desc_date'] || !currDynValue.value) {
     return
   }
-  let moneyDescChange4draw = currDynValue.value['moneyDescChange4draw']
-  const date_match = (elem) => elem['date_str'] === oneRow['remove_desc_date'].trim()
-  let _idx = moneyDescChange4draw.findIndex(date_match)
-  if (_idx === -1) {
+  removeDescDateByStr(oneRow['remove_desc_date'].trim(), oneRow)
+}
+
+function cutBuyDate(oneRow) {
+  if (!oneRow['cut_buy_date'] || !currDynValue.value) {
     return
   }
-  moneyDescChange4draw.splice(_idx, 1)
-  oneRow['statistics']['adjust_money_times'] -= 1
-  oneRow['statistics']['desc_money_times'] -= 1
-  oneRow['statistics']['desc_money_dates'].splice(_idx, 1)
+  let buyList4draw = currDynValue.value['buyList4draw']
+  let earlierThans = buyList4draw.filter((obj) => obj[0] < oneRow['cut_buy_date'])
+  currDynValue.value['buyList4draw'] = [...earlierThans]
+  oneRow['statistics']['buy_times'] = earlierThans.length
+
+  while (removeAscDateByStr(oneRow['cut_buy_date'], oneRow, false)) {
+
+  }
+  while (removeDescDateByStr(oneRow['cut_buy_date'], oneRow, false)) {
+
+  }
 }
 
 const sortFieldName = ref('')

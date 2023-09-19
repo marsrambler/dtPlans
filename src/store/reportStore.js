@@ -1,6 +1,7 @@
 import {defineStore} from 'pinia'
 import {axiosInst} from "../lib/api.js";
 import {ref} from 'vue'
+import { useApiStore } from './apiStore.js';
 
 export const useReportStore = defineStore('report-store', () => {
     // state
@@ -40,10 +41,11 @@ export const useReportStore = defineStore('report-store', () => {
         }
     }
 
-    async function removeLocalDynvalue(_fund_id) {
+    async function removeLocalDynvalue(_fund_id, _fund_name) {
         try {
             const response = await axiosInst.post("dt-plans/api/remove-dynValues/" + _fund_id)
             if (response.status === 200) {
+                useApiStore().pop_alert_msg("删除报告成功: " + _fund_name)
                 await getRecordsAndRates()
             } else {
                 console.error("axios remove local dyn values failed: ", response)

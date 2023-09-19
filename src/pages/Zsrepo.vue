@@ -12,16 +12,16 @@
         <input class="form-check-input" type="checkbox" v-model="showHides">
         <label class="form-check-label" for="flexCheckDefault">显示隐藏</label>
       </div>
-      <input class="btn btn-primary btn-sm" type="button" value="排序" @click="sortByField('selected')">
+      <input class="btn btn-primary btn-sm" type="button" value="前移选择" @click="sortByField('selected')">
       <!--
-      <input class="btn btn-warning btn-sm" type="button" value="清除" @click="clearSelected()">
       <input class="btn btn-info btn-sm" type="button" value="隐藏选择">
       <input class="btn btn-info btn-sm" type="button" value="清除隐藏">
       -->
-      <input type="text" class="form-control-plaintext search_box" 
-      style="grid-column: 6 / span 2;"
-      v-model="searchCond" @keyup.enter="searchByCond()">
+      <input type="text" class="form-control-plaintext search_box"
+             style="grid-column: 6 / span 2;"
+             v-model="searchCond" @keyup.enter="searchByCond()">
       <input class="btn btn-primary btn-sm" type="button" value="查找" @click="searchByCond()">
+      <input class="btn btn-warning btn-sm" type="button" value="刷新" @click="getZsRepo()">
     </div>
     <table id="table_header" class="table table-bordered" style="margin-bottom: 0;">
       <thead style="">
@@ -115,9 +115,14 @@
                   {{ oneRow.fund_id }}
                 </span>
               <span v-if="oneRow['in_kanban']" class="badge bg-danger" style="margin-right: 0.2rem;">已看板</span>
-              <span v-if="oneRow['hide_repo']" class="badge bg-dark">已隐藏</span>
+              <span v-else-if="oneRow['hide_repo']" class="badge bg-dark">已隐藏</span>
               <input v-else class="btn btn-warning btn-sm" type="button" value="隐藏"
-                     @click.stop="addZsRepoHide(oneRow.fund_id)">
+                     @click.stop="addZsRepoHide(oneRow.fund_id, oneRow.fund_name)">
+              <template v-if="oneRow['hide_repo']">
+                <span v-if="oneRow['exclude_repo']" class="badge bg-dark">已排除</span>
+                <input v-else class="btn btn-danger btn-sm" style="margin-left: 0.5rem;" type="button" value="永远排除"
+                       @click.stop="addZsRepoHide(oneRow.fund_id, oneRow.fund_name)">
+              </template>
             </div>
             <div>
               {{ oneRow.fund_name }}
@@ -170,30 +175,30 @@
             <span>{{ oneRow.fund_perc_len }}</span>
           </td>
           <td style="text-align: center;" v-bind:class="{ sel_row: oneRow['currSelected'] }">
-            <button type="button" class="btn btn-primary" v-if="!oneRow['hide_repo']"
+            <button type="button" class="btn btn-primary"
                     @click.stop="showPlanDtlPane($event, oneRow)">
               详情
             </button>
           </td>
         </tr>
         <tr v-if="oneRow['showPlanDtl']">
-          <td colspan="8" style="background-color: whitesmoke;">
+          <td colspan="8" style="background-color: lightblue;">
             <div :style="{height: opPaneHeight + 'rem', 'line-height': opPaneHeight + 'rem'}">
               <div class="flex_row">
-                <label>{{ oneRow['fund_id'] }}</label>
-                <label>{{ oneRow['fund_name'] }}</label>
-                <div>
-                  <label>类型:&nbsp;</label>
-                  <select class="form-select" style="width: 6rem;" v-model="oneRow['indexType']">
-                    <option v-for="option in type_map_objs_4_select" v-bind:value="option.source_val">
-                      {{ option.source_name }}
-                    </option>
-                  </select>
-                </div>
-                <div class="flex_row_gr">
-                  <label>URL:&nbsp;</label>
-                  <input type="text" class="form-control-plaintext input_box_gr" v-model="oneRow['indexUrl']">
-                </div>
+                <label>类型:&nbsp;</label>
+                <select class="form-select" style="width: 6rem;" v-model="oneRow['indexType']">
+                  <option v-for="option in type_map_objs_4_select" v-bind:value="option.source_val">
+                    {{ option.source_name }}
+                  </option>
+                </select>
+                <label>URL:&nbsp;</label>
+                <input type="text" class="form-control-plaintext input_box_br" style="max-width: 25rem;" v-model="oneRow['indexUrl']">
+                <label>Spider:&nbsp;</label>
+                <select class="form-select nr_select" style="width: 5rem;" v-model="oneRow['specialSpider']" @click.stop>
+                  <option v-for="option in spider_versions" v-bind:value="option.source_val">
+                    {{ option.source_name }}
+                  </option>
+                </select>
                 <button type="button" class="btn btn-primary"
                         @click="tobeAddOrRemoveObj = oneRow; tobeAddErrorMsg = ''; dlgController.addKbDlg.show();">
                   加入看板
@@ -240,12 +245,14 @@
           <h6>{{ tobeAddOrRemoveObj?.fund_id }}&nbsp;{{ tobeAddOrRemoveObj?.fund_name }}</h6>
           <h6>URL:&nbsp;{{ tobeAddOrRemoveObj?.indexUrl }}</h6>
           <h6>Type:&nbsp;{{ tobeAddOrRemoveObj?.indexType }}</h6>
-          <h6 class="bg-danger" v-if="tobeAddErrorMsg.length > 0">{{tobeAddErrorMsg}}</h6>
+          <h6>Spider:&nbsp;{{ tobeAddOrRemoveObj?.specialSpider }}</h6>
+          <h6 class="bg-danger" v-if="tobeAddErrorMsg.length > 0">{{ tobeAddErrorMsg }}</h6>
         </div>
         <div class="modal-footer">
           <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">取消</button>
           <button type="button" class="btn btn-primary" @click.prevent="addKanban4ui()"
-                  v-bind:disabled="tobeAddErrorMsg.length > 0">加入看板</button>
+                  v-bind:disabled="tobeAddErrorMsg.length > 0">加入看板
+          </button>
         </div>
       </div>
     </div>
@@ -271,8 +278,8 @@ import {useZskbStore} from '../store/zskbStore';
 import {Modal} from 'bootstrap';
 
 const zsRepoStore = useZsRepoStore()
-const {zsRepoObjs, zsRepoHides} = storeToRefs(zsRepoStore)
-const {addZsRepoHide} = zsRepoStore
+const {zsRepoObjs, zsRepoHides, zsRepoExcludes} = storeToRefs(zsRepoStore)
+const {addZsRepoHide, getZsRepo, excludeRepo} = zsRepoStore
 
 const zskbStore = useZskbStore()
 const {zskbObjs} = storeToRefs(zskbStore)
@@ -289,10 +296,15 @@ const colWidMap = {
   'col_8': 3
 }
 
+const spider_versions = [
+  {'source_name': 'v1', 'source_val': 'v1'},
+  {'source_name': 'v2', 'source_val': 'v2'}
+]
+
 const showHides = ref(false)
 const zsRepoViewObjs = ref([])
 
-watch([zsRepoObjs, zskbObjs, zsRepoHides, showHides], () => {
+watch([zsRepoObjs, zskbObjs, zsRepoHides, zsRepoExcludes, showHides], () => {
   const _kb_fund_ids = zskbObjs.value.map(elem => elem['fund_id'])
   zsRepoObjs.value.forEach((elem) => {
     if (_kb_fund_ids.indexOf(elem['fund_id']) != -1) {
@@ -300,6 +312,11 @@ watch([zsRepoObjs, zskbObjs, zsRepoHides, showHides], () => {
       let _searches = zskbObjs.value.filter((kbObj) => kbObj['fund_id'] === elem['fund_id'])
       elem['indexType'] = _searches[0]['indexType']
       elem['indexUrl'] = _searches[0]['indexUrl']
+      if (_searches[0].hasOwnProperty("specialSpider") && _searches[0]['specialSpider'] === "v2") {
+        elem['specialSpider'] = "v2"
+      } else {
+        elem['specialSpider'] = "v1"
+      }
     } else {
       elem['in_kanban'] = false
     }
@@ -307,6 +324,11 @@ watch([zsRepoObjs, zskbObjs, zsRepoHides, showHides], () => {
       elem['hide_repo'] = true
     } else {
       elem['hide_repo'] = false
+    }
+    if (zsRepoExcludes.value.indexOf(elem['fund_id']) != -1) {
+      elem['exclude_repo'] = true
+    } else {
+      elem['exclude_repo'] = false
     }
   })
   if (showHides.value) {
@@ -454,12 +476,12 @@ function sortByField(_field) {
 function scrollViewBySelection() {
   nextTick(() => {
     if (currSelectedNum.value >= 1) {
-      zsRepoViewObjs.value.forEach((elem) => {
-        if (elem['currSelected']) {
-          rowElements.value[elem['fund_id']].scrollIntoView({block: "center", behavior: "smooth"})
-          return
-        }
-      })
+      const func = elem => elem['currSelected'] && !elem['hide_repo']
+      let _idx = zsRepoViewObjs.value.findIndex(func)
+      if (_idx != -1) {
+        let _rowObj = zsRepoViewObjs.value[_idx]
+        rowElements.value[_rowObj['fund_id']].scrollIntoView({block: "center", behavior: "smooth"})
+      }
     } else {
       let _fund_id = zsRepoViewObjs.value[0]['fund_id']
       rowElements.value[_fund_id].scrollIntoView({block: "center", behavior: "smooth"})
@@ -486,14 +508,15 @@ async function removeKanban4ui() {
 
 async function addKanban4ui() {
   if (tobeAddOrRemoveObj.value) {
-    if (!tobeAddOrRemoveObj.value['indexType'] || !tobeAddOrRemoveObj.value['indexUrl']) {
+    if (tobeAddOrRemoveObj.value['indexType'] === null || !tobeAddOrRemoveObj.value['indexUrl']
+        || tobeAddOrRemoveObj.value['specialSpider'] === null) {
       tobeAddErrorMsg.value = "非法的类型或URL"
       return
     } else {
       tobeAddErrorMsg.value = ""
     }
     const retval = await addKanban(tobeAddOrRemoveObj.value['fund_id'], tobeAddOrRemoveObj.value['fund_name'],
-        tobeAddOrRemoveObj.value['indexType'], tobeAddOrRemoveObj.value['indexUrl'])
+        tobeAddOrRemoveObj.value['indexType'], tobeAddOrRemoveObj.value['indexUrl'], tobeAddOrRemoveObj.value['specialSpider'])
     if (retval) {
       dlgController.value.addKbDlg.hide()
     }
@@ -501,7 +524,6 @@ async function addKanban4ui() {
 }
 
 const rowElements = ref({})
-
 const searchCond = ref("")
 
 function searchByCond() {
@@ -532,7 +554,7 @@ function searchByCond() {
     }
   })
   if (_foundCnt > 0) {
-    scrollViewBySelection()
+    sortByField('selected')
   } else {
     searchCond.value = ""
   }
