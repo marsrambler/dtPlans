@@ -94,6 +94,10 @@ $mediumblue: mediumblue;
   color: $pink
 }
 
+.blue_8 {
+  color: $black
+}
+
 .blue_7 {
   color: $darkblue
 }
@@ -117,5 +121,26 @@ $mediumblue: mediumblue;
 .lv_font {
   font-size: 1.2rem;
   margin-left: 0.2rem;
+}
+
+.grid_pane_base {
+  padding-left: 0.5rem;
+  padding-right: 0.5rem;
+  padding-top: 0.5em;
+  display: grid;
+  justify-content: space-between;
+  align-items: baseline;
+  row-gap: 0.2rem;
+  column-gap: 0.2rem;
+}
+
+.grid_pane_c10 {
+  @extend .grid_pane_base;
+  grid-template-columns: repeat(auto-fill, 9.5%);
+}
+
+.grid_pane_c12 {
+  @extend .grid_pane_base;
+  grid-template-columns: repeat(auto-fill, 8%);
 }
 

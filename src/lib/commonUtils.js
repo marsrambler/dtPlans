@@ -1,4 +1,4 @@
-import {computed, ref} from 'vue'
+import {computed, ref, watch} from 'vue'
 
 function getCardStyle(_val) {
     if (_val <= 0.2) {
@@ -28,7 +28,7 @@ const opPaneHeight = ref(3)
 const tabHeaderHeight = ref(2)
 const topSectHeight = ref(opPaneHeight.value + tabHeaderHeight.value)
 const tabContTopPos = ref(navHeight.value + topSectHeight.value)
-const minPaneWidth = ref(60)
+const minPaneWidth = ref(72)
 
 const topSecClass = ref({
     'position': 'fixed',
@@ -40,6 +40,24 @@ const topSecClass = ref({
     'min-width': minPaneWidth.value + 'rem'
 })
 
+const infoPaneHeight = ref(0)
+const infoTopSectHeight = ref(0)
+const infoTabContTopPos = ref(0)
+const infoTopSecClass = ref({})
+
+watch(infoPaneHeight, () => {
+    infoTopSectHeight.value = infoPaneHeight.value + opPaneHeight.value + tabHeaderHeight.value
+    infoTabContTopPos.value = navHeight.value + infoTopSectHeight.value
+    infoTopSecClass.value = {
+        'position': 'fixed',
+        'top': opPaneTopPos.value + 'rem',
+        'height': infoTopSectHeight.value + 'rem',
+        'z-index': 100,
+        'background-color': 'rgba(255,255,255,1)',
+        'width': '100%',
+        'min-width': minPaneWidth.value + 'rem'
+    }
+}, {immediate: true})
 
 export {
     navHeight,
@@ -52,5 +70,9 @@ export {
     getCardStyle,
     typeMapObj,
     type_map_objs_4_select,
-    topSecClass
+    topSecClass,
+    infoPaneHeight,
+    infoTopSectHeight,
+    infoTabContTopPos,
+    infoTopSecClass
 }

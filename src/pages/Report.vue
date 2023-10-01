@@ -1,6 +1,6 @@
 <template>
   <div :style="topSecClass">
-    <div id="op_pane" :style="{ 'height': opPaneHeight + 'rem' }" class="grid_pane">
+    <div id="op_pane" :style="{ 'height': opPaneHeight + 'rem' }" class="grid_pane_c10">
       <div>请求ID号(,)&nbsp;</div>
       <input type="text" v-model="requireFundIds" class="form-control-plaintext search_box"
         style="grid-column: 2 / span 2; padding-left: 0.5rem;">
@@ -98,7 +98,7 @@
               <div>共:&nbsp;{{ oneRow.statistics?.tot_hold_days }}天</div>
             </td>
             <td>
-              <template v-if="oneRow.soldHistoryWrapper">
+              <template v-if="oneRow.soldHistoryWrapper" :key="one_sold.date_str">
                 <div v-for="(one_sold, index) in oneRow.soldHistoryWrapper">
                   <span v-if="index === oneRow.soldHistoryWrapper.length - 1" class="text-bg-danger">{{ one_sold?.date_str }}</span>
                   <span v-else>{{ one_sold?.date_str }}</span>

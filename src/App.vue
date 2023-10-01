@@ -1,19 +1,19 @@
 <script setup>
 import TopNavbar from "./components/TopNavbar.vue";
 
-import { onUpdated } from "vue";
-import { Toast } from 'bootstrap'
-import { useApiStore } from "./store/apiStore.js";
-import { storeToRefs } from 'pinia'
-import { useZsRepoStore } from "./store/zsrepoStore";
-import { useZskbStore } from "./store/zskbStore";
+import {onUpdated} from "vue";
+import {Toast} from 'bootstrap'
+import {useApiStore} from "./store/apiStore.js";
+import {storeToRefs} from 'pinia'
+import {useZsRepoStore} from "./store/zsrepoStore";
+import {useZskbStore} from "./store/zskbStore";
 
 const apiStore = useApiStore()
-const { requestMsgObjs, errorMsgObjs, isApiInProgress, isAlertVisible, alertMsg } = storeToRefs(apiStore)
+const {requestMsgObjs, errorMsgObjs, isApiInProgress, isAlertVisible, alertMsg} = storeToRefs(apiStore)
 const zsrepoStore = useZsRepoStore()
-const { getZsRepo, getZsRepoHides, getZsRepoExclude } = zsrepoStore
+const {getZsRepo, getZsRepoHides, getZsRepoExclude, getRepoBase, getRepoRecycles, getRepoRecycleHides} = zsrepoStore
 const zskbStore = useZskbStore()
-const { getRtRates, getZskb } = zskbStore
+const {getRtRates, getZskb} = zskbStore
 
 onUpdated(() => {
   const hiddenToasts = errorMsgObjs.value.filter((obj) => {
@@ -39,8 +39,11 @@ onUpdated(() => {
 getZsRepo()
 getZsRepoHides()
 getZsRepoExclude()
+getRepoBase()
 getZskb()
 getRtRates()
+getRepoRecycles()
+getRepoRecycleHides()
 
 </script>
 
@@ -56,7 +59,7 @@ getRtRates()
 
   <div ref="container" class="position-fixed bottom-0 end-0 p-3" style="z-index: 11">
     <div v-for="item in errorMsgObjs" v-bind:id="item.id" class="toast fade opacity-75 bg-danger" role="alert"
-      aria-live="assertive" aria-atomic="true" data-bs-autohide="false">
+         aria-live="assertive" aria-atomic="true" data-bs-autohide="false" :key="item.id">
       <div class="toast-header bg-danger">
         <strong class="me-auto text-white">{{ item.type }}</strong>
         <button type="button" class="btn-close" data-bs-dismiss="toast" aria-label="Close"></button>
@@ -64,8 +67,8 @@ getRtRates()
       <div class="toast-body text-white error-body">{{ item.msg }}</div>
     </div>
   </div>
-  <div class="alert alert-success position-fixed top-0 end-0" role="alert" 
-        v-if="isAlertVisible" style="z-index: 1100;">
+  <div class="alert alert-success position-fixed top-0 end-0" role="alert"
+       v-if="isAlertVisible" style="z-index: 1100;">
     {{ alertMsg }}
   </div>
 </template>

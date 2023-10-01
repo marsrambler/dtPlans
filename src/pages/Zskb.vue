@@ -1,11 +1,11 @@
 <template>
   <div :style="topSecClass">
-    <div id="op_pane" :style="{'height': opPaneHeight + 'rem'}" class="grid_pane">
-      <div>总数:&nbsp;<span class="badge bg-success">{{ currTotNum }}</span>
-      </div>
-      <div style="cursor: pointer;" @click="clearSelected()">
-        选择:&nbsp;<span class="badge bg-warning text-dark">{{ currSelectedNum }}</span>
-      </div>
+    <div id="op_pane" :style="{'height': opPaneHeight + 'rem'}" class="grid_pane_c12">
+      <div>总数&nbsp;<span class="badge bg-success">{{ currTotNum }}</span><!--
+      --></div>
+      <div style="cursor: pointer;" @click="clearSelected()"><!--
+        -->选择&nbsp;<span class="badge bg-warning text-dark">{{ currSelectedNum }}</span><!--
+      --></div>
       <!--      <div>隐藏:&nbsp;<span class="badge bg-warning text-dark">{{ currSelectedNum }}</span>-->
       <!--      </div>-->
       <div class="form-check" style="display: inline-block;">
@@ -20,9 +20,13 @@
         <input class="form-check-input" type="checkbox" v-model="indusIdxOnly">
         <label class="form-check-label" for="flexCheckChecked">行业</label>
       </div>
+      <div class="form-check" style="display: inline-block;">
+        <input class="form-check-input" type="checkbox" v-model="qdiiIdxOnly">
+        <label class="form-check-label" for="flexCheckChecked">QDII</label>
+      </div>
       <input class="btn btn-primary btn-sm" type="button" value="前移选择" @click="sortByField('selected')">
       <input type="text" class="form-control-plaintext search_box" 
-      style="grid-column: 7 / span 2;"
+      style="grid-column: 8 / span 2;"
       v-model="searchCond" @keyup.enter="searchByCond()">
       <input class="btn btn-primary btn-sm" type="button" value="查找" @click="searchByCond()">
       <input class="btn btn-warning btn-sm" type="button" value="刷新" @click="getZskb()">
@@ -168,12 +172,15 @@
       </tr>
       </thead>
       <tbody>
-      <template v-for="oneRow in zskbViewObjs">
+      <template v-for="oneRow in zskbViewObjs" :key="oneRow.fund_id">
         <tr v-bind:id="oneRow.fund_id" style="cursor: pointer;" @click="selOrDesRow(oneRow)"
-            v-bind:class="{sel_row: oneRow['currSelected']}" :ref="(el) => (rowElements[oneRow.fund_id] = el)">
+            v-bind:class="{sel_row: oneRow['currSelected']}" :ref="(el) => {if (el) {rowElements[oneRow.fund_id] = el;}}">
           <td v-bind:class="{sel_row: oneRow['currSelected']}">
             <div>
               {{ oneRow.fund_id }}
+              <template v-if="oneRow['statistics']['perc_not_update_days'] && oneRow['statistics']['perc_not_update_days'] - 1 >= 3">
+                <span class="badge bg-danger">缺失: {{oneRow.statistics.perc_not_update_days}}</span>
+              </template>
             </div>
             <div>
               {{ oneRow.fund_name }}
@@ -261,6 +268,7 @@
               <span v-bind:class="getHitStyle(oneRow.negative.day_90_negative_reach)">&nbsp;</span>
               <span v-bind:class="getHitStyle(oneRow.negative.day_120_negative_reach)">&nbsp;</span>
               <span v-bind:class="getHitStyle(oneRow.negative.day_160_negative_reach)">&nbsp;</span>
+              <span v-bind:class="getHitStyle(oneRow.negative.day_220_negative_reach)">&nbsp;</span>
             </div>
           </td>
           <td class="nr_td" colspan="3" v-bind:class="{sel_row: oneRow['currSelected']}">
@@ -368,9 +376,10 @@ const zskbViewObjs = ref([])
 const wideIdxOnly = ref(true)
 const topicIdxOnly = ref(true)
 const indusIdxOnly = ref(true)
+const qdiiIdxOnly = ref(true)
 
-watch([zskbObjs, wideIdxOnly, topicIdxOnly, indusIdxOnly], () => {
-  if (wideIdxOnly.value && topicIdxOnly.value && indusIdxOnly.value) {
+watch([zskbObjs, wideIdxOnly, topicIdxOnly, indusIdxOnly, qdiiIdxOnly], () => {
+  if (wideIdxOnly.value && topicIdxOnly.value && indusIdxOnly.value && qdiiIdxOnly.value) {
     zskbViewObjs.value = zskbObjs.value
   } else {
     zskbViewObjs.value = []
@@ -391,6 +400,13 @@ watch([zskbObjs, wideIdxOnly, topicIdxOnly, indusIdxOnly], () => {
     if (indusIdxOnly.value) {
       zskbObjs.value.forEach(elem => {
         if (elem['indexType'] === 2) {
+          zskbViewObjs.value.push(elem)
+        }
+      })
+    }
+    if (qdiiIdxOnly.value) {
+      zskbObjs.value.forEach(elem => {
+        if (elem['indexType'] === 3) {
           zskbViewObjs.value.push(elem)
         }
       })
@@ -660,7 +676,9 @@ function getPosColor(_val) {
 }
 
 function getNegColor(_val) {
-  if (_val >= 7) {
+  if (_val >= 8) {
+    return 'blue_8';
+  } else if (_val >= 7) {
     return 'blue_7';
   } else if (_val >= 6) {
     return 'blue_6';

@@ -4,6 +4,7 @@ import Zskb from "../pages/Zskb.vue";
 import Zsrepo from "../pages/Zsrepo.vue";
 import Compose from "../pages/Compose.vue";
 import Report from "../pages/Report.vue";
+import RepoRecycle from "../pages/RepoRecycle.vue";
 
 const routes = [
     {
@@ -21,6 +22,11 @@ const routes = [
     {
         path: '/report/',
         component: Report
+    },
+    ,
+    {
+        path: '/recycle/',
+        component: RepoRecycle
     }
 ]
 

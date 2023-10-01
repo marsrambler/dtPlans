@@ -1,33 +1,51 @@
 <template>
   <div :style="topSecClass">
-    <div id="op_pane" :style="{ 'height': opPaneHeight + 'rem'}" class="grid_pane">
-      <div>总数:&nbsp;<span class="badge bg-success">{{ currTotNum }}</span>
-      </div>
-      <div>隐藏:&nbsp;<span class="badge bg-dark">{{ currRepoHideNum }}</span>
-      </div>
-      <div style="cursor: pointer;" @click="clearSelected()">
-        选择:&nbsp;<span class="badge bg-warning text-dark">{{ currSelectedNum }}</span>
-      </div>
-      <div class="form-check" style="display: inline-block;">
-        <input class="form-check-input" type="checkbox" v-model="showHides">
-        <label class="form-check-label" for="flexCheckDefault">显示隐藏</label>
-      </div>
+    <div id="op_pane" :style="{ 'height': opPaneHeight + 'rem'}" class="grid_pane_c12">
+      <div>总数&nbsp;<span class="badge bg-success">{{ currTotNum }}</span><!--
+      --></div>
+      <div style=""><!--
+        --><input class="form-check-input" type="checkbox" v-model="showHides"><!--
+        -->&nbsp;隐藏&nbsp;<span class="badge bg-dark">{{ currRepoHideNum }}</span><!--
+      --></div>
+      <div style="cursor: pointer;" @click="clearSelected()"><!--
+        -->选择&nbsp;<span class="badge bg-warning text-dark">{{ currSelectedNum }}</span><!--
+      --></div>
+      <div style="">
+        <input class="form-check-input" type="checkbox" v-model="showNewAdd"><!--
+        -->&nbsp;新加&nbsp;<span class="badge bg-info text-bg-success">{{ currNewAddNum }}</span><!--
+      --></div>
+      <div style="">
+        <input class="form-check-input" type="checkbox" v-model="showKanban"><!--
+        -->&nbsp;看板&nbsp;<span class="badge bg-primary text-bg-primary">{{ currKanbanNum }}</span><!--
+      --></div>
       <input class="btn btn-primary btn-sm" type="button" value="前移选择" @click="sortByField('selected')">
       <!--
       <input class="btn btn-info btn-sm" type="button" value="隐藏选择">
       <input class="btn btn-info btn-sm" type="button" value="清除隐藏">
       -->
       <input type="text" class="form-control-plaintext search_box"
-             style="grid-column: 6 / span 2;"
+             style="grid-column: 7 / span 2;"
              v-model="searchCond" @keyup.enter="searchByCond()">
       <input class="btn btn-primary btn-sm" type="button" value="查找" @click="searchByCond()">
       <input class="btn btn-warning btn-sm" type="button" value="刷新" @click="getZsRepo()">
+      <input class="btn btn-primary btn-sm" type="button" value="保存" @click="saveRepoBase4Ui()">
     </div>
     <table id="table_header" class="table table-bordered" style="margin-bottom: 0;">
       <thead style="">
       <tr :style="{ 'height': tabHeaderHeight + 'rem' }">
         <th :style="{ 'width': colWidMap['col_1'] + 'rem' }">
-          <span>名称</span>
+          <div>
+            <div class="w50_w_br">
+              <span>名称</span>
+            </div>
+            <div class="w50_w_br" @click="sortByField('perc_not_update_days')" style="border: none;">
+              <template v-if="sortFieldName === 'perc_not_update_days'">
+                <span v-if="sortFieldFlag"><i class="bi bi-arrow-up"></i></span>
+                <span v-else><i class="bi bi-arrow-down"></i></span>
+              </template>
+              <span>更新</span>
+            </div>
+          </div>
         </th>
         <th :style="{ 'width': colWidMap['col_2'] + 'rem' }" @click="sortByField('cluster_id')">
           <template v-if="sortFieldName === 'cluster_id'">
@@ -108,25 +126,38 @@
       <tbody>
       <template v-for="oneRow in zsRepoViewObjs" :key="oneRow.fund_id">
         <tr v-bind:id="oneRow.fund_id" style="cursor: pointer;" @click="selOrDesRow(oneRow)"
-            v-bind:class="{ sel_row: oneRow['currSelected'] }" :ref="(el) => (rowElements[oneRow.fund_id] = el)">
+            v-bind:class="{ sel_row: oneRow['currSelected'] }"
+            :ref="(el) => { if (el) {rowElements[oneRow.fund_id] = el;}}">
           <td v-bind:class="{ sel_row: oneRow['currSelected'] }">
             <div>
                 <span style="margin-right: 0.5rem;">
                   {{ oneRow.fund_id }}
                 </span>
               <span v-if="oneRow['in_kanban']" class="badge bg-danger" style="margin-right: 0.2rem;">已看板</span>
-              <span v-else-if="oneRow['hide_repo']" class="badge bg-dark">已隐藏</span>
-              <input v-else class="btn btn-warning btn-sm" type="button" value="隐藏"
-                     @click.stop="addZsRepoHide(oneRow.fund_id, oneRow.fund_name)">
-              <template v-if="oneRow['hide_repo']">
-                <span v-if="oneRow['exclude_repo']" class="badge bg-dark">已排除</span>
-                <input v-else class="btn btn-danger btn-sm" style="margin-left: 0.5rem;" type="button" value="永远排除"
+              <span v-if="oneRow['hide_repo']" class="badge bg-dark" style="cursor: pointer;"
+                    @click.stop="removeZsRepoHide(oneRow.fund_id, oneRow.fund_name)">已隐藏</span>
+              <template v-else-if="!oneRow['in_kanban']">
+                <input class="btn btn-warning btn-sm" type="button" value="隐藏"
                        @click.stop="addZsRepoHide(oneRow.fund_id, oneRow.fund_name)">
+              </template>
+              <span v-if="oneRow['exclude_repo']" class="badge bg-dark" style="margin-left: 0.5rem;">已排除</span>
+              <template v-if="oneRow['hide_repo']">
+                <input v-if="!oneRow['exclude_repo']" class="btn btn-danger btn-sm" style="margin-left: 0.5rem;" type="button" value="永远排除"
+                       @click.stop="excludeRepo(oneRow.fund_id, oneRow.fund_name)">
+              </template>
+              <template v-if="oneRow['new_add_flag']">
+                <span class="badge bg-info text-bg-success" style="margin-left: 0.5rem;">新加</span>
               </template>
             </div>
             <div>
               {{ oneRow.fund_name }}
             </div>
+            <template v-if="oneRow['perc_not_update_days'] && oneRow['perc_not_update_days'] - 1 >= 3">
+              <div style="font-size: 0.85rem;">
+                {{ oneRow.last_perc_date_str }} <span
+                  class="badge bg-danger">缺失: {{ oneRow.perc_not_update_days }}</span>
+              </div>
+            </template>
           </td>
           <td v-bind:class="{ sel_row: oneRow['currSelected'] }">
             {{ oneRow.cluster_id }}
@@ -192,9 +223,11 @@
                   </option>
                 </select>
                 <label>URL:&nbsp;</label>
-                <input type="text" class="form-control-plaintext input_box_br" style="max-width: 25rem;" v-model="oneRow['indexUrl']">
+                <input type="text" class="form-control-plaintext input_box_br" style="max-width: 25rem;"
+                       v-model="oneRow['indexUrl']">
                 <label>Spider:&nbsp;</label>
-                <select class="form-select nr_select" style="width: 5rem;" v-model="oneRow['specialSpider']" @click.stop>
+                <select class="form-select nr_select" style="width: 5rem;" v-model="oneRow['specialSpider']"
+                        @click.stop>
                   <option v-for="option in spider_versions" v-bind:value="option.source_val">
                     {{ option.source_name }}
                   </option>
@@ -278,8 +311,8 @@ import {useZskbStore} from '../store/zskbStore';
 import {Modal} from 'bootstrap';
 
 const zsRepoStore = useZsRepoStore()
-const {zsRepoObjs, zsRepoHides, zsRepoExcludes} = storeToRefs(zsRepoStore)
-const {addZsRepoHide, getZsRepo, excludeRepo} = zsRepoStore
+const {zsRepoObjs, zsRepoHides, zsRepoExcludes, zsRepoBases} = storeToRefs(zsRepoStore)
+const {addZsRepoHide, removeZsRepoHide, getZsRepo, excludeRepo, saveRepoBase} = zsRepoStore
 
 const zskbStore = useZskbStore()
 const {zskbObjs} = storeToRefs(zskbStore)
@@ -302,9 +335,11 @@ const spider_versions = [
 ]
 
 const showHides = ref(false)
+const showNewAdd = ref(false)
+const showKanban = ref(false)
 const zsRepoViewObjs = ref([])
 
-watch([zsRepoObjs, zskbObjs, zsRepoHides, zsRepoExcludes, showHides], () => {
+watch([zsRepoObjs, zskbObjs, zsRepoHides, zsRepoExcludes, zsRepoBases, showHides, showNewAdd, showKanban], () => {
   const _kb_fund_ids = zskbObjs.value.map(elem => elem['fund_id'])
   zsRepoObjs.value.forEach((elem) => {
     if (_kb_fund_ids.indexOf(elem['fund_id']) != -1) {
@@ -330,13 +365,41 @@ watch([zsRepoObjs, zskbObjs, zsRepoHides, zsRepoExcludes, showHides], () => {
     } else {
       elem['exclude_repo'] = false
     }
+    if (zsRepoBases.value.indexOf(elem['fund_id']) != -1) {
+      elem['new_add_flag'] = false
+    } else {
+      elem['new_add_flag'] = true
+    }
   })
-  if (showHides.value) {
+  if (showNewAdd.value) {
+    zsRepoViewObjs.value = zsRepoObjs.value.filter(elem => elem['new_add_flag'])
+  } else if (showKanban.value) {
+    zsRepoViewObjs.value = zsRepoObjs.value.filter(elem => elem['in_kanban'])
+  } else if (showHides.value) {
     zsRepoViewObjs.value = zsRepoObjs.value
   } else {
     zsRepoViewObjs.value = zsRepoObjs.value.filter(elem => !elem['hide_repo'])
   }
 }, {immediate: true})
+
+watch([showHides, showNewAdd, showKanban],
+    ([showHidesNow, showNewAddNow, showKanbanNow], [showHidesPrev, showNewAddPrev, showKanbanPrev]) => {
+  if (!showHidesPrev && showHidesNow) {
+    showNewAdd.value = false
+    showKanban.value = false
+  } else if (!showNewAddPrev && showNewAddNow) {
+    showHides.value = false
+    showKanban.value = false
+  } else if (!showKanbanPrev && showKanbanNow) {
+    showHides.value = false
+    showNewAdd.value = false
+  }
+})
+
+function saveRepoBase4Ui() {
+  let _fund_arr = zsRepoObjs.value.map(elem => elem['fund_id'])
+  saveRepoBase(_fund_arr.join(','))
+}
 
 const currTotNum = computed(() => {
   return zsRepoViewObjs.value.length
@@ -364,12 +427,17 @@ function clearSelected() {
 
 const currSelectedNum = ref(0)
 const currRepoHideNum = ref(0)
-
+const currNewAddNum = ref(0)
+const currKanbanNum = ref(0)
 watch(zsRepoViewObjs, () => {
   let _filtered_1 = zsRepoViewObjs.value.filter((elem => elem['currSelected']))
   currSelectedNum.value = _filtered_1.length
   let _filtered_2 = zsRepoViewObjs.value.filter((elem) => elem['hide_repo'])
   currRepoHideNum.value = _filtered_2.length
+  let _filtered_3 = zsRepoViewObjs.value.filter((elem) => elem['new_add_flag'])
+  currNewAddNum.value = _filtered_3.length
+  let _filtered_4 = zsRepoViewObjs.value.filter((elem) => elem['in_kanban'])
+  currKanbanNum.value = _filtered_4.length
 }, {
   deep: true
 })
@@ -384,7 +452,18 @@ function sortByField(_field) {
     sortFieldName.value = _field
     sortFieldFlag.value = true
   }
-  if (_field === 'cluster_id') {
+
+  if (_field === 'perc_not_update_days') {
+    if (sortFieldFlag.value) {
+      zsRepoViewObjs.value.sort((a, b) => {
+        return a['perc_not_update_days'] - b['perc_not_update_days'];
+      });
+    } else {
+      zsRepoViewObjs.value.sort((a, b) => {
+        return b['perc_not_update_days'] - a['perc_not_update_days'];
+      });
+    }
+  } else if (_field === 'cluster_id') {
     if (sortFieldFlag.value) {
       zsRepoViewObjs.value.sort((a, b) => {
         return a['cluster_id'] - b['cluster_id'];
