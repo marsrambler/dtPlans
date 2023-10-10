@@ -13,28 +13,34 @@
       <thead style="">
       <tr :style="{'height': tabHeaderHeight + 'rem'}">
         <th :style="{'width': colWidMap['col_1'] + 'rem'}">
+          ID名称信息
         </th>
         <th :style="{'width': colWidMap['col_2'] + 'rem'}">
+          最小
         </th>
         <th :style="{'width': colWidMap['col_3'] + 'rem'}">
+          平均
         </th>
         <th :style="{'width': colWidMap['col_4'] + 'rem'}">
+          最大
         </th>
-        <th :style="{'width': colWidMap['col_5'] + 'rem'}">
-        </th>
-        <th :style="{'width': colWidMap['col_6'] + 'rem'}">
+        <th :style="{'width': colWidMap['col_5'] + colWidMap['col_6'] + 'rem'}" colspan="2">
+          <div>
+            <div class="w50_w_br">
+              <span>高点</span>
+            </div>
+            <div class="w50_w_br" style="border: none;">
+              <span>低点</span>
+            </div>
+          </div>
         </th>
         <th :style="{'width': colWidMap['col_7'] + 'rem'}">
+          持有情况
         </th>
         <th :style="{'width': colWidMap['col_8'] + 'rem'}">
+          购入设定
         </th>
         <th :style="{'width': colWidMap['col_9'] + 'rem'}">
-        </th>
-        <th :style="{'width': colWidMap['col_10'] + 'rem'}">
-        </th>
-        <th :style="{'width': colWidMap['col_11'] + 'rem'}">
-        </th>
-        <th :style="{'width': colWidMap['col_12'] + 'rem'}">
         </th>
       </tr>
       </thead>
@@ -57,19 +63,31 @@
         <th :style="{'width': colWidMap['col_7'] + 'rem'}"></th>
         <th :style="{'width': colWidMap['col_8'] + 'rem'}"></th>
         <th :style="{'width': colWidMap['col_9'] + 'rem'}"></th>
-        <th :style="{'width': colWidMap['col_10'] + 'rem'}"></th>
-        <th :style="{'width': colWidMap['col_11'] + 'rem'}"></th>
-        <th :style="{'width': colWidMap['col_12'] + 'rem'}"></th>
       </tr>
       </thead>
       <tbody>
       <template v-for="oneRow in composeViewObjs" :key="oneRow.fund_id">
         <tr v-bind:id="oneRow.fund_id">
           <td>
-            {{oneRow.fund_id}}
-          </td>
-          <td>
-            {{oneRow.fund_name}}
+            <template v-if="oneRow['kbObj']">
+              <div>{{oneRow.fund_id}}&nbsp;
+                <span style="font-size: 1rem; font-style: italic;text-decoration: underline;">
+                  {{oneRow.kbObj.statistics.last_perc_date_str}}
+                </span>
+              </div>
+              <div>{{oneRow.fund_name}}&nbsp;
+                <span style="font-size: 1rem; font-style: italic;text-decoration: underline;">
+                  {{oneRow.kbObj.statistics.fund_perc_len}}
+                </span>
+              </div>
+              <div>
+                <span v-bind:class="getCardStyle(oneRow.kbObj.statistics.day_200_thres)">&nbsp;</span>
+                <span v-bind:class="getCardStyle(oneRow.kbObj.statistics.day_300_thres)">&nbsp;</span>
+                <span v-bind:class="getCardStyle(oneRow.kbObj.statistics.day_400_thres)">&nbsp;</span>
+                <span v-bind:class="getCardStyle(oneRow.kbObj.statistics.day_500_thres)">&nbsp;</span>
+                <span v-bind:class="getCardStyle(oneRow.kbObj.statistics.day_600_thres)">&nbsp;</span>
+              </div>
+            </template>
           </td>
           <td>
             <div>
@@ -105,16 +123,70 @@
             </div>
           </td>
           <td>
+            <template v-if="oneRow['kbObj']">
+              <div style="height: 2.2em; position: relative;"
+                   v-bind:class="getPosColor(oneRow.kbObj.positive.positive_reach_len)">
+                  <span v-if="oneRow.kbObj.positive.positive_reach_len >= 4" class="icon_pos">
+                  <i class="bi bi-arrow-up-circle-fill"></i>
+                  <span class="lv_font">{{ oneRow.kbObj.positive.positive_reach_len }}</span>
+                  </span>
+              </div>
+              <div style="height: 2.2em; position: relative;"
+                   v-bind:class="getNegColor(oneRow.kbObj.negative.negative_reach_len)">
+                <span v-if="oneRow.kbObj.negative.negative_reach_len >= 3" class="icon_pos">
+                <i class="bi bi-arrow-down-circle-fill"></i>
+                  <span class="lv_font">{{ oneRow.kbObj.negative.negative_reach_len }}</span>
+                </span>
+              </div>
+            </template>
           </td>
           <td>
+            <template v-if="oneRow['kbObj']">
+              <div style="height: 2.2em;">
+                <span v-bind:class="getHitStyle(oneRow.kbObj.positive.day_5_positive_reach)">&nbsp;</span>
+                <span v-bind:class="getHitStyle(oneRow.kbObj.positive.day_10_positive_reach)">&nbsp;</span>
+                <span v-bind:class="getHitStyle(oneRow.kbObj.positive.day_20_positive_reach)">&nbsp;</span>
+                <span v-bind:class="getHitStyle(oneRow.kbObj.positive.day_60_positive_reach)">&nbsp;</span>
+                <span v-bind:class="getHitStyle(oneRow.kbObj.positive.day_90_positive_reach)">&nbsp;</span>
+                <span v-bind:class="getHitStyle(oneRow.kbObj.positive.day_120_positive_reach)">&nbsp;</span>
+                <span v-bind:class="getHitStyle(oneRow.kbObj.positive.day_160_positive_reach)">&nbsp;</span>
+                <span v-bind:class="getHitStyle(oneRow.kbObj.positive.day_220_positive_reach)">&nbsp;</span>
+              </div>
+              <div style="height: 2.2em;">
+                <span v-bind:class="getHitStyle(oneRow.kbObj.negative.day_5_negative_reach)">&nbsp;</span>
+                <span v-bind:class="getHitStyle(oneRow.kbObj.negative.day_10_negative_reach)">&nbsp;</span>
+                <span v-bind:class="getHitStyle(oneRow.kbObj.negative.day_20_negative_reach)">&nbsp;</span>
+                <span v-bind:class="getHitStyle(oneRow.kbObj.negative.day_60_negative_reach)">&nbsp;</span>
+                <span v-bind:class="getHitStyle(oneRow.kbObj.negative.day_90_negative_reach)">&nbsp;</span>
+                <span v-bind:class="getHitStyle(oneRow.kbObj.negative.day_120_negative_reach)">&nbsp;</span>
+                <span v-bind:class="getHitStyle(oneRow.kbObj.negative.day_160_negative_reach)">&nbsp;</span>
+                <span v-bind:class="getHitStyle(oneRow.kbObj.negative.day_220_negative_reach)">&nbsp;</span>
+              </div>
+            </template>
           </td>
           <td>
+            <template v-if="oneRow['kbObj']">
+              <div>
+                持有:
+              </div>
+              <div>
+                盈利:
+              </div>
+              <div>
+                计:
+              </div>
+            </template>
           </td>
           <td>
-          </td>
-          <td>
-          </td>
-          <td>
+            <div>
+              当前:
+            </div>
+            <div>
+              决策:
+            </div>
+            <div>
+              保存
+            </div>
           </td>
           <td>
             <button type="button" class="btn btn-primary" @click="oneRow['show_detail'] = !oneRow['show_detail'];">
@@ -124,7 +196,7 @@
         </tr>
         <template v-if="oneRow['show_detail']">
           <tr>
-            <td colspan="12" id="table_container">
+            <td colspan="9" id="table_container">
               <div>
                 <table class="table table-bordered">
                   <thead>
@@ -162,6 +234,7 @@ import {
   tabContTopPos,
   minPaneWidth,
   topSecClass,
+  getCardStyle,
   getPosColor,
   getNegColor,
   getHitStyle
@@ -185,18 +258,15 @@ const buy_in_from_plan = [
 ]
 
 const colWidMap = {
-  'col_1': 4,
-  'col_2': 8,
+  'col_1': 12,
+  'col_2': 3,
   'col_3': 3,
   'col_4': 3,
   'col_5': 3,
-  'col_6': 4,
-  'col_7': 3,
-  'col_8': 11,
-  'col_9': 4.5,
-  'col_10': 4.5,
-  'col_11': 4.5,
-  'col_12': 5
+  'col_6': 10,
+  'col_7': 7,
+  'col_8': 7,
+  'col_9': 4
 }
 
 const compose_name = ref('all')
@@ -216,11 +286,12 @@ watch([composeObjs, compose_name, zskbObjs], () => {
       composeViewObjs.value = composeObjs.value.find(item => item['compose_name'] === compose_name.value)['compose_objs']
     }
   }
+  /*
   if (zskbObjs && zskbObjs.value && zskbObjs.value.length > 0 && composeViewObjs.value.length > 0) {
     composeViewObjs.value.forEach(item => {
       item['kbObj'] = zskbObjs.value.find(elem => elem['fund_id'] === item['fund_id'])
     })
-  }
+  }*/
 }, {immediate: true})
 
 </script>

@@ -257,7 +257,7 @@ const colWidMap = {
   'col_8': 4
 }
 
-getRecordsAndRates()
+// getRecordsAndRates()
 
 const zskbViewObjs = ref({})
 watch(zskbObjs, () => {
