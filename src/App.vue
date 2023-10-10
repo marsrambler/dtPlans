@@ -7,6 +7,7 @@ import {useApiStore} from "./store/apiStore.js";
 import {storeToRefs} from 'pinia'
 import {useZsRepoStore} from "./store/zsrepoStore";
 import {useZskbStore} from "./store/zskbStore";
+import {useComposeStore} from "./store/composeStore.js";
 
 const apiStore = useApiStore()
 const {requestMsgObjs, errorMsgObjs, isApiInProgress, isAlertVisible, alertMsg} = storeToRefs(apiStore)
@@ -14,6 +15,8 @@ const zsrepoStore = useZsRepoStore()
 const {getZsRepo, getZsRepoHides, getZsRepoExclude, getRepoBase, getRepoRecycles, getRepoRecycleHides} = zsrepoStore
 const zskbStore = useZskbStore()
 const {getRtRates, getZskb} = zskbStore
+const composeStore = useComposeStore()
+const {getAllCompose} = composeStore
 
 onUpdated(() => {
   const hiddenToasts = errorMsgObjs.value.filter((obj) => {
@@ -44,6 +47,7 @@ getZskb()
 getRtRates()
 getRepoRecycles()
 getRepoRecycleHides()
+getAllCompose()
 
 </script>
 

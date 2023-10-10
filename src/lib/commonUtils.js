@@ -59,6 +59,45 @@ watch(infoPaneHeight, () => {
     }
 }, {immediate: true})
 
+function getPosColor(_val) {
+    if (_val >= 8) {
+      return 'red_8';
+    } else if (_val >= 7) {
+      return 'red_7';
+    } else if (_val >= 6) {
+      return 'red_6';
+    } else if (_val >= 5) {
+      return 'red_5';
+    } else {
+      return 'red_other';
+    }
+}
+
+function getNegColor(_val) {
+    if (_val >= 8) {
+      return 'blue_8';
+    } else if (_val >= 7) {
+      return 'blue_7';
+    } else if (_val >= 6) {
+      return 'blue_6';
+    } else if (_val >= 5) {
+      return 'blue_5';
+    } else if (_val >= 4) {
+      return 'blue_4';
+    } else {
+      return 'blue_3';
+    }
+}
+
+function getHitStyle(_val) {
+    if (_val > 0) {
+      return 'purple_card';
+    } else if (_val < 0) {
+      return 'grey_card';
+    }
+    return 'white_card';
+}
+
 export {
     navHeight,
     opPaneTopPos,
@@ -74,5 +113,8 @@ export {
     infoPaneHeight,
     infoTopSectHeight,
     infoTabContTopPos,
-    infoTopSecClass
+    infoTopSecClass,
+    getPosColor,
+    getNegColor,
+    getHitStyle
 }

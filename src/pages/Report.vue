@@ -1,9 +1,9 @@
 <template>
   <div :style="topSecClass">
-    <div id="op_pane" :style="{ 'height': opPaneHeight + 'rem' }" class="grid_pane_c10">
-      <div>请求ID号(,)&nbsp;</div>
+    <div id="op_pane" :style="{ 'height': opPaneHeight + 'rem' }" class="grid_pane_c12">
+      <div>请求ID号(,)</div>
       <input type="text" v-model="requireFundIds" class="form-control-plaintext search_box"
-        style="grid-column: 2 / span 2; padding-left: 0.5rem;">
+        style="grid-column: 2 / span 3; padding-left: 0.5rem;">
       <input class="btn btn-primary btn-sm" type="button" value="请求" @click="requireDynValues4ui();">
       <input class="btn btn-warning btn-sm" type="button" value="刷新" @click="getRecordsAndRates();">
     </div>

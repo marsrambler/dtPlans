@@ -25,9 +25,9 @@
         <label class="form-check-label" for="flexCheckChecked">QDII</label>
       </div>
       <input class="btn btn-primary btn-sm" type="button" value="前移选择" @click="sortByField('selected')">
-      <input type="text" class="form-control-plaintext search_box" 
-      style="grid-column: 8 / span 2;"
-      v-model="searchCond" @keyup.enter="searchByCond()">
+      <input type="text" class="form-control-plaintext search_box"
+             style="grid-column: 8 / span 2;"
+             v-model="searchCond" @keyup.enter="searchByCond()">
       <input class="btn btn-primary btn-sm" type="button" value="查找" @click="searchByCond()">
       <input class="btn btn-warning btn-sm" type="button" value="刷新" @click="getZskb()">
     </div>
@@ -174,12 +174,14 @@
       <tbody>
       <template v-for="oneRow in zskbViewObjs" :key="oneRow.fund_id">
         <tr v-bind:id="oneRow.fund_id" style="cursor: pointer;" @click="selOrDesRow(oneRow)"
-            v-bind:class="{sel_row: oneRow['currSelected']}" :ref="(el) => {if (el) {rowElements[oneRow.fund_id] = el;}}">
+            v-bind:class="{sel_row: oneRow['currSelected']}"
+            :ref="(el) => {if (el) {rowElements[oneRow.fund_id] = el;}}">
           <td v-bind:class="{sel_row: oneRow['currSelected']}">
             <div>
               {{ oneRow.fund_id }}
-              <template v-if="oneRow['statistics']['perc_not_update_days'] && oneRow['statistics']['perc_not_update_days'] - 1 >= 3">
-                <span class="badge bg-danger">缺失: {{oneRow.statistics.perc_not_update_days}}</span>
+              <template
+                  v-if="oneRow['statistics']['perc_not_update_days'] && oneRow['statistics']['perc_not_update_days'] - 1 >= 3">
+                <span class="badge bg-danger">缺失: {{ oneRow.statistics.perc_not_update_days }}</span>
               </template>
             </div>
             <div>
@@ -291,29 +293,36 @@
               <div></div>
               <div></div>
               <div class="right_pad">
-                <button type="button" class="btn btn-outline-dark mw4_ctl" @click="saveEstiPe($event, oneRow)">保存
+                <button type="button" class="btn btn-warning mw4_ctl" @click="saveEstiPe($event, oneRow)">保存
                 </button>
               </div>
             </div>
           </td>
           <td class="nr_td" v-bind:class="{sel_row: oneRow['currSelected']}">
             <div class="grid_1">
-              <select class="form-select nr_select" @click.stop>
-                <option v-for="option in buy_in_from_plan" v-bind:value="option.source_val">
-                  {{ option.source_name }}
-                </option>
-              </select>
-              <div class="right_pad">
-                <button type="button" class="btn btn-outline-dark mw4_ctl" @click="changePlan($event, oneRow)">
-                  详情
-                </button>
-              </div>
-            </div>
-          </td>
-        </tr>
-        <tr v-if="oneRow['showPlanDtl']">
-          <td colspan="12">
-            <div class="op_pane" style="height: 6rem;">
+              <template v-if="oneRow['compose_plan'] && oneRow['compose_plan'] === 'noplan'">
+                <select class="form-select nr_select" @click.stop v-model="oneRow['target_plan']">
+                  <option v-for="option in buy_in_from_plan" v-bind:value="option.source_val">
+                    {{ option.source_name }}
+                  </option>
+                </select>
+                <div class="right_pad">
+                  <button type="button" class="btn btn-warning mw4_ctl" @click="changeCompose($event, oneRow)"
+                          v-bind:disabled="!oneRow['target_plan'] || oneRow['target_plan'] === 'noplan'">保存</button>
+                </div>
+              </template>
+              <template v-if="oneRow['compose_plan'] && oneRow['compose_plan'] !== 'noplan'">
+                <div>
+                  <span class="badge bg-info text-bg-success" style="margin: auto; width: 100%; line-height: 2.2rem; font-size: 0.9rem;">
+                    {{ oneRow['compose_plan'] }}
+                  </span>
+                </div>
+                <div class="right_pad">
+                  <button type="button" class="btn btn-warning mw4_ctl" @click="removeCompose($event, oneRow)">
+                    移除
+                  </button>
+                </div>
+              </template>
             </div>
           </td>
         </tr>
@@ -333,15 +342,22 @@ import {
   minPaneWidth,
   getCardStyle,
   typeMapObj,
-  topSecClass
+  topSecClass,
+  getPosColor,
+  getNegColor,
+  getHitStyle
 } from "../lib/commonUtils.js"
 import {computed, nextTick, ref, watch} from "vue";
 import {storeToRefs} from 'pinia'
 import {useZskbStore} from "../store/zskbStore.js";
+import {useComposeStore} from "../store/composeStore.js";
 
 const zskbStore = useZskbStore()
 const {zskbObjs} = storeToRefs(zskbStore)
 const {getZskb} = zskbStore
+const composeStore = useComposeStore()
+const {composeObjs} = storeToRefs(composeStore)
+const {addOrRemoveCompose} = composeStore
 
 const buy_in_esti_sugg_full = [
   {'source_name': '未知', 'source_val': -2},
@@ -351,10 +367,10 @@ const buy_in_esti_sugg_full = [
 ]
 
 const buy_in_from_plan = [
-  {'source_name': '无计划', 'source_val': 0},
-  {'source_name': '橄榄树', 'source_val': 1},
-  {'source_name': '三叉戟', 'source_val': 2},
-  {'source_name': '海豚', 'source_val': 3}
+  {'source_name': '无计划', 'source_val': 'noplan'},
+  {'source_name': '橄榄树', 'source_val': 'ovtree'},
+  {'source_name': '海豚', 'source_val': 'dolphin'},
+  {'source_name': '三叉戟', 'source_val': 'trident'}
 ]
 
 const colWidMap = {
@@ -378,7 +394,7 @@ const topicIdxOnly = ref(true)
 const indusIdxOnly = ref(true)
 const qdiiIdxOnly = ref(true)
 
-watch([zskbObjs, wideIdxOnly, topicIdxOnly, indusIdxOnly, qdiiIdxOnly], () => {
+watch([zskbObjs, wideIdxOnly, topicIdxOnly, indusIdxOnly, qdiiIdxOnly, composeObjs], () => {
   if (wideIdxOnly.value && topicIdxOnly.value && indusIdxOnly.value && qdiiIdxOnly.value) {
     zskbViewObjs.value = zskbObjs.value
   } else {
@@ -412,6 +428,22 @@ watch([zskbObjs, wideIdxOnly, topicIdxOnly, indusIdxOnly, qdiiIdxOnly], () => {
       })
     }
   }
+  if (composeObjs && composeObjs.value && composeObjs.value.length > 0) {
+    let _ovtree_fund_ids = composeObjs.value.find(item => item['compose_name'] === 'ovtree')['compose_objs'].map(item => item['fund_id'])
+    let _dolphin_fund_ids = composeObjs.value.find(item => item['compose_name'] === 'dolphin')['compose_objs'].map(item => item['fund_id'])
+    let _trident_fund_ids = composeObjs.value.find(item => item['compose_name'] === 'trident')['compose_objs'].map(item => item['fund_id'])
+    zskbViewObjs.value.forEach(elem => {
+      if (_ovtree_fund_ids.indexOf(elem['fund_id']) != -1) {
+        elem['compose_plan'] = 'ovtree'
+      } else if (_dolphin_fund_ids.indexOf(elem['fund_id']) != -1) {
+        elem['compose_plan'] = 'dolphin'
+      } else if (_trident_fund_ids.indexOf(elem['fund_id']) != -1) {
+        elem['compose_plan'] = 'trident'
+      } else {
+        elem['compose_plan'] = 'noplan'
+      }
+    })
+  }
 }, {immediate: true})
 
 const currTotNum = computed(() => {
@@ -422,13 +454,14 @@ function saveEstiPe(event, oneRowObj) {
   event.stopPropagation()
 }
 
-function changePlan(event, oneRowObj) {
+function changeCompose(event, oneRowObj) {
   event.stopPropagation()
-  if (oneRowObj.hasOwnProperty('showPlanDtl')) {
-    oneRowObj['showPlanDtl'] = !oneRowObj['showPlanDtl']
-  } else {
-    oneRowObj['showPlanDtl'] = true
-  }
+  addOrRemoveCompose(oneRowObj['fund_id'], oneRowObj['fund_name'], oneRowObj['target_plan'])
+}
+
+function removeCompose(event, oneRowObj) {
+  event.stopPropagation()
+  addOrRemoveCompose(oneRowObj['fund_id'], oneRowObj['fund_name'], oneRowObj['compose_plan'])
 }
 
 function selOrDesRow(oneRowObj) {
@@ -652,52 +685,13 @@ function searchByCond() {
   }
 }
 
-function getHitStyle(_val) {
-  if (_val > 0) {
-    return 'purple_card';
-  } else if (_val < 0) {
-    return 'grey_card';
-  }
-  return 'white_card';
-}
-
-function getPosColor(_val) {
-  if (_val >= 8) {
-    return 'red_8';
-  } else if (_val >= 7) {
-    return 'red_7';
-  } else if (_val >= 6) {
-    return 'red_6';
-  } else if (_val >= 5) {
-    return 'red_5';
-  } else {
-    return 'red_other';
-  }
-}
-
-function getNegColor(_val) {
-  if (_val >= 8) {
-    return 'blue_8';
-  } else if (_val >= 7) {
-    return 'blue_7';
-  } else if (_val >= 6) {
-    return 'blue_6';
-  } else if (_val >= 5) {
-    return 'blue_5';
-  } else if (_val >= 4) {
-    return 'blue_4';
-  } else {
-    return 'blue_3';
-  }
-}
-
 </script>
 
 <style scoped>
-.nr_select {
-  width: 100%;
-  padding: 0.5rem 0.1rem 0.5rem 0.1rem;
-}
+/*.nr_select {*/
+/*  width: 100%;*/
+/*  padding: 0.5rem 0.1rem 0.5rem 0.1rem;*/
+/*}*/
 
 .nr_td {
   text-align: left;

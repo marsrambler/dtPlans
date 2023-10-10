@@ -9,7 +9,7 @@ input, label {
 
 select {
     display: inline-block !important;
-    height: 2.5rem;
+    height: 2.2rem;
 }
 
 table {
@@ -110,4 +110,9 @@ table {
     justify-content: flex-start;
     gap: 0.5rem;
     align-items: center;
+}
+
+.nr_select {
+    width: 100%;
+    padding: 0 1rem 0 1rem;
 }
