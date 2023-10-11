@@ -1,6 +1,6 @@
 <template>
   <div :style="topSecClass">
-    <div id="op_pane" :style="{'height': opPaneHeight + 'rem'}" class="grid_pane_c12">
+    <div id="op_pane" :style="{ 'height': opPaneHeight + 'rem' }" class="grid_pane_c12">
       <div>总数&nbsp;<span class="badge bg-success">{{ currTotNum }}</span><!--
       --></div>
       <div style="cursor: pointer;" @click="clearSelected()"><!--
@@ -25,127 +25,126 @@
         <label class="form-check-label" for="flexCheckChecked">QDII</label>
       </div>
       <input class="btn btn-primary btn-sm" type="button" value="前移选择" @click="sortByField('selected')">
-      <input type="text" class="form-control-plaintext search_box"
-             style="grid-column: 8 / span 2;"
-             v-model="searchCond" @keyup.enter="searchByCond()">
+      <input type="text" class="form-control-plaintext search_box" style="grid-column: 8 / span 2;" v-model="searchCond"
+        @keyup.enter="searchByCond()">
       <input class="btn btn-primary btn-sm" type="button" value="查找" @click="searchByCond()">
       <input class="btn btn-warning btn-sm" type="button" value="刷新" @click="getZskb()">
     </div>
     <table id="table_header" class="table table-bordered" style="margin-bottom: 0;">
       <thead style="">
-      <tr :style="{'height': tabHeaderHeight + 'rem'}">
-        <th :style="{'width': colWidMap['col_1'] + 'rem'}">
-          <!-- <div style="border-bottom: solid 1px whitesmoke;">信息</div> -->
-          <div>
-            <div class="w50_w_br" @click="sortByField('day_xxx_thres')">
-              <template v-if="sortFieldName === 'day_xxx_thres'">
-                <span v-if="sortFieldFlag"><i class="bi bi-arrow-up"></i></span>
-                <span v-else><i class="bi bi-arrow-down"></i></span>
-              </template>
-              <span>趋势</span>
+        <tr :style="{ 'height': tabHeaderHeight + 'rem' }">
+          <th :style="{ 'width': colWidMap['col_1'] + 'rem' }">
+            <!-- <div style="border-bottom: solid 1px whitesmoke;">信息</div> -->
+            <div>
+              <div class="w50_w_br" @click="sortByField('day_xxx_thres')">
+                <template v-if="sortFieldName === 'day_xxx_thres'">
+                  <span v-if="sortFieldFlag"><i class="bi bi-arrow-up"></i></span>
+                  <span v-else><i class="bi bi-arrow-down"></i></span>
+                </template>
+                <span>趋势</span>
+              </div>
+              <div class="w50_w_br" @click="sortByField('fund_len')" style="border: none;">
+                <template v-if="sortFieldName === 'fund_len'">
+                  <span v-if="sortFieldFlag"><i class="bi bi-arrow-up"></i></span>
+                  <span v-else><i class="bi bi-arrow-down"></i></span>
+                </template>
+                <span>长度</span>
+              </div>
             </div>
-            <div class="w50_w_br" @click="sortByField('fund_len')" style="border: none;">
-              <template v-if="sortFieldName === 'fund_len'">
-                <span v-if="sortFieldFlag"><i class="bi bi-arrow-up"></i></span>
-                <span v-else><i class="bi bi-arrow-down"></i></span>
-              </template>
-              <span>长度</span>
-            </div>
-          </div>
-        </th>
-        <th :style="{'width': colWidMap['col_2'] + 'rem'}" @click="sortByField('fund_type')">
-          <template v-if="sortFieldName === 'fund_type'">
-            <span v-if="sortFieldFlag"><i class="bi bi-arrow-up"></i></span>
-            <span v-else><i class="bi bi-arrow-down"></i></span>
-          </template><!--
+          </th>
+          <th :style="{ 'width': colWidMap['col_2'] + 'rem' }" @click="sortByField('fund_type')">
+            <template v-if="sortFieldName === 'fund_type'">
+              <span v-if="sortFieldFlag"><i class="bi bi-arrow-up"></i></span>
+              <span v-else><i class="bi bi-arrow-down"></i></span>
+            </template><!--
           --><span>类型</span>
-        </th>
-        <th :style="{'width': colWidMap['col_3'] + 'rem'}" @click="sortByField('cluster_id')">
-          <template v-if="sortFieldName === 'cluster_id'">
-            <span v-if="sortFieldFlag"><i class="bi bi-arrow-up"></i></span>
-            <span v-else><i class="bi bi-arrow-down"></i></span>
-          </template>
-          <span>簇</span>
-        </th>
-        <th :style="{'width': colWidMap['col_4'] + colWidMap['col_5'] + colWidMap['col_6'] + 'rem'}" colspan="3">
-          <!-- <div style="border-bottom: solid 1px whitesmoke;">统计盈利率</div> -->
-          <div>
-            <div class="w33_w_br" @click="sortByField('min_earn')">
-              <template v-if="sortFieldName === 'min_earn'">
-                <span v-if="sortFieldFlag"><i class="bi bi-arrow-up"></i></span>
-                <span v-else><i class="bi bi-arrow-down"></i></span>
-              </template>
-              <span>最小</span>
+          </th>
+          <th :style="{ 'width': colWidMap['col_3'] + 'rem' }" @click="sortByField('cluster_id')">
+            <template v-if="sortFieldName === 'cluster_id'">
+              <span v-if="sortFieldFlag"><i class="bi bi-arrow-up"></i></span>
+              <span v-else><i class="bi bi-arrow-down"></i></span>
+            </template>
+            <span>簇</span>
+          </th>
+          <th :style="{ 'width': colWidMap['col_4'] + colWidMap['col_5'] + colWidMap['col_6'] + 'rem' }" colspan="3">
+            <!-- <div style="border-bottom: solid 1px whitesmoke;">统计盈利率</div> -->
+            <div>
+              <div class="w33_w_br" @click="sortByField('min_earn')">
+                <template v-if="sortFieldName === 'min_earn'">
+                  <span v-if="sortFieldFlag"><i class="bi bi-arrow-up"></i></span>
+                  <span v-else><i class="bi bi-arrow-down"></i></span>
+                </template>
+                <span>最小</span>
+              </div>
+              <div class="w33_w_br" @click="sortByField('avg_earn')">
+                <template v-if="sortFieldName === 'avg_earn'">
+                  <span v-if="sortFieldFlag"><i class="bi bi-arrow-up"></i></span>
+                  <span v-else><i class="bi bi-arrow-down"></i></span>
+                </template>
+                <span>平均</span>
+              </div>
+              <div class="w33_w_br" @click="sortByField('max_earn')" style="border: none;">
+                <template v-if="sortFieldName === 'max_earn'">
+                  <span v-if="sortFieldFlag"><i class="bi bi-arrow-up"></i></span>
+                  <span v-else><i class="bi bi-arrow-down"></i></span>
+                </template>
+                <span>最大</span>
+              </div>
             </div>
-            <div class="w33_w_br" @click="sortByField('avg_earn')">
-              <template v-if="sortFieldName === 'avg_earn'">
-                <span v-if="sortFieldFlag"><i class="bi bi-arrow-up"></i></span>
-                <span v-else><i class="bi bi-arrow-down"></i></span>
-              </template>
-              <span>平均</span>
+          </th>
+          <th :style="{ 'width': colWidMap['col_7'] + colWidMap['col_8'] + 'rem' }" colspan="2">
+            <!-- <div style="border-bottom: solid 1px whitesmoke;">均线高低点</div> -->
+            <div>
+              <div class="w50_w_br" @click="sortByField('positive')">
+                <template v-if="sortFieldName === 'positive'">
+                  <span v-if="sortFieldFlag"><i class="bi bi-arrow-up"></i></span>
+                  <span v-else><i class="bi bi-arrow-down"></i></span>
+                </template>
+                <span>高点</span>
+              </div>
+              <div class="w50_w_br" @click="sortByField('negative')" style="border: none;">
+                <template v-if="sortFieldName === 'negative'">
+                  <span v-if="sortFieldFlag"><i class="bi bi-arrow-up"></i></span>
+                  <span v-else><i class="bi bi-arrow-down"></i></span>
+                </template>
+                <span>低点</span>
+              </div>
             </div>
-            <div class="w33_w_br" @click="sortByField('max_earn')" style="border: none;">
-              <template v-if="sortFieldName === 'max_earn'">
-                <span v-if="sortFieldFlag"><i class="bi bi-arrow-up"></i></span>
-                <span v-else><i class="bi bi-arrow-down"></i></span>
-              </template>
-              <span>最大</span>
+          </th>
+          <th :style="{ 'width': colWidMap['col_9'] + colWidMap['col_10'] + colWidMap['col_11'] + 'rem' }" colspan="3">
+            <!-- <div style="border-bottom: solid 1px whitesmoke;">推荐估值</div> -->
+            <div>
+              <div class="w33_w_br" @click="sortByField('esti_pe_ding')">
+                <template v-if="sortFieldName === 'esti_pe_ding'">
+                  <span v-if="sortFieldFlag"><i class="bi bi-arrow-up"></i></span>
+                  <span v-else><i class="bi bi-arrow-down"></i></span>
+                </template>
+                <span>螺丝钉</span>
+              </div>
+              <div class="w33_w_br" @click="sortByField('esti_pe_zhi')">
+                <template v-if="sortFieldName === 'esti_pe_zhi'">
+                  <span v-if="sortFieldFlag"><i class="bi bi-arrow-up"></i></span>
+                  <span v-else><i class="bi bi-arrow-down"></i></span>
+                </template>
+                <span>支付宝</span>
+              </div>
+              <div class="w33_w_br" @click="sortByField('esti_pe_wei')" style="border: none;">
+                <template v-if="sortFieldName === 'esti_pe_wei'">
+                  <span v-if="sortFieldFlag"><i class="bi bi-arrow-up"></i></span>
+                  <span v-else><i class="bi bi-arrow-down"></i></span>
+                </template>
+                <span>理财通</span>
+              </div>
             </div>
-          </div>
-        </th>
-        <th :style="{'width': colWidMap['col_7'] + colWidMap['col_8'] + 'rem'}" colspan="2">
-          <!-- <div style="border-bottom: solid 1px whitesmoke;">均线高低点</div> -->
-          <div>
-            <div class="w50_w_br" @click="sortByField('positive')">
-              <template v-if="sortFieldName === 'positive'">
-                <span v-if="sortFieldFlag"><i class="bi bi-arrow-up"></i></span>
-                <span v-else><i class="bi bi-arrow-down"></i></span>
-              </template>
-              <span>高点</span>
-            </div>
-            <div class="w50_w_br" @click="sortByField('negative')" style="border: none;">
-              <template v-if="sortFieldName === 'negative'">
-                <span v-if="sortFieldFlag"><i class="bi bi-arrow-up"></i></span>
-                <span v-else><i class="bi bi-arrow-down"></i></span>
-              </template>
-              <span>低点</span>
-            </div>
-          </div>
-        </th>
-        <th :style="{'width': colWidMap['col_9'] + colWidMap['col_10'] + colWidMap['col_11'] + 'rem'}" colspan="3">
-          <!-- <div style="border-bottom: solid 1px whitesmoke;">推荐估值</div> -->
-          <div>
-            <div class="w33_w_br" @click="sortByField('esti_pe_ding')">
-              <template v-if="sortFieldName === 'esti_pe_ding'">
-                <span v-if="sortFieldFlag"><i class="bi bi-arrow-up"></i></span>
-                <span v-else><i class="bi bi-arrow-down"></i></span>
-              </template>
-              <span>螺丝钉</span>
-            </div>
-            <div class="w33_w_br" @click="sortByField('esti_pe_zhi')">
-              <template v-if="sortFieldName === 'esti_pe_zhi'">
-                <span v-if="sortFieldFlag"><i class="bi bi-arrow-up"></i></span>
-                <span v-else><i class="bi bi-arrow-down"></i></span>
-              </template>
-              <span>支付宝</span>
-            </div>
-            <div class="w33_w_br" @click="sortByField('esti_pe_wei')" style="border: none;">
-              <template v-if="sortFieldName === 'esti_pe_wei'">
-                <span v-if="sortFieldFlag"><i class="bi bi-arrow-up"></i></span>
-                <span v-else><i class="bi bi-arrow-down"></i></span>
-              </template>
-              <span>理财通</span>
-            </div>
-          </div>
-        </th>
-        <th :style="{'width': colWidMap['col_12'] + 'rem'}" @click="sortByField('fund_plan')">
-          <template v-if="sortFieldName === 'fund_plan'">
-            <span v-if="sortFieldFlag"><i class="bi bi-arrow-up"></i></span>
-            <span v-else><i class="bi bi-arrow-down"></i></span>
-          </template><!--
+          </th>
+          <th :style="{ 'width': colWidMap['col_12'] + 'rem' }" @click="sortByField('compose_plan')">
+            <template v-if="sortFieldName === 'compose_plan'">
+              <span v-if="sortFieldFlag"><i class="bi bi-arrow-up"></i></span>
+              <span v-else><i class="bi bi-arrow-down"></i></span>
+            </template><!--
           --><span>组合</span>
-        </th>
-      </tr>
+          </th>
+        </tr>
       </thead>
       <tbody>
       </tbody>
@@ -154,179 +153,191 @@
 
   <div style="position: relative;">
     <table id="table_content" class="table table-bordered"
-           :style="{'position': 'absolute', 'top': tabContTopPos + 'rem', 'min-width': minPaneWidth + 'rem'}">
+      :style="{ 'position': 'absolute', 'top': tabContTopPos + 'rem', 'min-width': minPaneWidth + 'rem' }">
       <thead style="">
-      <tr>
-        <th :style="{'width': colWidMap['col_1'] + 'rem'}"></th>
-        <th :style="{'width': colWidMap['col_2'] + 'rem'}"></th>
-        <th :style="{'width': colWidMap['col_3'] + 'rem'}"></th>
-        <th :style="{'width': colWidMap['col_4'] + 'rem'}"></th>
-        <th :style="{'width': colWidMap['col_5'] + 'rem'}"></th>
-        <th :style="{'width': colWidMap['col_6'] + 'rem'}"></th>
-        <th :style="{'width': colWidMap['col_7'] + 'rem'}"></th>
-        <th :style="{'width': colWidMap['col_8'] + 'rem'}"></th>
-        <th :style="{'width': colWidMap['col_9'] + 'rem'}"></th>
-        <th :style="{'width': colWidMap['col_10'] + 'rem'}"></th>
-        <th :style="{'width': colWidMap['col_11'] + 'rem'}"></th>
-        <th :style="{'width': colWidMap['col_12'] + 'rem'}"></th>
-      </tr>
+        <tr>
+          <th :style="{ 'width': colWidMap['col_1'] + 'rem' }"></th>
+          <th :style="{ 'width': colWidMap['col_2'] + 'rem' }"></th>
+          <th :style="{ 'width': colWidMap['col_3'] + 'rem' }"></th>
+          <th :style="{ 'width': colWidMap['col_4'] + 'rem' }"></th>
+          <th :style="{ 'width': colWidMap['col_5'] + 'rem' }"></th>
+          <th :style="{ 'width': colWidMap['col_6'] + 'rem' }"></th>
+          <th :style="{ 'width': colWidMap['col_7'] + 'rem' }"></th>
+          <th :style="{ 'width': colWidMap['col_8'] + 'rem' }"></th>
+          <th :style="{ 'width': colWidMap['col_9'] + 'rem' }"></th>
+          <th :style="{ 'width': colWidMap['col_10'] + 'rem' }"></th>
+          <th :style="{ 'width': colWidMap['col_11'] + 'rem' }"></th>
+          <th :style="{ 'width': colWidMap['col_12'] + 'rem' }"></th>
+        </tr>
       </thead>
       <tbody>
-      <template v-for="oneRow in zskbViewObjs" :key="oneRow.fund_id">
-        <tr v-bind:id="oneRow.fund_id" style="cursor: pointer;" @click="selOrDesRow(oneRow)"
-            v-bind:class="{sel_row: oneRow['currSelected']}"
-            :ref="(el) => {if (el) {rowElements[oneRow.fund_id] = el;}}">
-          <td v-bind:class="{sel_row: oneRow['currSelected']}">
-            <div>
-              {{ oneRow.fund_id }}
-              <template
+        <template v-for="oneRow in zskbViewObjs" :key="oneRow.fund_id">
+          <tr v-bind:id="oneRow.fund_id" style="cursor: pointer;" @click="selOrDesRow(oneRow)"
+            v-bind:class="{ sel_row: oneRow['currSelected'] }"
+            :ref="(el) => { if (el) { rowElements[oneRow.fund_id] = el; } }">
+            <td v-bind:class="{ sel_row: oneRow['currSelected'] }">
+              <div>
+                {{ oneRow.fund_id }}
+                <template
                   v-if="oneRow['statistics']['perc_not_update_days'] && oneRow['statistics']['perc_not_update_days'] - 1 >= 3">
-                <span class="badge bg-danger">缺失: {{ oneRow.statistics.perc_not_update_days }}</span>
-              </template>
-            </div>
-            <div>
-              {{ oneRow.fund_name }}
-            </div>
-            <div>
-              <span v-bind:class="getCardStyle(oneRow.statistics.day_200_thres)">&nbsp;</span>
-              <span v-bind:class="getCardStyle(oneRow.statistics.day_300_thres)">&nbsp;</span>
-              <span v-bind:class="getCardStyle(oneRow.statistics.day_400_thres)">&nbsp;</span>
-              <span v-bind:class="getCardStyle(oneRow.statistics.day_500_thres)">&nbsp;</span>
-              <span v-bind:class="getCardStyle(oneRow.statistics.day_600_thres)">&nbsp;</span>
-              <span>{{ oneRow.statistics.fund_perc_len }}</span>
-            </div>
-          </td>
-          <td v-bind:class="{sel_row: oneRow['currSelected']}">
-            {{ typeMapObj[oneRow.indexType] }}
-          </td>
-          <td v-bind:class="{sel_row: oneRow['currSelected']}">
-            {{ oneRow.statistics.cluster_id }}
-          </td>
-          <td v-bind:class="{sel_row: oneRow['currSelected']}">
-            <div>
-              {{ oneRow.statistics.min_earn_str }}
-            </div>
-            <div>
-              {{ oneRow.statistics.min_earn_aux_str }}
-            </div>
-            <div>
-              {{ oneRow.statistics.min_earn_tri_str }}
-            </div>
-          </td>
-          <td v-bind:class="{sel_row: oneRow['currSelected']}">
-            <div>
-              {{ oneRow.statistics.avg_earn_str }}
-            </div>
-            <div>
-              {{ oneRow.statistics.avg_earn_aux_str }}
-            </div>
-            <div>
-              {{ oneRow.statistics.avg_earn_tri_str }}
-            </div>
-          </td>
-          <td v-bind:class="{sel_row: oneRow['currSelected']}">
-            <div>
-              {{ oneRow.statistics.max_earn_str }}
-            </div>
-            <div>
-              {{ oneRow.statistics.max_earn_aux_str }}
-            </div>
-            <div>
-              {{ oneRow.statistics.max_earn_tri_str }}
-            </div>
-          </td>
-          <td style="text-align: left;" v-bind:class="{sel_row: oneRow['currSelected']}">
-            <div style="height: 2.2em; position: relative;"
-                 v-bind:class="getPosColor(oneRow.positive.positive_reach_len)">
-                <span v-if="oneRow.positive.positive_reach_len >= 4" class="icon_pos">
-                <i class="bi bi-arrow-up-circle-fill"></i>
-                <span class="lv_font">{{ oneRow.positive.positive_reach_len }}</span>
-                </span>
-            </div>
-            <div style="height: 2.2em; position: relative;"
-                 v-bind:class="getNegColor(oneRow.negative.negative_reach_len)">
-              <span v-if="oneRow.negative.negative_reach_len >= 3" class="icon_pos">
-              <i class="bi bi-arrow-down-circle-fill"></i>
-                <span class="lv_font">{{ oneRow.negative.negative_reach_len }}</span>
-              </span>
-            </div>
-          </td>
-          <td v-bind:class="{sel_row: oneRow['currSelected']}">
-            <div style="height: 2.2em;">
-              <span v-bind:class="getHitStyle(oneRow.positive.day_5_positive_reach)">&nbsp;</span>
-              <span v-bind:class="getHitStyle(oneRow.positive.day_10_positive_reach)">&nbsp;</span>
-              <span v-bind:class="getHitStyle(oneRow.positive.day_20_positive_reach)">&nbsp;</span>
-              <span v-bind:class="getHitStyle(oneRow.positive.day_60_positive_reach)">&nbsp;</span>
-              <span v-bind:class="getHitStyle(oneRow.positive.day_90_positive_reach)">&nbsp;</span>
-              <span v-bind:class="getHitStyle(oneRow.positive.day_120_positive_reach)">&nbsp;</span>
-              <span v-bind:class="getHitStyle(oneRow.positive.day_160_positive_reach)">&nbsp;</span>
-              <span v-bind:class="getHitStyle(oneRow.positive.day_220_positive_reach)">&nbsp;</span>
-            </div>
-            <div style="height: 2.2em;">
-              <span v-bind:class="getHitStyle(oneRow.negative.day_5_negative_reach)">&nbsp;</span>
-              <span v-bind:class="getHitStyle(oneRow.negative.day_10_negative_reach)">&nbsp;</span>
-              <span v-bind:class="getHitStyle(oneRow.negative.day_20_negative_reach)">&nbsp;</span>
-              <span v-bind:class="getHitStyle(oneRow.negative.day_60_negative_reach)">&nbsp;</span>
-              <span v-bind:class="getHitStyle(oneRow.negative.day_90_negative_reach)">&nbsp;</span>
-              <span v-bind:class="getHitStyle(oneRow.negative.day_120_negative_reach)">&nbsp;</span>
-              <span v-bind:class="getHitStyle(oneRow.negative.day_160_negative_reach)">&nbsp;</span>
-              <span v-bind:class="getHitStyle(oneRow.negative.day_220_negative_reach)">&nbsp;</span>
-            </div>
-          </td>
-          <td class="nr_td" colspan="3" v-bind:class="{sel_row: oneRow['currSelected']}">
-            <div class="grid_r3">
-              <select class="form-select nr_select" v-model="oneRow['esti_pe']['ding']" @click.stop>
-                <option v-for="option in buy_in_esti_sugg_full" v-bind:value="option.source_val">
-                  {{ option.source_name }}
-                </option>
-              </select>
-              <select class="form-select nr_select" v-model="oneRow['esti_pe']['zhi']" @click.stop>
-                <option v-for="option in buy_in_esti_sugg_full" v-bind:value="option.source_val">
-                  {{ option.source_name }}
-                </option>
-              </select>
-              <select class="form-select nr_select" v-model="oneRow['esti_pe']['wei']" @click.stop>
-                <option v-for="option in buy_in_esti_sugg_full" v-bind:value="option.source_val">
-                  {{ option.source_name }}
-                </option>
-              </select>
-              <div></div>
-              <div></div>
-              <div class="right_pad">
-                <button type="button" class="btn btn-warning mw4_ctl" @click="saveEstiPe($event, oneRow)">保存
-                </button>
+                  <span class="badge bg-danger">缺失: {{ oneRow.statistics.perc_not_update_days }}</span>
+                </template>
               </div>
-            </div>
-          </td>
-          <td class="nr_td" v-bind:class="{sel_row: oneRow['currSelected']}">
-            <div class="grid_1">
-              <template v-if="oneRow['compose_plan'] && oneRow['compose_plan'] === 'noplan'">
-                <select class="form-select nr_select" @click.stop v-model="oneRow['target_plan']">
-                  <option v-for="option in buy_in_from_plan" v-bind:value="option.source_val">
+              <div>
+                {{ oneRow.fund_name }}
+              </div>
+              <div>
+                <span v-bind:class="getCardStyle(oneRow.statistics.day_200_thres)">&nbsp;</span>
+                <span v-bind:class="getCardStyle(oneRow.statistics.day_300_thres)">&nbsp;</span>
+                <span v-bind:class="getCardStyle(oneRow.statistics.day_400_thres)">&nbsp;</span>
+                <span v-bind:class="getCardStyle(oneRow.statistics.day_500_thres)">&nbsp;</span>
+                <span v-bind:class="getCardStyle(oneRow.statistics.day_600_thres)">&nbsp;</span>
+                <span>{{ oneRow.statistics.fund_perc_len }}</span>
+              </div>
+            </td>
+            <td v-bind:class="{ sel_row: oneRow['currSelected'] }">
+              {{ typeMapObj[oneRow.indexType] }}
+            </td>
+            <td v-bind:class="{ sel_row: oneRow['currSelected'] }">
+              {{ oneRow.statistics.cluster_id }}
+            </td>
+            <td v-bind:class="{ sel_row: oneRow['currSelected'] }">
+              <div>
+                {{ oneRow.statistics.min_earn_str }}
+              </div>
+              <div>
+                {{ oneRow.statistics.min_earn_aux_str }}
+              </div>
+              <div>
+                {{ oneRow.statistics.min_earn_tri_str }}
+              </div>
+            </td>
+            <td v-bind:class="{ sel_row: oneRow['currSelected'] }">
+              <div>
+                {{ oneRow.statistics.avg_earn_str }}
+              </div>
+              <div>
+                {{ oneRow.statistics.avg_earn_aux_str }}
+              </div>
+              <div>
+                {{ oneRow.statistics.avg_earn_tri_str }}
+              </div>
+            </td>
+            <td v-bind:class="{ sel_row: oneRow['currSelected'] }">
+              <div>
+                {{ oneRow.statistics.max_earn_str }}
+              </div>
+              <div>
+                {{ oneRow.statistics.max_earn_aux_str }}
+              </div>
+              <div>
+                {{ oneRow.statistics.max_earn_tri_str }}
+              </div>
+            </td>
+            <td style="text-align: left;" v-bind:class="{ sel_row: oneRow['currSelected'] }">
+              <div style="height: 2.2em; position: relative;"
+                v-bind:class="getPosColor(oneRow.positive.positive_reach_len)">
+                <span v-if="oneRow.positive.positive_reach_len >= 4" class="icon_pos">
+                  <i class="bi bi-arrow-up-circle-fill"></i>
+                  <span class="lv_font">{{ oneRow.positive.positive_reach_len }}</span>
+                </span>
+              </div>
+              <div style="height: 2.2em; position: relative;"
+                v-bind:class="getNegColor(oneRow.negative.negative_reach_len)">
+                <span v-if="oneRow.negative.negative_reach_len >= 3" class="icon_pos">
+                  <i class="bi bi-arrow-down-circle-fill"></i>
+                  <span class="lv_font">{{ oneRow.negative.negative_reach_len }}</span>
+                </span>
+              </div>
+            </td>
+            <td v-bind:class="{ sel_row: oneRow['currSelected'] }">
+              <div style="height: 2.2em;">
+                <span v-bind:class="getHitStyle(oneRow.positive.day_5_positive_reach)">&nbsp;</span>
+                <span v-bind:class="getHitStyle(oneRow.positive.day_10_positive_reach)">&nbsp;</span>
+                <span v-bind:class="getHitStyle(oneRow.positive.day_20_positive_reach)">&nbsp;</span>
+                <span v-bind:class="getHitStyle(oneRow.positive.day_60_positive_reach)">&nbsp;</span>
+                <span v-bind:class="getHitStyle(oneRow.positive.day_90_positive_reach)">&nbsp;</span>
+                <span v-bind:class="getHitStyle(oneRow.positive.day_120_positive_reach)">&nbsp;</span>
+                <span v-bind:class="getHitStyle(oneRow.positive.day_160_positive_reach)">&nbsp;</span>
+                <span v-bind:class="getHitStyle(oneRow.positive.day_220_positive_reach)">&nbsp;</span>
+              </div>
+              <div style="height: 2.2em;">
+                <span v-bind:class="getHitStyle(oneRow.negative.day_5_negative_reach)">&nbsp;</span>
+                <span v-bind:class="getHitStyle(oneRow.negative.day_10_negative_reach)">&nbsp;</span>
+                <span v-bind:class="getHitStyle(oneRow.negative.day_20_negative_reach)">&nbsp;</span>
+                <span v-bind:class="getHitStyle(oneRow.negative.day_60_negative_reach)">&nbsp;</span>
+                <span v-bind:class="getHitStyle(oneRow.negative.day_90_negative_reach)">&nbsp;</span>
+                <span v-bind:class="getHitStyle(oneRow.negative.day_120_negative_reach)">&nbsp;</span>
+                <span v-bind:class="getHitStyle(oneRow.negative.day_160_negative_reach)">&nbsp;</span>
+                <span v-bind:class="getHitStyle(oneRow.negative.day_220_negative_reach)">&nbsp;</span>
+              </div>
+            </td>
+            <td class="nr_td" colspan="3" v-bind:class="{ sel_row: oneRow['currSelected'] }">
+              <div class="grid_r3">
+                <select class="form-select nr_select" v-model="oneRow['esti_pe']['ding']" @click.stop>
+                  <option v-for="option in buy_in_esti_sugg_full" v-bind:value="option.source_val">
                     {{ option.source_name }}
                   </option>
                 </select>
+                <select class="form-select nr_select" v-model="oneRow['esti_pe']['zhi']" @click.stop>
+                  <option v-for="option in buy_in_esti_sugg_full" v-bind:value="option.source_val">
+                    {{ option.source_name }}
+                  </option>
+                </select>
+                <select class="form-select nr_select" v-model="oneRow['esti_pe']['wei']" @click.stop>
+                  <option v-for="option in buy_in_esti_sugg_full" v-bind:value="option.source_val">
+                    {{ option.source_name }}
+                  </option>
+                </select>
+                <div></div>
+                <div></div>
                 <div class="right_pad">
-                  <button type="button" class="btn btn-warning mw4_ctl" @click="changeCompose($event, oneRow)"
-                          v-bind:disabled="!oneRow['target_plan'] || oneRow['target_plan'] === 'noplan'">保存</button>
-                </div>
-              </template>
-              <template v-if="oneRow['compose_plan'] && oneRow['compose_plan'] !== 'noplan'">
-                <div>
-                  <span class="badge bg-info text-bg-success" style="margin: auto; width: 100%; line-height: 2.2rem; font-size: 0.9rem;">
-                    {{ oneRow['compose_plan'] }}
-                  </span>
-                </div>
-                <div class="right_pad">
-                  <button type="button" class="btn btn-warning mw4_ctl" @click="removeCompose($event, oneRow)">
-                    移除
+                  <button type="button" class="btn btn-warning mw4_ctl" @click="saveEstiPe($event, oneRow)">保存
                   </button>
                 </div>
-              </template>
-            </div>
-          </td>
-        </tr>
-      </template>
+              </div>
+            </td>
+            <td class="nr_td" v-bind:class="{ sel_row: oneRow['currSelected'] }">
+              <div class="grid_1">
+                <template v-if="oneRow['compose_plan'] && oneRow['compose_plan'] === 'noplan'">
+                  <select class="form-select nr_select" @click.stop v-model="oneRow['target_plan']">
+                    <option v-for="option in buy_in_from_plan" v-bind:value="option.source_val">
+                      {{ option.source_name }}
+                    </option>
+                  </select>
+                  <div class="right_pad">
+                    <button type="button" class="btn btn-warning mw4_ctl" @click="changeCompose($event, oneRow)"
+                      v-bind:disabled="!oneRow['target_plan'] || oneRow['target_plan'] === 'noplan'">保存</button>
+                  </div>
+                </template>
+                <template v-if="oneRow['compose_plan'] && oneRow['compose_plan'] !== 'noplan'">
+                  <div>
+                    <template v-if="oneRow['compose_plan'] === 'ovtree'">
+                      <span class="badge bg-info text-bg-success big_badge">
+                        橄榄树
+                      </span>
+                    </template>
+                    <template v-else-if="oneRow['compose_plan'] === 'dolphin'">
+                      <span class="badge bg-success text-bg-success big_badge">
+                        海豚
+                      </span>
+                    </template>
+                    <template v-else>
+                      <span class="badge bg-danger text-bg-success big_badge">
+                        三叉戟
+                      </span>
+                    </template>
+                  </div>
+                  <div class="right_pad">
+                    <button type="button" class="btn btn-warning mw4_ctl" @click="removeCompose($event, oneRow)">
+                      移除
+                    </button>
+                  </div>
+                </template>
+              </div>
+            </td>
+          </tr>
+        </template>
       </tbody>
     </table>
   </div>
@@ -347,30 +358,30 @@ import {
   getNegColor,
   getHitStyle
 } from "../lib/commonUtils.js"
-import {computed, nextTick, ref, watch} from "vue";
-import {storeToRefs} from 'pinia'
-import {useZskbStore} from "../store/zskbStore.js";
-import {useComposeStore} from "../store/composeStore.js";
+import { computed, nextTick, ref, watch } from "vue";
+import { storeToRefs } from 'pinia'
+import { useZskbStore } from "../store/zskbStore.js";
+import { useComposeStore } from "../store/composeStore.js";
 
 const zskbStore = useZskbStore()
-const {zskbObjs} = storeToRefs(zskbStore)
-const {getZskb} = zskbStore
+const { zskbObjs } = storeToRefs(zskbStore)
+const { getZskb } = zskbStore
 const composeStore = useComposeStore()
-const {composeObjs} = storeToRefs(composeStore)
-const {addOrRemoveCompose} = composeStore
+const { composeObjs } = storeToRefs(composeStore)
+const { addOrRemoveCompose } = composeStore
 
 const buy_in_esti_sugg_full = [
-  {'source_name': '未知', 'source_val': -2},
-  {'source_name': '持有', 'source_val': 0},
-  {'source_name': '买入', 'source_val': 1},
-  {'source_name': '卖出', 'source_val': -1}
+  { 'source_name': '未知', 'source_val': -2 },
+  { 'source_name': '持有', 'source_val': 0 },
+  { 'source_name': '买入', 'source_val': 1 },
+  { 'source_name': '卖出', 'source_val': -1 }
 ]
 
 const buy_in_from_plan = [
-  {'source_name': '无计划', 'source_val': 'noplan'},
-  {'source_name': '橄榄树', 'source_val': 'ovtree'},
-  {'source_name': '海豚', 'source_val': 'dolphin'},
-  {'source_name': '三叉戟', 'source_val': 'trident'}
+  { 'source_name': '无计划', 'source_val': 'noplan' },
+  { 'source_name': '橄榄树', 'source_val': 'ovtree' },
+  { 'source_name': '海豚', 'source_val': 'dolphin' },
+  { 'source_name': '三叉戟', 'source_val': 'trident' }
 ]
 
 const colWidMap = {
@@ -444,7 +455,7 @@ watch([zskbObjs, wideIdxOnly, topicIdxOnly, indusIdxOnly, qdiiIdxOnly, composeOb
       }
     })
   }
-}, {immediate: true})
+}, { immediate: true })
 
 const currTotNum = computed(() => {
   return zskbViewObjs.value.length
@@ -615,6 +626,24 @@ function sortByField(_field) {
         return b['esti_pe']['wei'] - a['esti_pe']['wei'];
       });
     }
+  } else if (_field === 'compose_plan') {
+    if (sortFieldFlag.value) {
+      zskbViewObjs.value.sort((a, b) => {
+        let _a_compose = a['compose_plan']
+        let _a_val = (_a_compose === 'noplan') ? 3 : (_a_compose === 'ovtree') ? 0 : (_a_compose === 'dolphin') ? 1 : (_a_compose === 'trident') ? 2 : 3
+        let _b_compose = b['compose_plan']
+        let _b_val = (_b_compose === 'noplan') ? 3 : (_b_compose === 'ovtree') ? 0 : (_b_compose === 'dolphin') ? 1 : (_b_compose === 'trident') ? 2 : 3
+        return _a_val - _b_val
+      });
+    } else {
+      zskbViewObjs.value.sort((a, b) => {
+        let _a_compose = a['compose_plan']
+        let _a_val = (_a_compose === 'noplan') ? 3 : (_a_compose === 'ovtree') ? 0 : (_a_compose === 'dolphin') ? 1 : (_a_compose === 'trident') ? 2 : 3
+        let _b_compose = b['compose_plan']
+        let _b_val = (_b_compose === 'noplan') ? 3 : (_b_compose === 'ovtree') ? 0 : (_b_compose === 'dolphin') ? 1 : (_b_compose === 'trident') ? 2 : 3
+        return _b_val - _a_val
+      });
+    }
   } else if (_field === 'selected') {
     zskbViewObjs.value.sort((a, b) => {
       if (a.hasOwnProperty('currSelected') && b.hasOwnProperty('currSelected')) {
@@ -642,11 +671,11 @@ function scrollViewBySelection() {
       let _idx = zskbViewObjs.value.findIndex(func)
       if (_idx != -1) {
         let _rowObj = zskbViewObjs.value[_idx]
-        rowElements.value[_rowObj['fund_id']].scrollIntoView({block: "center", behavior: "smooth"})
+        rowElements.value[_rowObj['fund_id']].scrollIntoView({ block: "center", behavior: "smooth" })
       }
     } else {
       let _fund_id = zskbViewObjs.value[0]['fund_id']
-      rowElements.value[_fund_id].scrollIntoView({block: "center", behavior: "smooth"})
+      rowElements.value[_fund_id].scrollIntoView({ block: "center", behavior: "smooth" })
     }
   })
 }
@@ -719,5 +748,12 @@ function searchByCond() {
 
 .mw4_ctl {
   max-width: 4rem;
+}
+
+.big_badge {
+  margin: auto;
+  width: 100%;
+  line-height: 2.2rem;
+  font-size: 0.9rem;
 }
 </style>

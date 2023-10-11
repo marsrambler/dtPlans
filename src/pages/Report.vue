@@ -196,7 +196,7 @@
     </table>
   </div>
   <div class="modal fade" id="reportDialog" tabindex="-1">
-    <div class="modal-dialog">
+    <div class="modal-dialog" style="max-width: 48rem;">
       <div class="modal-content">
         <div class="modal-header">
           <h5 class="modal-title">{{ cfmDlgTitle }}</h5>
@@ -208,7 +208,7 @@
             <h6 class="bg-danger" v-if="requireFundIds.trim().length === 0">非法的请求ID</h6>
           </template>
           <template v-if="cfmDlgType === 'gen report'">
-            <textarea style="width: 100%; height: 40rem;">{{ cfmDlgCont }}</textarea>
+            <textarea style="width: 100%; height: 30rem;">{{ cfmDlgCont }}</textarea>
           </template>
         </div>
         <div class="modal-footer">
