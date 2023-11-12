@@ -26,9 +26,9 @@ export const useReportStore = defineStore('report-store', () => {
         }
     }
 
-    async function getRecordsAndRates() {
+    async function getRecordsAndRates(_refresh) {
         try {
-            const response = await axiosInst.get("dt-plans/api/get-fund-records-rate")
+            const response = await axiosInst.get("dt-plans/api/get-fund-records-rate/" + _refresh)
             if (response.status === 200) {
                 dynRecordObjs.value = await response.data
             } else {
@@ -46,7 +46,7 @@ export const useReportStore = defineStore('report-store', () => {
             const response = await axiosInst.post("dt-plans/api/remove-dynValues/" + _fund_id)
             if (response.status === 200) {
                 useApiStore().pop_alert_msg("删除报告成功: " + _fund_name)
-                await getRecordsAndRates()
+                await getRecordsAndRates('refresh')
             } else {
                 console.error("axios remove local dyn values failed: ", response)
             }

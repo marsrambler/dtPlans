@@ -133,7 +133,7 @@
                 <span style="margin-right: 0.5rem;">
                   {{ oneRow.fund_id }}
                 </span>
-              <span v-if="oneRow['in_kanban']" class="badge bg-danger" style="margin-right: 0.2rem;">已看板</span>
+              <span v-if="oneRow['in_kanban']" class="badge bg-primary" style="margin-right: 0.2rem;">已看板</span>
               <span v-if="oneRow['hide_repo']" class="badge bg-dark" style="cursor: pointer;"
                     @click.stop="removeZsRepoHide(oneRow.fund_id, oneRow.fund_name)">已隐藏</span>
               <template v-else-if="!oneRow['in_kanban']">
@@ -154,7 +154,7 @@
             </div>
             <template v-if="oneRow['perc_not_update_days'] && oneRow['perc_not_update_days'] - 1 >= 3">
               <div style="font-size: 0.85rem;">
-                {{ oneRow.last_perc_date_str }} <span
+                {{ oneRow.last_perc_date_str }}&nbsp;<span
                   class="badge bg-danger">缺失: {{ oneRow.perc_not_update_days }}</span>
               </div>
             </template>
@@ -246,6 +246,13 @@
         </tr>
       </template>
       </tbody>
+      <tfoot>
+      <tr style="line-height: 5rem; border-color: white;">
+        <td colspan="8">
+          &nbsp;
+        </td>
+      </tr>
+      </tfoot>
     </table>
   </div>
   <div class="modal fade" id="rmKbDialog" tabindex="-1">

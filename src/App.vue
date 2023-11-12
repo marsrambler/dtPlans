@@ -9,6 +9,7 @@ import {useZsRepoStore} from "./store/zsrepoStore";
 import {useZskbStore} from "./store/zskbStore";
 import {useComposeStore} from "./store/composeStore.js";
 import {useReportStore} from "./store/reportStore.js";
+import { useAggressiveStore } from "./store/aggressiveStore";
 
 const apiStore = useApiStore()
 const {requestMsgObjs, errorMsgObjs, isApiInProgress, isAlertVisible, alertMsg} = storeToRefs(apiStore)
@@ -20,6 +21,8 @@ const composeStore = useComposeStore()
 const {getAllCompose} = composeStore
 const reportStore = useReportStore()
 const {getRecordsAndRates} = reportStore
+const aggressiveStore = useAggressiveStore()
+const {getAllAggressive} = aggressiveStore
 
 onUpdated(() => {
   const hiddenToasts = errorMsgObjs.value.filter((obj) => {
@@ -51,8 +54,8 @@ getRtRates()
 getRepoRecycles()
 getRepoRecycleHides()
 getAllCompose()
-getRecordsAndRates()
-
+getRecordsAndRates('no')
+getAllAggressive()
 </script>
 
 <template>

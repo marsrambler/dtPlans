@@ -5,7 +5,7 @@
       <input type="text" v-model="requireFundIds" class="form-control-plaintext search_box"
         style="grid-column: 2 / span 3; padding-left: 0.5rem;">
       <input class="btn btn-primary btn-sm" type="button" value="请求" @click="requireDynValues4ui();">
-      <input class="btn btn-warning btn-sm" type="button" value="刷新" @click="getRecordsAndRates();">
+      <input class="btn btn-warning btn-sm" type="button" value="刷新" @click="getRecordsAndRates('refresh');">
     </div>
     <table id="table_header" class="table table-bordered" style="margin-bottom: 0;">
       <thead style="">
@@ -193,6 +193,13 @@
           </tr>
         </template>
       </tbody>
+      <tfoot>
+      <tr style="line-height: 5rem; border-color: white;">
+        <td colspan="8">
+          &nbsp;
+        </td>
+      </tr>
+      </tfoot>
     </table>
   </div>
   <div class="modal fade" id="reportDialog" tabindex="-1">
@@ -257,7 +264,7 @@ const colWidMap = {
   'col_8': 4
 }
 
-// getRecordsAndRates()
+// getRecordsAndRates('no')
 
 const zskbViewObjs = ref({})
 watch(zskbObjs, () => {

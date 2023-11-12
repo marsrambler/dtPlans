@@ -109,6 +109,13 @@
         </template>
       </template>
       </tbody>
+      <tfoot>
+      <tr style="line-height: 5rem; border-color: white;">
+        <td colspan="4">
+          &nbsp;
+        </td>
+      </tr>
+      </tfoot>
     </table>
   </div>
   <div class="modal fade" id="sortDialog" tabindex="-1">

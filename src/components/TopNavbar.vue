@@ -12,9 +12,10 @@
         <ul class="navbar-nav" style="gap: 0.5rem;">
           <router-link to="/" class="nav-item nav-link">仓库</router-link>
           <router-link to="/kanban" class="nav-item nav-link">看板</router-link>
+          <router-link to="/recycle" class="nav-item nav-link">回收</router-link>
+          <router-link to="/aggressive" class="nav-item nav-link">主动</router-link>
           <router-link to="/composite" class="nav-item nav-link">组合</router-link>
           <router-link to="/report" class="nav-item nav-link">报告</router-link>
-          <router-link to="/recycle" class="nav-item nav-link">回收</router-link>
           <li class="nav-item dropdown">
             <a class="nav-link dropdown-toggle" href="#" id="navbarDropdownMenuLink" role="button"
               data-bs-toggle="dropdown" aria-expanded="false">

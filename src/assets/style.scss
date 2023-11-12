@@ -134,6 +134,11 @@ $mediumblue: mediumblue;
   column-gap: 0.2rem;
 }
 
+.grid_pane_c8 {
+  @extend .grid_pane_base;
+  grid-template-columns: repeat(auto-fill, 12%);
+}
+
 .grid_pane_c10 {
   @extend .grid_pane_base;
   grid-template-columns: repeat(auto-fill, 9.5%);
