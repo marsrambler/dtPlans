@@ -16,6 +16,7 @@ $pink: pink;
 $darkblue: darkblue;
 $deepskyblue: deepskyblue;
 $mediumblue: mediumblue;
+$darkgolden: #ffc107;
 
 .stat_card {
   border: solid 1px;
@@ -65,6 +66,12 @@ $mediumblue: mediumblue;
   @extend .stat_card;
   background-color: $white;
   border-color: $black;
+}
+
+.darkgolden_card {
+  @extend .stat_card;
+  background-color: $darkgolden;
+  border-color: $darkgolden;
 }
 
 .icon_pos {

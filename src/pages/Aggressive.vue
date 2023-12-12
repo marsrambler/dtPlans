@@ -98,19 +98,26 @@
         <th :style="{ 'width': colWidMap['col_7'] + colWidMap['col_8'] + 'rem' }" colspan="2">
           <!-- <div style="border-bottom: solid 1px whitesmoke;">均线高低点</div> -->
           <div>
-            <div class="w50_w_br" @click="sortByField('positive')">
+            <div class="w33_w_br" @click="sortByField('positive')">
               <template v-if="sortFieldName === 'positive'">
                 <span v-if="sortFieldFlag"><i class="bi bi-arrow-up"></i></span>
                 <span v-else><i class="bi bi-arrow-down"></i></span>
               </template>
               <span>高点</span>
             </div>
-            <div class="w50_w_br" @click="sortByField('negative')" style="border: none;">
+            <div class="w33_w_br" @click="sortByField('negative')">
               <template v-if="sortFieldName === 'negative'">
                 <span v-if="sortFieldFlag"><i class="bi bi-arrow-up"></i></span>
                 <span v-else><i class="bi bi-arrow-down"></i></span>
               </template>
               <span>低点</span>
+            </div>
+            <div class="w33_w_br" @click="sortByField('wav_rate')" style="border: none;">
+              <template v-if="sortFieldName === 'wav_rate'">
+                <span v-if="sortFieldFlag"><i class="bi bi-arrow-up"></i></span>
+                <span v-else><i class="bi bi-arrow-down"></i></span>
+              </template>
+              <span>波动</span>
             </div>
           </div>
         </th>
@@ -288,23 +295,25 @@
                 </div>
               </td>
               <td style="text-align: left;" v-bind:class="{ sel_row: oneRow['currSelected'] }">
-                <div style="height: 2.2em; position: relative;"
+                <div style="height: 1.8em; position: relative;"
                     v-bind:class="getPosColor(oneRow.positive.positive_reach_len)">
-                                    <span v-if="oneRow.positive.positive_reach_len >= 4" class="icon_pos">
-                                        <i class="bi bi-arrow-up-circle-fill"></i>
-                                        <span class="lv_font">{{ oneRow.positive.positive_reach_len }}</span>
-                                    </span>
+                  <span v-if="oneRow.positive.positive_reach_len >= 4" class="icon_pos">
+                    <i class="bi bi-arrow-up-circle-fill"></i>
+                    <span class="lv_font">{{ oneRow.positive.positive_reach_len }}</span>
+                  </span>
                 </div>
-                <div style="height: 2.2em; position: relative;"
+                <div style="height: 1.8em; position: relative;"
                     v-bind:class="getNegColor(oneRow.negative.negative_reach_len)">
-                                    <span v-if="oneRow.negative.negative_reach_len >= 3" class="icon_pos">
-                                        <i class="bi bi-arrow-down-circle-fill"></i>
-                                        <span class="lv_font">{{ oneRow.negative.negative_reach_len }}</span>
-                                    </span>
+                  <span v-if="oneRow.negative.negative_reach_len >= 3" class="icon_pos">
+                    <i class="bi bi-arrow-down-circle-fill"></i>
+                    <span class="lv_font">{{ oneRow.negative.negative_reach_len }}</span>
+                  </span>
+                </div>
+                <div style="height: 3em; position: relative;">
                 </div>
               </td>
-              <td v-bind:class="{ sel_row: oneRow['currSelected'] }">
-                <div style="height: 2.2em;">
+              <td v-bind:class="{ sel_row: oneRow['currSelected'] }" style="text-align: center;">
+                <div style="height: 1.8em;">
                   <span v-bind:class="getHitStyle(oneRow.positive.day_5_positive_reach)">&nbsp;</span>
                   <span v-bind:class="getHitStyle(oneRow.positive.day_10_positive_reach)">&nbsp;</span>
                   <span v-bind:class="getHitStyle(oneRow.positive.day_20_positive_reach)">&nbsp;</span>
@@ -314,7 +323,7 @@
                   <span v-bind:class="getHitStyle(oneRow.positive.day_160_positive_reach)">&nbsp;</span>
                   <span v-bind:class="getHitStyle(oneRow.positive.day_200_positive_reach)">&nbsp;</span>
                 </div>
-                <div style="height: 2.2em;">
+                <div style="height: 1.8em;">
                   <span v-bind:class="getHitStyle(oneRow.negative.day_5_negative_reach)">&nbsp;</span>
                   <span v-bind:class="getHitStyle(oneRow.negative.day_10_negative_reach)">&nbsp;</span>
                   <span v-bind:class="getHitStyle(oneRow.negative.day_20_negative_reach)">&nbsp;</span>
@@ -324,11 +333,32 @@
                   <span v-bind:class="getHitStyle(oneRow.negative.day_160_negative_reach)">&nbsp;</span>
                   <span v-bind:class="getHitStyle(oneRow.negative.day_200_negative_reach)">&nbsp;</span>
                 </div>
+                <div style="height: 3em; margin-top: 0.4rem; border-top: solid 1px darkgray; cursor: pointer;"
+                     :style="{'background-color': (oneRow['show_wav']? 'cornsilk' : ''), 'font-style':  (oneRow['show_wav']? 'italic' : '')}"
+                     v-if="oneRow.wav_obj" @click.stop="switchWavDisp(oneRow);">
+                  <div>
+                    <span>{{oneRow.wav_obj.avg_duration}}日</span>
+                    <span>&nbsp;{{oneRow.wav_obj.avg_exp_earn}}%</span>
+                    <span>&nbsp;{{oneRow.wav_obj.avg_exp_cnt}}次</span>
+                    <span :style="{'color': (oneRow.wav_obj.wav_dur_level < 3? 'red' :  oneRow.wav_obj.wav_dur_level < 6? 'orange': ''), 'font-weight':  'bold'}">
+                      &nbsp;L{{oneRow.wav_obj.wav_dur_level}}
+                    </span>
+                  </div>
+                  <div>
+                    <span v-html="get_suggestion_by_wav(oneRow.wav_obj)"></span>
+                  </div>
+                </div>
               </td>
               <td class="nr_td" v-bind:class="{ sel_row: oneRow['currSelected'] }">
                 <div style="text-align: center; font-size: 0.9rem; border-radius: 0.5rem;" :class="oneRow['manager_disp_class']">
                   <div style="font-size: inherit;">{{ oneRow['manager_disp_1st_line'] }}</div>
                   <div style="font-size: inherit;">{{ oneRow['manager_disp_2nd_line'] }}</div>
+                </div>
+                <div class="right_pad">
+                      <button type="button" class="btn btn-outline-danger mw4_ctl" style="margin-top: 0.3rem;"
+                              @click.stop="custBuyIn(oneRow.fund_id, oneRow.fund_name)"
+                              v-bind:disabled="!oneRow['canGenMgr']">更新
+                      </button>
                 </div>
               </td>
               <td class="nr_td" v-bind:class="{ sel_row: oneRow['currSelected'] }">
@@ -348,7 +378,7 @@
                     </select>
                     <div class="right_pad">
                       <button type="button" class="btn btn-warning mw4_ctl"
-                              @click="changeCompose($event, oneRow)"
+                              @click.stop="changeCompose($event, oneRow)"
                               v-bind:disabled="!oneRow['target_plan'] || oneRow['target_plan'] === 'noplan'">保存
                       </button>
                     </div>
@@ -378,12 +408,18 @@
                     </div>
                     <div class="right_pad">
                       <button type="button" class="btn btn-warning mw4_ctl"
-                              @click="removeCompose4Ui($event, oneRow)">
+                              @click.stop="removeCompose4Ui($event, oneRow)">
                         移除
                       </button>
                     </div>
                   </template>
                 </div>
+              </td>
+            </tr>
+            <tr v-if="oneRow['show_wav']">
+              <td colspan="11" style="background-color: lightblue;">
+                <img v-bind:src="'../wav-report/'+oneRow['fund_id']+'.png'"
+                     style="width: 100%; height: 100%; max-width: 100%;" class="img-fluid" alt="Responsive image">
               </td>
             </tr>
           </template>
@@ -435,20 +471,25 @@ import {
   topSecClass,
   getPosColor,
   getNegColor,
-  getHitStyle
+  getHitStyle,
+  get_suggestion_by_wav
 } from "../lib/commonUtils.js"
 import {computed, nextTick, onMounted, ref, watch} from "vue";
 import {storeToRefs} from 'pinia'
 import {useAggressiveStore} from '../store/aggressiveStore';
 import {useComposeStore} from "../store/composeStore.js";
 import {Modal} from "bootstrap";
+import {useBuyInOutStore} from "../store/buyInOutStore.js";
 
 const aggressiveStore = useAggressiveStore()
 const {aggressiveObjs, aggressiveExcludes} = storeToRefs(aggressiveStore)
 const {getAllAggressive, getAggressiveExcludes, addAggressiveExclude} = aggressiveStore
 const composeStore = useComposeStore()
 const {composeObjs} = storeToRefs(composeStore)
-const {addOrRemoveCompose} = composeStore
+const {addOrRemoveCompose, } = composeStore
+const buyInOutStore = useBuyInOutStore()
+const {buyin_records, wav_reports} = storeToRefs(buyInOutStore)
+const {getAllBuyinRecords, custBuyIn} = buyInOutStore
 
 const buy_in_from_plan = [
   {'source_name': '无计划', 'source_val': 'noplan'},
@@ -470,32 +511,34 @@ const colWidMap = {
   'col_11': 5
 }
 
+getAllAggressive()
 getAggressiveExcludes()
 
 const lostAggressiveNum = ref(0)
 const threeConvgNum = ref(0)
 const aggressiveViewObjs = ref([])
-watch([aggressiveObjs, composeObjs, aggressiveExcludes], () => {
+
+watch([aggressiveObjs, aggressiveExcludes, buyin_records], () => {
   aggressiveViewObjs.value = aggressiveObjs.value
-  if (composeObjs && composeObjs.value && composeObjs.value.length > 0) {
-    let _ovtree_fund_ids = composeObjs.value.find(item => item['compose_name'] === 'ovtree')['compose_objs'].map(item => item['fund_id'])
-    let _dolphin_fund_ids = composeObjs.value.find(item => item['compose_name'] === 'dolphin')['compose_objs'].map(item => item['fund_id'])
-    let _trident_fund_ids = composeObjs.value.find(item => item['compose_name'] === 'trident')['compose_objs'].map(item => item['fund_id'])
-    let _gdngoat_fund_ids = composeObjs.value.find(item => item['compose_name'] === 'gdngoat')['compose_objs'].map(item => item['fund_id'])
-    aggressiveViewObjs.value.forEach(elem => {
-      if (_ovtree_fund_ids.indexOf(elem['fund_id']) != -1) {
-        elem['compose_plan'] = 'ovtree'
-      } else if (_dolphin_fund_ids.indexOf(elem['fund_id']) != -1) {
-        elem['compose_plan'] = 'dolphin'
-      } else if (_trident_fund_ids.indexOf(elem['fund_id']) != -1) {
-        elem['compose_plan'] = 'trident'
-      } else if (_gdngoat_fund_ids.indexOf(elem['fund_id']) != -1) {
-        elem['compose_plan'] = 'gdngoat'
-      } else {
-        elem['compose_plan'] = 'noplan'
-      }
-    })
-  }
+  // if (composeObjs && composeObjs.value && composeObjs.value.length > 0) {
+  //   let _ovtree_fund_ids = composeObjs.value.find(item => item['compose_name'] === 'ovtree')['compose_objs'].map(item => item['fund_id'])
+  //   let _dolphin_fund_ids = composeObjs.value.find(item => item['compose_name'] === 'dolphin')['compose_objs'].map(item => item['fund_id'])
+  //   let _trident_fund_ids = composeObjs.value.find(item => item['compose_name'] === 'trident')['compose_objs'].map(item => item['fund_id'])
+  //   let _gdngoat_fund_ids = composeObjs.value.find(item => item['compose_name'] === 'gdngoat')['compose_objs'].map(item => item['fund_id'])
+  //   aggressiveViewObjs.value.forEach(elem => {
+  //     if (_ovtree_fund_ids.indexOf(elem['fund_id']) != -1) {
+  //       elem['compose_plan'] = 'ovtree'
+  //     } else if (_dolphin_fund_ids.indexOf(elem['fund_id']) != -1) {
+  //       elem['compose_plan'] = 'dolphin'
+  //     } else if (_trident_fund_ids.indexOf(elem['fund_id']) != -1) {
+  //       elem['compose_plan'] = 'trident'
+  //     } else if (_gdngoat_fund_ids.indexOf(elem['fund_id']) != -1) {
+  //       elem['compose_plan'] = 'gdngoat'
+  //     } else {
+  //       elem['compose_plan'] = 'noplan'
+  //     }
+  //   })
+  // }
   if (aggressiveExcludes && aggressiveExcludes.value && aggressiveExcludes.value.length > 0) {
     aggressiveViewObjs.value.forEach(elem => {
       if (aggressiveExcludes.value.indexOf(elem['fund_id']) != -1) {
@@ -630,6 +673,7 @@ watch([aggressiveObjs, composeObjs, aggressiveExcludes], () => {
       elem['already_hold_rate_class'] = 'emtpy_already_buy';
     }
   })
+
   lostAggressiveNum.value = 0
   threeConvgNum.value = 0
   aggressiveViewObjs.value.forEach(elem => {
@@ -640,7 +684,24 @@ watch([aggressiveObjs, composeObjs, aggressiveExcludes], () => {
       threeConvgNum.value++
     }
   })
+
+  aggressiveViewObjs.value.forEach(elem => {
+      if (!buyin_records.value || buyin_records.value.length === 0) {
+        elem['canGenMgr'] = true
+      } else {
+        const func = buyin => buyin['fund_id'] === elem['fund_id']
+        let _idx = buyin_records.value.findIndex(func)
+        if (_idx != -1) {
+          elem['canGenMgr'] = false
+        } else {
+          elem['canGenMgr'] = true
+        }
+      }
+  })
+
 }, {immediate: true})
+
+getAllBuyinRecords()
 
 const currTotNum = computed(() => {
   return aggressiveViewObjs.value.length
@@ -781,6 +842,16 @@ function sortByField(_field) {
         return b['negative']['negative_reach_len'] - a['negative']['negative_reach_len'];
       });
     }
+  } else if (_field === 'wav_rate') {
+    if (sortFieldFlag.value) {
+      aggressiveViewObjs.value.sort((a, b) => {
+        return a['wav_obj']['wav_sort_level'] - b['wav_obj']['wav_sort_level'];
+      });
+    } else {
+      aggressiveViewObjs.value.sort((a, b) => {
+        return b['wav_obj']['wav_sort_level'] - a['wav_obj']['wav_sort_level'];
+      });
+    }
   } else if (_field === 'day_xxx_thres') {
     if (sortFieldFlag.value) {
       aggressiveViewObjs.value.sort((a, b) => {
@@ -887,7 +958,7 @@ function scrollViewBySelection() {
 
 const rowElements = ref({})
 
-const searchCond = ref("&l<880;&r<0")
+const searchCond = ref("&l<880;&r<0;&c>150")
 
 function searchByCond() {
   if (searchCond.value.trim() === '') {
@@ -912,6 +983,14 @@ function searchByCond() {
           let _min_rate_compare = parseInt(_subCond.trim().replace("&r<", "").trim())
           aggressiveViewObjs.value.forEach(elem => {
             if (elem['statistics']['min_earn'] <= _min_rate_compare) {
+              elem['currSelected'] = true
+              _foundCnt += 1
+            }
+          })
+        } else if (_subCond.trim().indexOf("&c>") != -1) {
+          let _avg_covg_compare = parseInt(_subCond.trim().replace("&c>", "").trim())
+          aggressiveViewObjs.value.forEach(elem => {
+            if (elem['avg_convg_days'] > _avg_covg_compare) {
               elem['currSelected'] = true
               _foundCnt += 1
             }
@@ -965,6 +1044,13 @@ function clearAllHides() {
 
 const showOnly3Convg = ref(false)
 
+function switchWavDisp(oneRowObj) {
+  if (!oneRowObj.hasOwnProperty('show_wav')) {
+    oneRowObj['show_wav'] = true;
+  } else {
+    oneRowObj['show_wav'] = !oneRowObj['show_wav'];
+  }
+}
 </script>
 
 <style scoped>

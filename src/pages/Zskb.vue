@@ -102,19 +102,26 @@
         <th :style="{ 'width': colWidMap['col_7'] + colWidMap['col_8'] + 'rem' }" colspan="2">
           <!-- <div style="border-bottom: solid 1px whitesmoke;">均线高低点</div> -->
           <div>
-            <div class="w50_w_br" @click="sortByField('positive')">
+            <div class="w33_w_br" @click="sortByField('positive')">
               <template v-if="sortFieldName === 'positive'">
                 <span v-if="sortFieldFlag"><i class="bi bi-arrow-up"></i></span>
                 <span v-else><i class="bi bi-arrow-down"></i></span>
               </template>
               <span>高点</span>
             </div>
-            <div class="w50_w_br" @click="sortByField('negative')" style="border: none;">
+            <div class="w33_w_br" @click="sortByField('negative')">
               <template v-if="sortFieldName === 'negative'">
                 <span v-if="sortFieldFlag"><i class="bi bi-arrow-up"></i></span>
                 <span v-else><i class="bi bi-arrow-down"></i></span>
               </template>
               <span>低点</span>
+            </div>
+            <div class="w33_w_br" @click="sortByField('wav_rate')" style="border: none;">
+              <template v-if="sortFieldName === 'wav_rate'">
+                <span v-if="sortFieldFlag"><i class="bi bi-arrow-up"></i></span>
+                <span v-else><i class="bi bi-arrow-down"></i></span>
+              </template>
+              <span>波动</span>
             </div>
           </div>
         </th>
@@ -245,23 +252,25 @@
             </div>
           </td>
           <td style="text-align: left;" v-bind:class="{ sel_row: oneRow['currSelected'] }">
-            <div style="height: 2.2em; position: relative;"
+            <div style="height: 1.8em; position: relative;"
                  v-bind:class="getPosColor(oneRow.positive.positive_reach_len)">
                 <span v-if="oneRow.positive.positive_reach_len >= 4" class="icon_pos">
                   <i class="bi bi-arrow-up-circle-fill"></i>
                   <span class="lv_font">{{ oneRow.positive.positive_reach_len }}</span>
                 </span>
             </div>
-            <div style="height: 2.2em; position: relative;"
+            <div style="height: 1.8em; position: relative;"
                  v-bind:class="getNegColor(oneRow.negative.negative_reach_len)">
                 <span v-if="oneRow.negative.negative_reach_len >= 3" class="icon_pos">
                   <i class="bi bi-arrow-down-circle-fill"></i>
                   <span class="lv_font">{{ oneRow.negative.negative_reach_len }}</span>
                 </span>
             </div>
+            <div style="height: 3em; position: relative;">
+            </div>
           </td>
-          <td v-bind:class="{ sel_row: oneRow['currSelected'] }">
-            <div style="height: 2.2em;">
+          <td v-bind:class="{ sel_row: oneRow['currSelected'] }" style="text-align: center;">
+            <div style="height: 1.8em;">
               <span v-bind:class="getHitStyle(oneRow.positive.day_5_positive_reach)">&nbsp;</span>
               <span v-bind:class="getHitStyle(oneRow.positive.day_10_positive_reach)">&nbsp;</span>
               <span v-bind:class="getHitStyle(oneRow.positive.day_20_positive_reach)">&nbsp;</span>
@@ -271,7 +280,7 @@
               <span v-bind:class="getHitStyle(oneRow.positive.day_160_positive_reach)">&nbsp;</span>
               <span v-bind:class="getHitStyle(oneRow.positive.day_220_positive_reach)">&nbsp;</span>
             </div>
-            <div style="height: 2.2em;">
+            <div style="height: 1.8em;">
               <span v-bind:class="getHitStyle(oneRow.negative.day_5_negative_reach)">&nbsp;</span>
               <span v-bind:class="getHitStyle(oneRow.negative.day_10_negative_reach)">&nbsp;</span>
               <span v-bind:class="getHitStyle(oneRow.negative.day_20_negative_reach)">&nbsp;</span>
@@ -280,6 +289,21 @@
               <span v-bind:class="getHitStyle(oneRow.negative.day_120_negative_reach)">&nbsp;</span>
               <span v-bind:class="getHitStyle(oneRow.negative.day_160_negative_reach)">&nbsp;</span>
               <span v-bind:class="getHitStyle(oneRow.negative.day_220_negative_reach)">&nbsp;</span>
+            </div>
+            <div style="height: 3em; margin-top: 0.4rem; border-top: solid 1px darkgray; cursor: pointer;"
+                 :style="{'background-color': (oneRow['show_wav']? 'cornsilk' : ''), 'font-style':  (oneRow['show_wav']? 'italic' : '')}"
+                 v-if="oneRow.wav_obj" @click.stop="switchWavDisp(oneRow);">
+              <div>
+                <span>{{oneRow.wav_obj.avg_duration}}日</span>
+                <span>&nbsp;{{oneRow.wav_obj.avg_exp_earn}}%</span>
+                <span>&nbsp;{{oneRow.wav_obj.avg_exp_cnt}}次</span>
+                <span :style="{'color': (oneRow.wav_obj.wav_dur_level < 3? 'red' :  oneRow.wav_obj.wav_dur_level < 6? 'orange': ''), 'font-weight':  'bold'}">
+                  &nbsp;L{{oneRow.wav_obj.wav_dur_level}}
+                </span>
+              </div>
+              <div>
+                <span v-html="get_suggestion_by_wav(oneRow.wav_obj)"></span>
+              </div>
             </div>
           </td>
           <td class="nr_td" colspan="3" v-bind:class="{ sel_row: oneRow['currSelected'] }">
@@ -302,7 +326,7 @@
               <div></div>
               <div></div>
               <div class="right_pad">
-                <button type="button" class="btn btn-warning mw4_ctl" @click="saveEstiPe($event, oneRow)">保存
+                <button type="button" class="btn btn-outline-danger mw4_ctl" @click.stop="saveEstiPe($event, oneRow)">保存
                 </button>
               </div>
             </div>
@@ -316,7 +340,7 @@
                   </option>
                 </select>
                 <div class="right_pad">
-                  <button type="button" class="btn btn-warning mw4_ctl" @click="changeCompose($event, oneRow)"
+                  <button type="button" class="btn btn-warning mw4_ctl" @click.stop="changeCompose($event, oneRow)"
                           v-bind:disabled="!oneRow['target_plan'] || oneRow['target_plan'] === 'noplan'">保存
                   </button>
                 </div>
@@ -353,6 +377,12 @@
             </div>
           </td>
         </tr>
+        <tr v-if="oneRow['show_wav']">
+          <td colspan="12" style="background-color: lightblue;">
+            <img v-bind:src="'../wav-report/'+oneRow['fund_id']+'.png'"
+                 style="width: 100%; height: 100%; max-width: 100%;" class="img-fluid" alt="Responsive image">
+          </td>
+        </tr>
       </template>
       </tbody>
       <tfoot>
@@ -379,12 +409,14 @@ import {
   topSecClass,
   getPosColor,
   getNegColor,
-  getHitStyle
+  getHitStyle,
+  get_suggestion_by_wav
 } from "../lib/commonUtils.js"
 import {computed, nextTick, ref, watch} from "vue";
 import {storeToRefs} from 'pinia'
 import {useZskbStore} from "../store/zskbStore.js";
 import {useComposeStore} from "../store/composeStore.js";
+import {useBuyInOutStore} from "../store/buyInOutStore.js";
 
 const zskbStore = useZskbStore()
 const {zskbObjs} = storeToRefs(zskbStore)
@@ -392,6 +424,8 @@ const {getZskb} = zskbStore
 const composeStore = useComposeStore()
 const {composeObjs} = storeToRefs(composeStore)
 const {addOrRemoveCompose} = composeStore
+const buyInOutStore = useBuyInOutStore()
+const {wav_reports} = storeToRefs(buyInOutStore)
 
 const buy_in_esti_sugg_full = [
   {'source_name': '未知', 'source_val': -2},
@@ -612,6 +646,16 @@ function sortByField(_field) {
         return b['negative']['negative_reach_len'] - a['negative']['negative_reach_len'];
       });
     }
+  } else if (_field === 'wav_rate') {
+    if (sortFieldFlag.value) {
+      zskbViewObjs.value.sort((a, b) => {
+        return a['wav_obj']['wav_sort_level'] - b['wav_obj']['wav_sort_level'];
+      });
+    } else {
+      zskbViewObjs.value.sort((a, b) => {
+        return b['wav_obj']['wav_sort_level'] - a['wav_obj']['wav_sort_level'];
+      });
+    }
   } else if (_field === 'day_xxx_thres') {
     if (sortFieldFlag.value) {
       zskbViewObjs.value.sort((a, b) => {
@@ -750,6 +794,13 @@ function searchByCond() {
   }
 }
 
+function switchWavDisp(oneRowObj) {
+  if (!oneRowObj.hasOwnProperty('show_wav')) {
+    oneRowObj['show_wav'] = true;
+  } else {
+    oneRowObj['show_wav'] = !oneRowObj['show_wav'];
+  }
+}
 </script>
 
 <style scoped>

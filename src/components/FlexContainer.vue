@@ -1,20 +1,38 @@
 <template>
-  <template v-if="itemArray.length > 0">
-    <div class="flex_row_wp" :ref="(el) => (rowElements['container'] = el)">
-      <template v-for="oneItem in itemArray" :key="oneItem">
-        <template v-if="oneItem.indexOf('---') == -1">
-          <input class="btn btn-danger btn-sm" type="button" :value="oneItem" @click="$emit('click-item', oneItem)">
+  <template v-if="!simplifyMode">
+    <template v-if="itemArray.length > 0">
+      <div class="flex_row_wp" :ref="(el) => (rowElements['container'] = el)">
+        <template v-for="oneItem in itemArray" :key="oneItem">
+          <template v-if="oneItem.indexOf('---') == -1">
+            <input class="btn btn-danger btn-sm" type="button" :value="oneItem" @click="$emit('click-item', oneItem)">
+          </template>
+          <template v-else>
+            <span style="font-weight: bold;">&nbsp;|&nbsp;</span>
+          </template>
         </template>
-        <template v-else>
-          <span style="font-weight: bold;">&nbsp;|&nbsp;</span>
-        </template>
-      </template>
-      <div class="form-check" style="display: inline-block;">
-        <input class="form-check-input" type="checkbox" v-model="useFilterMode">
-        <label class="form-check-label" for="flexCheckDefault">使用过滤</label>
+        <div class="form-check" style="display: inline-block;">
+          <input class="form-check-input" type="checkbox" v-model="useFilterMode">
+          <label class="form-check-label" for="flexCheckDefault">使用过滤</label>
+        </div>
+        <input class="btn btn-primary btn-sm" type="button" value="排序" @click="$emit('order-filter')">
+        <input class="btn btn-light btn-sm" type="button" value="折叠" @click="$emit('mode-changed')">
       </div>
-      <input class="btn btn-primary btn-sm" type="button" value="排序" @click="$emit('order-filter')">
-    </div>
+    </template>
+  </template>
+  <template v-else>
+    <template v-if="itemSubArray.length > 0">
+      <div class="flex_row_wp" :ref="(el) => (rowElements['container'] = el)">
+        <template v-for="oneItem in itemSubArray" :key="oneItem">
+          <template v-if="oneItem.indexOf('---') == -1">
+            <input class="btn btn-danger btn-sm" type="button" :value="oneItem">
+          </template>
+          <template v-else>
+            <span style="font-weight: bold;">&nbsp;|&nbsp;</span>
+          </template>
+        </template>
+        <input class="btn btn-light btn-sm" type="button" value="展开" @click="$emit('mode-changed')">
+      </div>
+    </template>
   </template>
 </template>
 
@@ -23,13 +41,28 @@ import '../assets/style.scss'
 import '../style.css'
 import {onMounted, onUpdated, ref, computed, watch} from "vue";
 
-const props = defineProps(["itemArray", "useFilter"])
-const emits = defineEmits(["click-item", "height-changed", 'filter-changed', 'order-filter'])
+const props = defineProps(["itemArray", "useFilter", "simplifyMode"])
+const emits = defineEmits(["click-item", "height-changed", 'filter-changed', 'order-filter', 'mode-changed'])
 
 const remPx = parseInt(getComputedStyle(document.documentElement).fontSize)
 const rowElements = ref({})
 const prevHeight = ref(0)
 const useFilterMode = ref(false)
+const itemSubArray = ref([])
+
+watch(
+  () => props.itemArray,
+  (newProps) => {
+    if (newProps.length > 5) {
+      itemSubArray.value = newProps.slice(0, 5)
+    } else {
+      itemSubArray.value = newProps.slice()
+    }
+  },
+  {
+    immediate: true
+  }
+)
 
 watch(
   () => props.useFilter,

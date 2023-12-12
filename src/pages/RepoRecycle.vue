@@ -3,9 +3,11 @@
     <div id="op_pane" :style="{ 'height': opPaneHeight + infoPaneHeight + 'rem'}">
       <FlexContainer :item-array=zsRepoRecycleHides
                      :use-filter="useFilterCond"
+                     :simplifyMode="beSimplify"
                      @click-item="popUpRmCfmDialog($event)"
                      @height-changed="containerResized"
                      @filter-changed="useFilterCond = $event"
+                     @mode-changed="beSimplify = !beSimplify"
                      @order-filter="popUpOrderDialog">
       </FlexContainer>
       <div :style="{ 'height': opPaneHeight + 'rem'}" class="grid_pane_c12">
@@ -126,7 +128,7 @@
           <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
         </div>
         <div class="modal-body">
-            <textarea style="width: 100%; height: 35rem;" v-model="recycleHides4Sort"></textarea>
+            <textarea style="width: 100%; height: 28rem;" v-model="recycleHides4Sort"></textarea>
         </div>
         <div class="modal-footer">
           <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">取消</button>
@@ -197,7 +199,7 @@ const zskbStore = useZskbStore()
 const {zskbObjs} = storeToRefs(zskbStore)
 const {removeKanban, addKanban} = zskbStore
 const useFilterCond = ref(true)
-
+const beSimplify = ref(false)
 const colWidMap = {
   'col_1': 5,
   'col_2': 8,

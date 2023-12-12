@@ -80,12 +80,23 @@
             </div>
           </div>
         </th>
-        <th :style="{ 'width': colWidMap['col_6'] + 'rem' }" @click="sortByField('day_xxx_thres')">
-          <template v-if="sortFieldName === 'day_xxx_thres'">
-            <span v-if="sortFieldFlag"><i class="bi bi-arrow-up"></i></span>
-            <span v-else><i class="bi bi-arrow-down"></i></span>
-          </template>
-          <span>趋势</span>
+        <th :style="{ 'width': colWidMap['col_6'] + 'rem' }">
+          <div>
+            <div class="w50_w_br" @click="sortByField('day_xxx_thres')">
+              <template v-if="sortFieldName === 'day_xxx_thres'">
+                <span v-if="sortFieldFlag"><i class="bi bi-arrow-up"></i></span>
+                <span v-else><i class="bi bi-arrow-down"></i></span>
+              </template>
+              <span>趋势</span>
+            </div>
+            <div class="w50_w_br" @click="sortByField('wav_rate')" style="border: none;">
+              <template v-if="sortFieldName === 'wav_rate'">
+                <span v-if="sortFieldFlag"><i class="bi bi-arrow-up"></i></span>
+                <span v-else><i class="bi bi-arrow-down"></i></span>
+              </template>
+              <span>波动</span>
+            </div>
+          </div>
         </th>
         <th :style="{ 'width': colWidMap['col_7'] + 'rem' }" @click="sortByField('fund_len')">
           <template v-if="sortFieldName === 'fund_len'">
@@ -195,12 +206,29 @@
               {{ oneRow.max_earn_tri_str }}
             </div>
           </td>
-          <td style="text-align: left;" v-bind:class="{ sel_row: oneRow['currSelected'] }">
-            <span v-bind:class="getCardStyle(oneRow.day_200_thres)">&nbsp;</span>
-            <span v-bind:class="getCardStyle(oneRow.day_300_thres)">&nbsp;</span>
-            <span v-bind:class="getCardStyle(oneRow.day_400_thres)">&nbsp;</span>
-            <span v-bind:class="getCardStyle(oneRow.day_500_thres)">&nbsp;</span>
-            <span v-bind:class="getCardStyle(oneRow.day_600_thres)">&nbsp;</span>
+          <td style="text-align: center;" v-bind:class="{ sel_row: oneRow['currSelected'] }">
+            <div>
+              <span v-bind:class="getCardStyle(oneRow.day_200_thres)">&nbsp;</span>
+              <span v-bind:class="getCardStyle(oneRow.day_300_thres)">&nbsp;</span>
+              <span v-bind:class="getCardStyle(oneRow.day_400_thres)">&nbsp;</span>
+              <span v-bind:class="getCardStyle(oneRow.day_500_thres)">&nbsp;</span>
+              <span v-bind:class="getCardStyle(oneRow.day_600_thres)">&nbsp;</span>
+            </div>
+            <div style="margin-top: 0.4rem; border-top: solid 1px darkgray; cursor: pointer;"
+                 :style="{'background-color': (oneRow['show_wav']? 'cornsilk' : ''), 'font-style':  (oneRow['show_wav']? 'italic' : '')}"
+                 v-if="oneRow.wav_obj" @click.stop="switchWavDisp(oneRow);">
+              <div>
+                <span>{{oneRow.wav_obj.avg_duration}}日</span>
+                <span>&nbsp;{{oneRow.wav_obj.avg_exp_earn}}%</span>
+                <span>&nbsp;{{oneRow.wav_obj.avg_exp_cnt}}次</span>
+                <span :style="{'color': (oneRow.wav_obj.wav_dur_level < 3? 'red' :  oneRow.wav_obj.wav_dur_level < 6? 'orange': ''), 'font-weight':  'bold'}">
+                  &nbsp;L{{oneRow.wav_obj.wav_dur_level}}
+                </span>
+              </div>
+              <div>
+                <span v-html="get_suggestion_by_wav(oneRow.wav_obj)"></span>
+              </div>
+            </div>
           </td>
           <td v-bind:class="{ sel_row: oneRow['currSelected'] }">
             <span>{{ oneRow.fund_perc_len }}</span>
@@ -242,6 +270,12 @@
                 </button>
               </div>
             </div>
+          </td>
+        </tr>
+        <tr v-if="oneRow['show_wav']">
+          <td colspan="8" style="background-color: lightblue;">
+            <img v-bind:src="'../wav-report/'+oneRow['fund_id']+'.png'"
+                 style="width: 100%; height: 100%; max-width: 100%;" class="img-fluid" alt="Responsive image">
           </td>
         </tr>
       </template>
@@ -309,13 +343,15 @@ import {
   minPaneWidth,
   getCardStyle,
   type_map_objs_4_select,
-  topSecClass
+  topSecClass,
+  get_suggestion_by_wav
 } from "../lib/commonUtils.js"
 import {onMounted, computed, ref, watch, nextTick} from "vue";
 import {storeToRefs} from 'pinia'
 import {useZsRepoStore} from "../store/zsrepoStore.js";
 import {useZskbStore} from '../store/zskbStore';
 import {Modal} from 'bootstrap';
+import {useBuyInOutStore} from "../store/buyInOutStore.js";
 
 const zsRepoStore = useZsRepoStore()
 const {zsRepoObjs, zsRepoHides, zsRepoExcludes, zsRepoBases} = storeToRefs(zsRepoStore)
@@ -324,6 +360,9 @@ const {addZsRepoHide, removeZsRepoHide, getZsRepo, excludeRepo, saveRepoBase} = 
 const zskbStore = useZskbStore()
 const {zskbObjs} = storeToRefs(zskbStore)
 const {removeKanban, addKanban} = zskbStore
+
+const buyInOutStore = useBuyInOutStore()
+const {wav_reports} = storeToRefs(buyInOutStore)
 
 const colWidMap = {
   'col_1': 8,
@@ -520,6 +559,16 @@ function sortByField(_field) {
         return b['day_sort_tot_thres'] - a['day_sort_tot_thres'];
       });
     }
+  } else if (_field === 'wav_rate') {
+    if (sortFieldFlag.value) {
+      zsRepoViewObjs.value.sort((a, b) => {
+        return a['wav_obj']['wav_sort_level'] - b['wav_obj']['wav_sort_level'];
+      });
+    } else {
+      zsRepoViewObjs.value.sort((a, b) => {
+        return b['wav_obj']['wav_sort_level'] - a['wav_obj']['wav_sort_level'];
+      });
+    }
   } else if (_field === 'fund_len') {
     if (sortFieldFlag.value) {
       zsRepoViewObjs.value.sort((a, b) => {
@@ -643,6 +692,14 @@ function searchByCond() {
     sortByField('selected')
   } else {
     searchCond.value = ""
+  }
+}
+
+function switchWavDisp(oneRowObj) {
+  if (!oneRowObj.hasOwnProperty('show_wav')) {
+    oneRowObj['show_wav'] = true;
+  } else {
+    oneRowObj['show_wav'] = !oneRowObj['show_wav'];
   }
 }
 </script>

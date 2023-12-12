@@ -98,6 +98,61 @@ function getHitStyle(_val) {
     return 'white_card';
 }
 
+function getTodayStr() {
+    Date.prototype.Format = function (fmt) {
+        let o = {
+            "M+": this.getMonth() + 1,
+            "d+": this.getDate(),
+            "h+": this.getHours(),
+            "m+": this.getMinutes(),
+            "s+": this.getSeconds(),
+            "q+": Math.floor((this.getMonth() + 3) / 3),
+            "S": this.getMilliseconds()
+        };
+        if (/(y+)/.test(fmt)) fmt = fmt.replace(RegExp.$1, (this.getFullYear() + "").substr(4 - RegExp.$1.length));
+        for (let k in o)
+            if (new RegExp("(" + k + ")").test(fmt)) fmt = fmt.replace(RegExp.$1, (RegExp.$1.length == 1) ? (o[k]) : (("00" + o[k]).substr(("" + o[k]).length)));
+        return fmt;
+    }
+    return new Date().Format("yyyy-MM-dd");
+}
+
+function get_suggestion_by_wav(wav_obj) {
+    let _sugg_str = '';
+    if (wav_obj['wav_dur_level'] < 3) {
+        _sugg_str += '<span style="color: red;">回报快</span>'
+        _sugg_str += '<span>&nbsp;</span>'
+        if (wav_obj['wav_earn_level'] < 5) {
+            _sugg_str += '<span style="color: red;">盈利高</span>'
+        } else if (wav_obj['wav_earn_level'] < 8) {
+            _sugg_str += '<span style="color: orange;">盈利中</span>'
+        } else {
+            _sugg_str += '<span style="color: blue;">盈利低</span>'
+        }
+    } else if (wav_obj['wav_dur_level'] < 6) {
+        _sugg_str += '<span style="color: orange;">回报中</span>'
+        _sugg_str += '<span>&nbsp;</span>'
+        if (wav_obj['wav_earn_level'] < 3) {
+            _sugg_str += '<span style="color: red;">盈利高</span>'
+        } else if (wav_obj['wav_earn_level'] < 7) {
+            _sugg_str += '<span style="color: orange;">盈利中</span>'
+        } else {
+            _sugg_str += '<span style="color: blue;">盈利低</span>'
+        }
+    } else {
+        _sugg_str += '<span style="color: orange;">回报慢</span>'
+        _sugg_str += '<span>&nbsp;</span>'
+        if (wav_obj['wav_earn_level'] < 3) {
+            _sugg_str += '<span style="color: red;">盈利高</span>'
+        } else if (wav_obj['wav_earn_level'] < 5) {
+            _sugg_str += '<span style="color: orange;">盈利中</span>'
+        } else {
+            _sugg_str += '<span style="color: blue;">盈利低</span>'
+        }
+    }
+    return _sugg_str;
+}
+
 export {
     navHeight,
     opPaneTopPos,
@@ -116,5 +171,7 @@ export {
     infoTopSecClass,
     getPosColor,
     getNegColor,
-    getHitStyle
+    getHitStyle,
+    getTodayStr,
+    get_suggestion_by_wav
 }
