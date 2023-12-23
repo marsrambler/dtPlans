@@ -14,6 +14,7 @@
           <router-link to="/kanban" class="nav-item nav-link">看板</router-link>
           <router-link to="/recycle" class="nav-item nav-link">回收</router-link>
           <router-link to="/aggressive" class="nav-item nav-link">主动</router-link>
+          <router-link to="/convg" class="nav-item nav-link">优选</router-link>
           <router-link to="/composite" class="nav-item nav-link">组合</router-link>
           <router-link to="/report" class="nav-item nav-link">报告</router-link>
           <li class="nav-item dropdown">

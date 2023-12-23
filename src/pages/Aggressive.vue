@@ -128,8 +128,8 @@
           </template>
           <span>变动</span>
         </th>
-        <th :style="{ 'width': colWidMap['col_10'] + 'rem' }">
-          <template v-if="sortFieldName === 'esti_pe_zhi'">
+        <th :style="{ 'width': colWidMap['col_10'] + 'rem' }" @click="sortByField('hold_money')">
+          <template v-if="sortFieldName === 'hold_money'">
             <span v-if="sortFieldFlag"><i class="bi bi-arrow-up"></i></span>
             <span v-else><i class="bi bi-arrow-down"></i></span>
           </template>
@@ -344,7 +344,7 @@
                       &nbsp;L{{oneRow.wav_obj.wav_dur_level}}
                     </span>
                   </div>
-                  <div>
+                  <div style="margin-top: -6px;">
                     <span v-html="get_suggestion_by_wav(oneRow.wav_obj)"></span>
                   </div>
                 </div>
@@ -882,14 +882,22 @@ function sortByField(_field) {
         return b['esti_pe']['ding'] - a['esti_pe']['ding'];
       });
     }
-  } else if (_field === 'esti_pe_zhi') {
+  } else if (_field === 'hold_money') {
     if (sortFieldFlag.value) {
       aggressiveViewObjs.value.sort((a, b) => {
-        return a['esti_pe']['zhi'] - b['esti_pe']['zhi'];
+        let _m_a = 0;
+        let _m_b = 0;
+        if (a['tot_money']) _m_a = a['tot_money'];
+        if (b['tot_money']) _m_b = b['tot_money'];
+        return _m_a - _m_b;
       });
     } else {
       aggressiveViewObjs.value.sort((a, b) => {
-        return b['esti_pe']['zhi'] - a['esti_pe']['zhi'];
+        let _m_a = 0;
+        let _m_b = 0;
+        if (a['tot_money']) _m_a = a['tot_money'];
+        if (b['tot_money']) _m_b = b['tot_money'];
+        return _m_b - _m_a;
       });
     }
   } else if (_field === 'esti_pe_wei') {

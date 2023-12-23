@@ -301,7 +301,7 @@
                   &nbsp;L{{oneRow.wav_obj.wav_dur_level}}
                 </span>
               </div>
-              <div>
+              <div style="margin-top: -6px;">
                 <span v-html="get_suggestion_by_wav(oneRow.wav_obj)"></span>
               </div>
             </div>
@@ -437,7 +437,7 @@ const buy_in_esti_sugg_full = [
 const buy_in_from_plan = [
   {'source_name': '无计划', 'source_val': 'noplan'},
   {'source_name': '橄榄树', 'source_val': 'ovtree'},
-  {'source_name': '海豚', 'source_val': 'dolphin'},
+  // {'source_name': '海豚', 'source_val': 'dolphin'},
   // { 'source_name': '三叉戟', 'source_val': 'trident' }
 ]
 

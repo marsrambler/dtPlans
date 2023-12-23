@@ -403,7 +403,7 @@
                       &nbsp;L{{oneRow.wav_obj.wav_dur_level}}
                     </span>
                   </div>
-                  <div>
+                  <div style="margin-top: -6px;">
                     <span v-html="get_suggestion_by_wav(oneRow.wav_obj)"></span>
                   </div>
                 </div>

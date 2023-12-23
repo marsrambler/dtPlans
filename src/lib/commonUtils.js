@@ -118,36 +118,44 @@ function getTodayStr() {
 }
 
 function get_suggestion_by_wav(wav_obj) {
+    let _dur_str_st = '<span style="color: red; position: relative;">回报快<span style="font-size: 0.8rem;position: absolute;top: 0.8rem;left: 1.1rem;color: black;font-weight: bold;border: solid 1px black;border-radius: 5px;line-height: 0.9rem; padding: 2px 2px 0px 1px;">买</span></span>';
+    let _dur_str_md = '<span style="color: orange; position: relative;">回报中<span style="font-size: 0.8rem;position: absolute;top: 0.8rem;left: 1.1rem;color: black;font-weight: bold;border: solid 1px black;border-radius: 5px;line-height: 0.9rem; padding: 2px 2px 0px 1px;">买</span></span>';
+    let _dur_str_lg = '<span style="color: blue; position: relative;">回报慢<span style="font-size: 0.8rem;position: absolute;top: 0.8rem;left: 1.1rem;color: black;font-weight: bold;border: solid 1px black;border-radius: 5px;line-height: 0.9rem; padding: 2px 2px 0px 1px;">买</span></span>';
+
+    let _earn_str_hi = '<span style="color: red;position: relative;">盈利高<span style="font-size: 0.8rem;position: absolute;top: 0.8rem;left: 1.1rem;color: darkviolet;font-weight: bold;border: solid 1px darkviolet;border-radius: 5px;line-height: 0.9rem; padding: 2px 2px 0px 1px;">卖</span></span>';
+    let _earn_str_md = '<span style="color: orange;position: relative;">盈利中<span style="font-size: 0.8rem;position: absolute;top: 0.8rem;left: 1.1rem;color: darkviolet;font-weight: bold;border: solid 1px darkviolet;border-radius: 5px;line-height: 0.9rem; padding: 2px 2px 0px 1px;">卖</span></span>'
+    let _earn_str_lo = '<span style="color: blue;position: relative;">盈利低<span style="font-size: 0.8rem;position: absolute;top: 0.8rem;left: 1.1rem;color: darkviolet;font-weight: bold;border: solid 1px darkviolet;border-radius: 5px;line-height: 0.9rem; padding: 2px 2px 0px 1px;">卖</span></span>'
+
     let _sugg_str = '';
     if (wav_obj['wav_dur_level'] < 3) {
-        _sugg_str += '<span style="color: red;">回报快</span>'
+        _sugg_str += _dur_str_st
         _sugg_str += '<span>&nbsp;</span>'
         if (wav_obj['wav_earn_level'] < 5) {
-            _sugg_str += '<span style="color: red;">盈利高</span>'
+            _sugg_str += _earn_str_hi
         } else if (wav_obj['wav_earn_level'] < 8) {
-            _sugg_str += '<span style="color: orange;">盈利中</span>'
+            _sugg_str += _earn_str_md
         } else {
-            _sugg_str += '<span style="color: blue;">盈利低</span>'
+            _sugg_str += _earn_str_lo
         }
     } else if (wav_obj['wav_dur_level'] < 6) {
-        _sugg_str += '<span style="color: orange;">回报中</span>'
+        _sugg_str += _dur_str_md
         _sugg_str += '<span>&nbsp;</span>'
         if (wav_obj['wav_earn_level'] < 3) {
-            _sugg_str += '<span style="color: red;">盈利高</span>'
+            _sugg_str += _earn_str_hi
         } else if (wav_obj['wav_earn_level'] < 7) {
-            _sugg_str += '<span style="color: orange;">盈利中</span>'
+            _sugg_str += _earn_str_md
         } else {
-            _sugg_str += '<span style="color: blue;">盈利低</span>'
+            _sugg_str += _earn_str_lo
         }
     } else {
-        _sugg_str += '<span style="color: orange;">回报慢</span>'
+        _sugg_str += _dur_str_lg
         _sugg_str += '<span>&nbsp;</span>'
         if (wav_obj['wav_earn_level'] < 3) {
-            _sugg_str += '<span style="color: red;">盈利高</span>'
+            _sugg_str += _earn_str_hi
         } else if (wav_obj['wav_earn_level'] < 5) {
-            _sugg_str += '<span style="color: orange;">盈利中</span>'
+            _sugg_str += _earn_str_md
         } else {
-            _sugg_str += '<span style="color: blue;">盈利低</span>'
+            _sugg_str += _earn_str_lo
         }
     }
     return _sugg_str;

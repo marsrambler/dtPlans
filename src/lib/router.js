@@ -6,6 +6,7 @@ import Compose from "../pages/Compose.vue";
 import Report from "../pages/Report.vue";
 import RepoRecycle from "../pages/RepoRecycle.vue";
 import Aggressive from "../pages/Aggressive.vue";
+import DtConvg from "../pages/DtConvg.vue";
 
 const routes = [
     {
@@ -31,6 +32,10 @@ const routes = [
     {
         path: '/aggressive/',
         component: Aggressive
+    },
+    {
+        path: '/convg/',
+        component: DtConvg
     }
 ]
 
