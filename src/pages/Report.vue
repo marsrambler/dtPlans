@@ -6,8 +6,10 @@
         style="grid-column: 2 / span 3; padding-left: 0.5rem;">
       <input class="btn btn-primary btn-sm" type="button" value="请求" @click="requireDynValues4ui();">
       <input class="btn btn-warning btn-sm" type="button" value="刷新" @click="getRecordsAndRates('refresh');">
+      <input class="btn btn-secondary btn-sm" type="button" v-bind:value="canAddAllFlag? '全选' : '取消'" 
+      @click="allAllFundIntoRequestList();">
       <input type="text" v-model="searchFundName" class="form-control-plaintext search_box"
-             style="grid-column: 7 / span 2; padding-left: 0.5rem;" @keyup.enter="excuteSearchFund()">
+             style="grid-column: 8 / span 2; padding-left: 0.5rem;" @keyup.enter="excuteSearchFund()">
       <input class="btn btn-primary btn-sm" type="button" value="查找" @click="excuteSearchFund();">
     </div>
     <table id="table_header" class="table table-bordered" style="margin-bottom: 0;">
@@ -370,6 +372,26 @@ function addFundId4UpdateDynValue(_fund_id) {
     let _fundIds = requireFundIds.value.split(",")
     let _fundIds_filtered = _fundIds.filter((elem) => elem !== _fund_id)
     requireFundIds.value = _fundIds_filtered.join(",")
+  }
+  if (!requireFundIds.value || requireFundIds.value.trim() === '') {
+    canAddAllFlag.value = true
+  } else {
+    canAddAllFlag.value = false
+  }
+}
+
+const canAddAllFlag = ref(true)
+function allAllFundIntoRequestList() {
+  if (!requireFundIds.value || requireFundIds.value.trim() === '') {
+    if (dynRecordObjs && dynRecordObjs.value && dynRecordObjs.value.length > 0) {
+      dynRecordObjs.value.forEach(elem => {
+        addFundId4UpdateDynValue(elem['fund_id'])
+      })
+    }
+    canAddAllFlag.value = false
+  } else {
+    requireFundIds.value = ""
+    canAddAllFlag.value = true
   }
 }
 

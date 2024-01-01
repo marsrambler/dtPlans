@@ -41,6 +41,11 @@
           <span>{{totPlanBuy}}</span>
         </template>
       </div>
+      <template v-if="totPositiveNum > 0">
+        <span class="blink_me badge bg-danger" style="line-height: 1.5rem; font-size: 1rem;">
+          有高点:&nbsp;{{ totPositiveNum }}
+        </span>
+      </template>
     </div>
     <table id="table_header" class="table table-bordered" style="margin-bottom: 0;">
       <thead style="">
@@ -732,6 +737,7 @@ const totSetBuy = ref(0)
 const totPlanBuy = ref(0)
 const diffBuySet = ref(0)
 const showLostOnly = ref(false)
+const totPositiveNum = ref(0)
 watch([composeObjs, compose_name, fixedHoldObjs, buyoutRecords, showLostOnly], () => {
   composeViewObjs.value = []
   if (composeObjs && composeObjs.value && composeObjs.value.length > 0) {
@@ -787,6 +793,8 @@ watch([composeObjs, compose_name, fixedHoldObjs, buyoutRecords, showLostOnly], (
   totEarnRate.value = ''
   totSetBuy.value = 0
   totPlanBuy.value = 0
+  totPositiveNum.value = 0
+
   if (composeViewObjs.value.length > 0) {
     composeViewObjs.value.forEach(elem => {
       let fixedHoldObj = elem['fixedHoldObj']
@@ -796,6 +804,16 @@ watch([composeObjs, compose_name, fixedHoldObjs, buyoutRecords, showLostOnly], (
         totEarnMoney.value += lastHoldObj['accu_pure_profit']
         totSetBuy.value += elem['money']
         totPlanBuy.value += elem['adjust_money']
+      }
+
+      if (elem.hasOwnProperty('kbObj') && elem['kbObj'] != null) {
+        let _kbOjb = elem['kbObj']
+        if (_kbOjb.hasOwnProperty('positive') && _kbOjb['positive'] != null) {
+          let _positive = _kbOjb['positive']
+          if (_positive['positive_reach_len'] >= 5) {
+            totPositiveNum.value += 1
+          }
+        }
       }
     })
     if (totMoney.value > 0) {
@@ -1130,5 +1148,15 @@ function switchWavDisp(oneRowObj) {
 
 .less_height {
   line-height: 1.2rem;
+}
+
+.blink_me {
+  animation: blinker 10s linear infinite;
+}
+
+@keyframes blinker {
+  50% {
+    opacity: 0;
+  }
 }
 </style>
