@@ -6,7 +6,7 @@
         style="grid-column: 2 / span 3; padding-left: 0.5rem;">
       <input class="btn btn-primary btn-sm" type="button" value="请求" @click="requireDynValues4ui();">
       <input class="btn btn-warning btn-sm" type="button" value="刷新" @click="getRecordsAndRates('refresh');">
-      <input class="btn btn-secondary btn-sm" type="button" v-bind:value="canAddAllFlag? '全选' : '取消'" 
+      <input class="btn btn-info btn-sm" type="button" v-bind:value="canAddAllFlag? '全选' : '取消'"
       @click="allAllFundIntoRequestList();">
       <input type="text" v-model="searchFundName" class="form-control-plaintext search_box"
              style="grid-column: 8 / span 2; padding-left: 0.5rem;" @keyup.enter="excuteSearchFund()">
@@ -185,7 +185,7 @@
           </tr>
           <tr v-if="currDynValue && currDynValue['fund_id'] == oneRow['fund_id']">
             <td colspan=8>
-              <div class="op_pane flex_act_pane">
+              <div class="op_pane_sub flex_act_pane">
                 <button type="button" class="btn btn-secondary from_ctl_nr" @click="yAxisTopAdjTimes += 1;">
                   增加顶
                 </button>
@@ -208,7 +208,7 @@
                 <button type="button" class="btn btn-secondary from_ctl_nr" @click="remove_Asc_or_Desc_or_Sold_Date(oneRow)"
                         v-bind:disabled="!oneRow['remove_date_type'] || oneRow['remove_date_type'] ===''">
                   <template v-if="!oneRow['remove_date_type'] || oneRow['remove_date_type'] ===''">
-                    移除选择
+                    移除项
                   </template>
                   <template v-else-if="oneRow['remove_date_type'] === 'asc'">
                     移除+
@@ -234,6 +234,98 @@
                 <button type="button" class="btn btn-primary from_ctl_nr" @click="genTextReport()">
                   文档
                 </button>
+                <div style="line-height: 2rem;" class="flex_act_pane" v-if="oneRow['tranStateObj']">
+                  <div class="para_info">
+                    <div>
+                      <div class="stack_2_info">总:&nbsp;{{oneRow['tranStateObj']['tot_money']}}</div>
+                    </div>
+                    <div class="sep_line">
+                      <div class="stack_2_info">额:&nbsp;{{oneRow['tranStateObj']['money']}}</div>
+                    </div>
+                  </div>
+                  <template v-if="oneRow['tranStateObj']['orig_summ_level']">
+                    <div class="para_info">
+                      <div>
+                        <div class="stack_2_info">
+                          原:&nbsp;<span class="level_info"
+                                        v-bind:class="getFixedRetroClassV2(oneRow['tranStateObj']['orig_summ_level'])">
+                        {{ oneRow['tranStateObj']['orig_summ_level'] }}</span>
+                        </div>
+                      </div>
+                      <div class="sep_line">
+                        <div class="stack_2_info">
+                          设:&nbsp;<span class="level_info"
+                                        v-bind:class="getFixedRetroClassV2(oneRow['tranStateObj']['subs_summ_level'])">
+                        {{ oneRow['tranStateObj']['subs_summ_level'] }}</span>
+                        </div>
+                      </div>
+                    </div>
+                  </template>
+                  <div class="para_info">
+                    <div>
+                      <div class="stack_2_info">
+                        盈:&nbsp;<span class="val_font_color"
+                                      :style="{color: oneRow['tranStateObj']['tot_rate'] >= 0? 'red' : 'darkgreen'}">
+                        {{ oneRow['tranStateObj']['tot_rate_str'] }}</span>
+                      </div>
+                    </div>
+                    <div class="sep_line">
+                      <div class="stack_2_info">
+                        日:&nbsp;<span class="val_font_color"
+                                      :style="{color: oneRow['tranStateObj']['rate_val'] >= 0? 'red' : 'darkgreen'}">
+                        {{ oneRow['tranStateObj']['rate_str'] }}</span>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="para_info">
+                    <div>
+                      <template v-if="oneRow['tranStateObj']['compose_plan'] === 'ovtree'">
+                      <span class="badge bg-primary text-bg-success big_badge stack_2_info">
+                        橄榄树
+                      </span>
+                      </template>
+                      <template v-else-if="oneRow['tranStateObj']['compose_plan'] === 'dolphin'">
+                          <span class="badge bg-info text-bg-success big_badge stack_2_info">
+                            海豚
+                          </span>
+                      </template>
+                      <template v-else-if="oneRow['tranStateObj']['compose_plan'] === 'trident'">
+                          <span class="badge bg-success text-bg-success big_badge stack_2_info">
+                            三叉戟
+                          </span>
+                      </template>
+                      <template v-else-if="oneRow['tranStateObj']['compose_plan'] === 'gdngoat'">
+                          <span class="badge bg-danger text-bg-success big_badge stack_2_info">
+                            金毛羊
+                          </span>
+                      </template>
+                      <template v-else-if="oneRow['tranStateObj']['compose_plan'] === 'bigpool'">
+                          <span class="badge bg-warning text-bg-success big_badge stack_2_info">
+                            大池
+                          </span>
+                      </template>
+                      <template v-else>
+                          <span class="badge bg-dark text-bg-success big_badge para_info">
+                            无
+                          </span>
+                      </template>
+                    </div>
+                    <div class="sep_line">
+                      <template v-if="oneRow['tranStateObj']['orig_summ_level']">
+                        <a class="stack_2_info" v-bind:href="baseUrl4Nav + oneRow.fund_id" target="_blank"
+                          style="cursor: pointer; text-decoration: underline; color: darkslateblue;">
+                          去配置
+                        </a>
+                      </template>
+                      <template v-else>
+                        <a class="stack_2_info" v-bind:href="'/composite' + oneRow.fund_id " target="_blank"
+                          style="cursor: pointer; text-decoration: underline; color: darkslateblue;">
+                          去配置
+                        </a>
+                      </template>
+                    </div>
+                  </div>
+                </div>
               </div>
               <div id="hc_container">
                 <highcharts :constructor-type="'stockChart'" :options="chartOptions" />
@@ -294,13 +386,14 @@ import { storeToRefs } from 'pinia'
 import { useZskbStore } from '../store/zskbStore';
 import { useReportStore } from "../store/reportStore.js";
 import { Modal, Alert } from "bootstrap";
+import {useComposeStore} from "../store/composeStore.js";
 
 const zskbStore = useZskbStore()
 const { zskbObjs } = storeToRefs(zskbStore)
 
 const reportStore = useReportStore()
 const { dynRecordObjs } = storeToRefs(reportStore)
-const { requireDynValues, getRecordsAndRates, removeLocalDynvalue } = reportStore
+const { requireDynValues, getRecordsAndRates, removeLocalDynvalue, getBigPoolFixedHold, getIndexRtRate } = reportStore
 
 const colWidMap = {
   'col_1': 6,
@@ -314,6 +407,8 @@ const colWidMap = {
 }
 
 // getRecordsAndRates('no')
+getBigPoolFixedHold()
+getIndexRtRate()
 
 const zskbViewObjs = ref({})
 watch(zskbObjs, () => {
@@ -326,9 +421,12 @@ const cfmDlgTitle = ref("")
 const cfmDlgCont = ref("")
 const cfmDlgType = ref("")
 const dlgController = ref({ reportDlg: null })
-
+const baseUrl4Nav = ref("")
 onMounted(() => {
   dlgController.value.reportDlg = new Modal('#reportDialog', {})
+  let _prot = window.location.protocol;
+  let _host = window.location.hostname;
+  baseUrl4Nav.value = _prot + "//" + _host + "/probe-funds.html?dt_fund_id="
 })
 
 const requireFundIds = ref("")
@@ -1173,6 +1271,113 @@ function genTextReport() {
 
 const rowElements = ref({})
 
+function getFixedRetroClassV2(_int_val) {
+  if (_int_val == -1) {
+    return 'fixed_retro_bg_m_1';
+  } else if (_int_val == 0) {
+    return 'fixed_retro_bg_0';
+  } else if (_int_val == 1) {
+    return 'fixed_retro_bg_1';
+  } else if (_int_val == 2) {
+    return 'fixed_retro_bg_2';
+  } else if (_int_val == 3) {
+    return 'fixed_retro_bg_3';
+  } else if (_int_val == 4) {
+    return 'fixed_retro_bg_4';
+  } else if (_int_val < 1) {
+    return 'fixed_retro_bg_imp_2';
+  } else if (_int_val > 4) {
+    return 'fixed_retro_bg_imp_1';
+  }
+  return '';
+}
 </script>
 
-<style scoped></style>
+<style scoped>
+.para_info {
+  line-height: 1.5;
+  font-size: 1rem;
+  padding: 5px;
+  text-align: center;
+}
+.level_info {
+  display: inline-block;
+  width: 1.5em;
+  text-align: center;
+  border-radius: 5px;
+  margin-left: 0.5em;
+  padding: 1px 1px 1px 1px;
+  color: white;
+  font-size: 0.8em;
+}
+.stack_2_info {
+  padding-left: 0.5rem;
+  padding-right: 0.5rem;
+  line-height: 1.2;
+}
+.fixed_retro_bg_m_1 {
+  border: solid 1px black;
+  background-color: black;
+  color: white;
+  border-radius: 5px;
+  line-height: 1;
+}
+.fixed_retro_bg_0 {
+  border: solid 1px blue;
+  background-color: blue;
+  border-radius: 5px;
+  line-height: 1;
+}
+.fixed_retro_bg_1 {
+  border: solid 1px skyblue;
+  background-color: skyblue;
+  border-radius: 5px;
+  line-height: 1;
+}
+.fixed_retro_bg_2 {
+  border: solid 1px grey;
+  background-color: grey;
+  border-radius: 5px;
+  line-height: 1;
+}
+.fixed_retro_bg_3 {
+  border: solid 1px orange;
+  background-color: orange;
+  border-radius: 5px;
+  line-height: 1;
+}
+.fixed_retro_bg_4 {
+  border: solid 1px red;
+  background-color: red;
+  border-radius: 5px;
+  line-height: 1;
+}
+.fixed_retro_bg_imp_1 {
+  font-size: 0.7em !important;
+  border: dashed 2px red;
+  color: red !important;
+  font-weight: 900;
+  width: 2.4em !important;
+  line-height: 1;
+}
+.fixed_retro_bg_imp_2 {
+  font-size: 0.7em !important;
+  border: dashed 2px blue;
+  color: blue !important;
+  font-weight: 900;
+  width: 2.4em !important;
+  line-height: 1;
+}
+.val_font_color {
+  display: inline-block;
+  text-align: right;
+  /*width: 3em;*/
+  margin-right: 0.1em;
+  font-weight: 600;
+  font-style: italic;
+  font-size: 0.9em;
+}
+.sep_line {
+  border-top: solid 1px whitesmoke;
+}
+</style>

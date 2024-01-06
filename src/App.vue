@@ -19,9 +19,9 @@ const {getZsRepo, getZsRepoHides, getZsRepoExclude, getRepoBase, getRepoRecycles
 const zskbStore = useZskbStore()
 const {getRtRates, getZskb} = zskbStore
 const composeStore = useComposeStore()
-const {getAllCompose} = composeStore
+const {getAllCompose, getComposeFixedHold} = composeStore
 const reportStore = useReportStore()
-const {getRecordsAndRates} = reportStore
+const {getRecordsAndRates, getRetroFunds, getFixedFunds, getAllComposeFixedHold, getBigPoolFixedHold} = reportStore
 const aggressiveStore = useAggressiveStore()
 const {getAllAggressive} = aggressiveStore
 const buyInOutStore = useBuyInOutStore()
@@ -58,6 +58,10 @@ getRepoRecycles()
 getRepoRecycleHides()
 getAllCompose()
 getRecordsAndRates('no')
+getRetroFunds()
+getFixedFunds()
+getAllComposeFixedHold()
+// getBigPoolFixedHold()
 // getAllAggressive()
 // getFundWavReport()
 </script>
