@@ -98,7 +98,7 @@
             <td v-bind:class="{ sel_row: oneRow['currSelected'] }">
               <div>{{ oneRow.fund_id }}</div>
               <div>{{ oneRow.fund_name }}</div>
-              <div>净值日:&nbsp;<span class="text-bg-danger">{{ oneRow.statistics?.latest_price_date }}</span></div>
+              <div>净值日:&nbsp;<span class="text-bg-warning">{{ oneRow.statistics?.latest_price_date }}</span></div>
             </td>
             <td v-bind:class="{ sel_row: oneRow['currSelected'] }">
               <template v-if="zskbViewObjs && zskbViewObjs[oneRow.fund_id]">
@@ -120,17 +120,43 @@
               </template>
             </td>
             <td v-bind:class="{ sel_row: oneRow['currSelected'] }">
-              <div>起:&nbsp;{{ oneRow.statistics?.buy_first_day }}</div>
-              <div>止:&nbsp;{{ oneRow.statistics?.buy_last_day }}</div>
-              <div>计:&nbsp;{{ oneRow.statistics?.tot_exchange_days }}天</div>
-              <div>共:&nbsp;{{ oneRow.statistics?.tot_hold_days }}天</div>
+              <div style="height: 6rem;">
+                <div>起:&nbsp;{{ oneRow.statistics?.buy_first_day }}</div>
+                <div>止:&nbsp;{{ oneRow.statistics?.buy_last_day }}</div>
+                <div>计:&nbsp;{{ oneRow.statistics?.tot_exchange_days }}天</div>
+                <div>共:&nbsp;{{ oneRow.statistics?.tot_hold_days }}天</div>
+              </div>
+              <template v-if="oneRow.statistics && oneRow.statistics.rate_from_last_sold">
+                <div style="border-top: solid 1px gray; margin-top: 0.5rem; padding-top: 0.5rem; line-height: 1.2rem;">
+                  <span v-if="oneRow.statistics.rate_from_last_sold >= 0" class="text-bg-danger">
+                    &nbsp;自卖:&nbsp;{{oneRow.statistics.days_from_last_sold}}日&nbsp;
+                  </span>
+                  <span v-else style="color: white; background-color: darkgreen;">
+                    &nbsp;自卖:&nbsp;{{oneRow.statistics.days_from_last_sold}}日&nbsp;
+                  </span>
+                </div>
+              </template>
             </td>
             <td style="line-height: 1.2rem;" v-bind:class="{ sel_row: oneRow['currSelected'] }">
-              <template v-if="oneRow.soldHistoryWrapper" :key="one_sold.date_str">
-                <template v-for="(one_sold, index) in oneRow.soldHistoryWrapper">
-                  <span v-if="index === oneRow.soldHistoryWrapper.length - 1" class="text-bg-danger">{{ one_sold?.date_str }}</span>
-                  <span v-else>{{ one_sold?.date_str }},&nbsp;</span>
+              <div style="height: 6rem; overflow: hidden; text-overflow: ellipsis; word-break: break-all;">
+                <template v-if="oneRow.soldHistoryWrapper_reverse" :key="one_sold.date_str">
+                  <template v-for="(one_sold, index) in oneRow.soldHistoryWrapper_reverse">
+                    <span v-if="index === 0 && oneRow.soldHistoryWrapper_reverse.length > 1" class="text-bg-warning">&nbsp;{{ one_sold?.date_str }}&nbsp;</span>
+                    <span v-else-if="index === 0 && oneRow.soldHistoryWrapper_reverse.length === 1" class="text-bg-warning">&nbsp;{{ one_sold?.date_str }}&nbsp;</span>
+                    <span v-else-if="index !== oneRow.soldHistoryWrapper_reverse.length - 1">&nbsp;{{ one_sold?.date_str }}&nbsp;</span>
+                    <span v-else>&nbsp;{{ one_sold?.date_str }}&nbsp;</span>
+                  </template>
                 </template>
+              </div>
+              <template v-if="oneRow.statistics && oneRow.statistics.rate_from_last_sold">
+                <div style="border-top: solid 1px gray; margin-top: 0.5rem; padding-top: 0.5rem;">
+                  <span v-if="oneRow.statistics.rate_from_last_sold >= 0" class="text-bg-danger">
+                    &nbsp;计:&nbsp;{{oneRow.statistics.rate_from_last_sold_str}}&nbsp;
+                  </span>
+                  <span v-else style="color: white; background-color: darkgreen;">
+                    &nbsp;计:&nbsp;{{oneRow.statistics.rate_from_last_sold_str}}&nbsp;
+                  </span>
+                </div>
               </template>
             </td>
             <td v-bind:class="{ sel_row: oneRow['currSelected'] }">
@@ -312,13 +338,13 @@
                     </div>
                     <div class="sep_line">
                       <template v-if="oneRow['tranStateObj']['orig_summ_level']">
-                        <a class="stack_2_info" v-bind:href="baseUrl4Nav + oneRow.fund_id" target="_blank"
+                        <a class="stack_2_info" v-bind:href="baseUrl4ProbeNav + oneRow.fund_id" target="_blank"
                           style="cursor: pointer; text-decoration: underline; color: darkslateblue;">
                           去配置
                         </a>
                       </template>
                       <template v-else>
-                        <a class="stack_2_info" v-bind:href="'/composite' + oneRow.fund_id " target="_blank"
+                        <a class="stack_2_info" v-bind:href="baseUrl4ComposeNav + oneRow.fund_id + '&dt_compose=' + oneRow['tranStateObj']['compose_plan']" target="_blank"
                           style="cursor: pointer; text-decoration: underline; color: darkslateblue;">
                           去配置
                         </a>
@@ -421,12 +447,14 @@ const cfmDlgTitle = ref("")
 const cfmDlgCont = ref("")
 const cfmDlgType = ref("")
 const dlgController = ref({ reportDlg: null })
-const baseUrl4Nav = ref("")
+const baseUrl4ProbeNav = ref("")
+const baseUrl4ComposeNav = ref("")
 onMounted(() => {
   dlgController.value.reportDlg = new Modal('#reportDialog', {})
   let _prot = window.location.protocol;
   let _host = window.location.hostname;
-  baseUrl4Nav.value = _prot + "//" + _host + "/probe-funds.html?dt_fund_id="
+  baseUrl4ProbeNav.value = _prot + "//" + _host + "/probe-funds.html?dt_fund_id="
+  baseUrl4ComposeNav.value = _prot + "//" + _host + "/dt_plans_web/#/composite?dt_fund_id="
 })
 
 const requireFundIds = ref("")
@@ -889,6 +917,14 @@ function removeSoldDateByStr(_date_str, oneRow) {
     return false
   }
   soldHistoryWrapper.splice(_idx, 1)
+
+  let soldHistoryWrapper_reverse = currDynValue.value['soldHistoryWrapper_reverse']
+  _idx = soldHistoryWrapper_reverse.findIndex(date_match)
+  if (_idx === -1 || _idx === 0) {
+    return false
+  }
+  soldHistoryWrapper_reverse.splice(_idx, 1)
+
   oneRow['statistics']['sold_times'] -= 1
 }
 

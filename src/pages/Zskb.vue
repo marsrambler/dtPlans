@@ -8,19 +8,19 @@
       --></div>
       <!--      <div>隐藏:&nbsp;<span class="badge bg-warning text-dark">{{ currSelectedNum }}</span>-->
       <!--      </div>-->
-      <div class="form-check" style="display: inline-block;">
+      <div class="form-check form_check_cust">
         <input class="form-check-input" type="checkbox" v-model="wideIdxOnly">
         <label class="form-check-label" for="flexCheckDefault">宽基</label>
       </div>
-      <div class="form-check" style="display: inline-block;">
+      <div class="form-check form_check_cust">
         <input class="form-check-input" type="checkbox" v-model="topicIdxOnly">
         <label class="form-check-label" for="flexCheckChecked">主题</label>
       </div>
-      <div class="form-check" style="display: inline-block;">
+      <div class="form-check form_check_cust">
         <input class="form-check-input" type="checkbox" v-model="indusIdxOnly">
         <label class="form-check-label" for="flexCheckChecked">行业</label>
       </div>
-      <div class="form-check" style="display: inline-block;">
+      <div class="form-check form_check_cust">
         <input class="form-check-input" type="checkbox" v-model="qdiiIdxOnly">
         <label class="form-check-label" for="flexCheckChecked">QDII</label>
       </div>

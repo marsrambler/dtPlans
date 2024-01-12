@@ -133,10 +133,10 @@ $darkgolden: #ffc107;
 .grid_pane_base {
   padding-left: 0.5rem;
   padding-right: 0.5rem;
-  padding-top: 0.5em;
+  padding-top: 0.3em;
   display: grid;
   justify-content: space-between;
-  align-items: baseline;
+  align-items: center;
   row-gap: 0.2rem;
   column-gap: 0.2rem;
 }
@@ -151,8 +151,17 @@ $darkgolden: #ffc107;
   grid-template-columns: repeat(auto-fill, 9.5%);
 }
 
+.grid_pane_c11 {
+  @extend .grid_pane_base;
+  grid-template-columns: repeat(auto-fill, 8.7%);
+}
+
 .grid_pane_c12 {
   @extend .grid_pane_base;
   grid-template-columns: repeat(auto-fill, 8%);
 }
 
+.form_check_cust {
+  display: inline-block; 
+  margin-bottom: -0.6rem !important;
+}

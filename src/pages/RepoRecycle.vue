@@ -199,7 +199,7 @@ const zskbStore = useZskbStore()
 const {zskbObjs} = storeToRefs(zskbStore)
 const {removeKanban, addKanban} = zskbStore
 const useFilterCond = ref(true)
-const beSimplify = ref(false)
+const beSimplify = ref(true)
 const colWidMap = {
   'col_1': 5,
   'col_2': 8,

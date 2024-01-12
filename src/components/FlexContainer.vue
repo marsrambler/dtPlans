@@ -10,7 +10,7 @@
             <span style="font-weight: bold;">&nbsp;|&nbsp;</span>
           </template>
         </template>
-        <div class="form-check" style="display: inline-block;">
+        <div class="form-check form_check_cust" style="display: inline-block; margin-bottom: -0.6rem;">
           <input class="form-check-input" type="checkbox" v-model="useFilterMode">
           <label class="form-check-label" for="flexCheckDefault">使用过滤</label>
         </div>

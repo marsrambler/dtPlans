@@ -1,16 +1,22 @@
 <template>
   <div :style="topSecClass">
-    <div id="op_pane" :style="{ 'height': opPaneHeight + 'rem' }" class="grid_pane_c10">
+    <div id="op_pane" :style="{ 'height': opPaneHeight + 'rem' }" class="grid_pane_c12">
       <div style="grid-column: 1 / span 2;">组合名称:&nbsp;
-        <select class="form-select" style="width: 8rem;"  v-model="compose_name">
+        <select class="form-select" style="width: 6.5rem;"  v-model="compose_name">
           <option v-for="option in buy_in_from_plan" v-bind:value="option.source_val">
             {{ option.source_name }}
           </option>
         </select>
       </div>
-      <div class="form-check" style="display: inline-block;">
+      <div class="form-check form_check_cust">
         <input class="form-check-input" type="checkbox" v-model="showLostOnly">
-        <label class="form-check-label" for="flexCheckDefault">仅看缺失</label>
+        <label class="form-check-label" for="flexCheckDefault">缺失&nbsp;</label>
+        <span class="badge bg-warning">{{totLostNum}}</span>
+      </div>
+      <div class="form-check form_check_cust">
+        <input class="form-check-input" type="checkbox" v-model="showPauseOnly">
+        <label class="form-check-label" for="flexCheckDefault">暂停&nbsp;</label>
+        <span class="badge bg-warning">{{totPauseNum}}</span>
       </div>
       <div>买入:&nbsp;{{totMoney}}</div>
       <div>盈利:&nbsp;
@@ -45,6 +51,12 @@
         <span class="blink_me badge bg-danger" style="line-height: 1.5rem; font-size: 1rem;">
           有高点:&nbsp;{{ totPositiveNum }}
         </span>
+      </template>
+      <div style="cursor: pointer;" @click="clearSelected()">
+        &nbsp;选择&nbsp;<span class="badge bg-warning text-dark">{{ currSelectedNum }}</span>
+      </div>
+      <template v-if="currSelectedNum > 0">
+        <input class="btn btn-primary btn-sm" type="button" value="前移选择" @click="sortByField('selected')">
       </template>
     </div>
     <table id="table_header" class="table table-bordered" style="margin-bottom: 0;">
@@ -176,9 +188,11 @@
       </thead>
       <tbody>
       <template v-for="oneRow in composeViewObjs" :key="oneRow.fund_id">
-        <template v-if="oneRow['lost_in_aggressive']">
-          <tr v-bind:id="oneRow.fund_id">
-            <td>
+        <template v-if="oneRow['lost_in_aggressive'] || oneRow['lost_in_dtconvg']">
+          <tr v-bind:id="oneRow.fund_id" style="cursor: pointer;" @click="selOrDesRow(oneRow)"
+              v-bind:class="{ sel_row: oneRow['currSelected'] }"
+              :ref="(el) => { if (el) { rowElements[oneRow.fund_id] = el; } }">
+            <td v-bind:class="{ sel_row: oneRow['currSelected'] }">
               <div>
                 <template v-if="oneRow['has_bonus']">
                   <span style="color: red; font-weight: bold;">{{ oneRow.fund_id }}&nbsp;</span>
@@ -193,49 +207,42 @@
                 </template>
               </div>
             </td>
-            <td colspan="5">
+            <td colspan="5" v-bind:class="{ sel_row: oneRow['currSelected'] }">
               <span style="color: red; font-weight: 900;">已缺失，可能是经理更换或业绩不再收敛。</span>
             </td>
-            <td style="line-height: 2rem;">
+            <td style="line-height: 2rem;" v-bind:class="{ sel_row: oneRow['currSelected'] }">
               <template v-if="oneRow['kbObj']">
                 <div>
                   持有:&nbsp;
-                  <template
-                      v-if="oneRow['fixedHoldObj'] && oneRow['fixedHoldObj']['hold_objs'] && oneRow['fixedHoldObj']['hold_objs'].length > 0">
-                      <span
-                          :set="accu_money = oneRow['fixedHoldObj']['hold_objs'][oneRow['fixedHoldObj']['hold_objs'].length - 1]['accu_money']">
-                        {{ accu_money }}
+                  <template v-if="oneRow['hold_accu_money']">
+                      <span>
+                        {{ oneRow['hold_accu_money'] }}
                       </span>
                   </template>
                 </div>
                 <div>
-                  盈利:
+                  盈利:&nbsp;
                   <template
-                      v-if="oneRow['fixedHoldObj'] && oneRow['fixedHoldObj']['hold_objs'] && oneRow['fixedHoldObj']['hold_objs'].length > 0">
-                      <span
-                          :set="accu_pure_profit = oneRow['fixedHoldObj']['hold_objs'][oneRow['fixedHoldObj']['hold_objs'].length - 1]['accu_pure_profit']"
-                          :style="{color: (accu_pure_profit >= 0? 'red' : 'darkgreen'), 'font-weight': 'bold'}">
-                        {{ accu_pure_profit }}
+                      v-if="oneRow['hold_accu_pure_profit']">
+                      <span :style="{color: (oneRow['hold_accu_pure_profit'] >= 0? 'red' : 'darkgreen'), 'font-weight': 'bold'}">
+                        {{ oneRow['hold_accu_pure_profit'] }}
                       </span>
                   </template>
                 </div>
                 <div>
-                  计:
-                  <template
-                      v-if="oneRow['fixedHoldObj'] && oneRow['fixedHoldObj']['hold_objs'] && oneRow['fixedHoldObj']['hold_objs'].length > 0">
-                      <span
-                          :set="accu_pure_percent_str = oneRow['fixedHoldObj']['hold_objs'][oneRow['fixedHoldObj']['hold_objs'].length - 1]['accu_pure_percent_str']"
-                          :style="{color: (accu_pure_profit >= 0? 'red' : 'darkgreen'), 'font-weight': 'bold'}">
-                        {{ accu_pure_percent_str }}
+                  计:&nbsp;
+                  <template v-if="oneRow['hold_accu_pure_percent_str']">
+                      <span :style="{color: (oneRow['hold_accu_pure_profit'] >= 0? 'red' : 'darkgreen'), 'font-weight': 'bold'}">
+                        {{ oneRow['hold_accu_pure_percent_str'] }}
                       </span>
                   </template>
                 </div>
               </template>
             </td>
-            <td style="line-height: 2rem;">
+            <td style="line-height: 2rem;" v-bind:class="{ sel_row: oneRow['currSelected'] }">
               <div>
                 当前:&nbsp;
-                <input type="number" style="width: 4rem; border-radius: 5px;" v-model="oneRow['money']">
+                <input type="number" style="width: 4rem; border-radius: 5px;" v-model="oneRow['money']" @click.stop>
               </div>
               <div>
                 决策:&nbsp;&nbsp;{{ oneRow['adjust_money'] }}
@@ -264,11 +271,11 @@
                        @click.stop="setComposeProperty(oneRow['fund_id'], oneRow['fund_name'], oneRow['compose_name'], parseInt(oneRow['money']), oneRow['buyin_source'])">
               </div>
             </td>
-            <td style="text-align: center;">
+            <td style="text-align: center;" v-bind:class="{ sel_row: oneRow['currSelected'] }">
               <template v-if="oneRow['fixedHoldObj']">
                 <button type="button" class="btn"
                         :class="{'btn-primary': !oneRow['fixedHoldObj']['disp_flag'], 'btn-secondary': oneRow['fixedHoldObj']['disp_flag']}"
-                        @click="oneRow['fixedHoldObj']['disp_flag'] = !oneRow['fixedHoldObj']['disp_flag'];">
+                        @click.stop="oneRow['fixedHoldObj']['disp_flag'] = !oneRow['fixedHoldObj']['disp_flag'];">
                   <template v-if="!oneRow['fixedHoldObj']['disp_flag']">展开</template>
                   <template v-else>折叠</template>
                 </button>
@@ -277,8 +284,10 @@
           </tr>
         </template>
         <template v-else>
-          <tr v-bind:id="oneRow.fund_id">
-            <td>
+          <tr v-bind:id="oneRow.fund_id" style="cursor: pointer;" @click="selOrDesRow(oneRow)"
+              v-bind:class="{ sel_row: oneRow['currSelected'] }"
+              :ref="(el) => { if (el) { rowElements[oneRow.fund_id] = el; } }">
+            <td v-bind:class="{ sel_row: oneRow['currSelected'] }">
               <div>
                 <template v-if="oneRow['fixedHoldObj'] && oneRow['fixedHoldObj']['has_bonus']">
                   <span style="color: red; font-weight: bold;">{{ oneRow.fund_id }}&nbsp;</span>
@@ -312,7 +321,7 @@
                 </template>
               </div>
             </td>
-            <td>
+            <td v-bind:class="{ sel_row: oneRow['currSelected'] }">
               <div>
                 {{ oneRow?.kbObj?.statistics?.min_earn_str }}
               </div>
@@ -323,7 +332,7 @@
                 {{ oneRow?.kbObj?.statistics?.min_earn_tri_str }}
               </div>
             </td>
-            <td>
+            <td v-bind:class="{ sel_row: oneRow['currSelected'] }">
               <div>
                 {{ oneRow?.kbObj?.statistics?.avg_earn_str }}
               </div>
@@ -334,7 +343,7 @@
                 {{ oneRow?.kbObj?.statistics?.avg_earn_tri_str }}
               </div>
             </td>
-            <td>
+            <td v-bind:class="{ sel_row: oneRow['currSelected'] }">
               <div>
                 {{ oneRow?.kbObj?.statistics?.max_earn_str }}
               </div>
@@ -345,7 +354,7 @@
                 {{ oneRow?.kbObj?.statistics?.max_earn_tri_str }}
               </div>
             </td>
-            <td>
+            <td v-bind:class="{ sel_row: oneRow['currSelected'] }">
               <template v-if="oneRow['kbObj']">
                 <div style="height: 1.8em; position: relative;"
                      v-bind:class="getPosColor(oneRow.kbObj.positive.positive_reach_len)">
@@ -365,7 +374,7 @@
                 </div>
               </template>
             </td>
-            <td style="text-align: center;">
+            <td style="text-align: center;" v-bind:class="{ sel_row: oneRow['currSelected'] }">
               <template v-if="oneRow['kbObj']">
                 <div style="height: 1.8em;">
                   <span v-bind:class="getHitStyle(oneRow.kbObj.positive.day_5_positive_reach)">&nbsp;</span>
@@ -414,7 +423,7 @@
                 </div>
               </template>
             </td>
-            <td style="line-height: 2rem;">
+            <td style="line-height: 2rem;" v-bind:class="{ sel_row: oneRow['currSelected'] }">
               <template v-if="oneRow['kbObj']">
                 <div>
                   持有:&nbsp;
@@ -450,10 +459,10 @@
                 </div>
               </template>
             </td>
-            <td style="line-height: 2rem;">
+            <td style="line-height: 2rem;" v-bind:class="{ sel_row: oneRow['currSelected'] }">
               <div>
                 当前:&nbsp;
-                <input type="number" style="width: 4rem; border-radius: 5px;" v-model="oneRow['money']">
+                <input type="number" style="width: 4rem; border-radius: 5px;" v-model="oneRow['money']" @click.stop>
               </div>
               <div>
                 决策:&nbsp;&nbsp;{{ oneRow['adjust_money'] }}
@@ -482,11 +491,11 @@
                        @click.stop="setComposeProperty(oneRow['fund_id'], oneRow['fund_name'], oneRow['compose_name'], parseInt(oneRow['money']), oneRow['buyin_source'])">
               </div>
             </td>
-            <td style="text-align: center;">
+            <td style="text-align: center;" v-bind:class="{ sel_row: oneRow['currSelected'] }">
               <template v-if="oneRow['fixedHoldObj']">
                 <button type="button" class="btn"
                         :class="{'btn-primary': !oneRow['fixedHoldObj']['disp_flag'], 'btn-secondary': oneRow['fixedHoldObj']['disp_flag']}"
-                        @click="oneRow['fixedHoldObj']['disp_flag'] = !oneRow['fixedHoldObj']['disp_flag'];">
+                        @click.stop="oneRow['fixedHoldObj']['disp_flag'] = !oneRow['fixedHoldObj']['disp_flag'];">
                   <template v-if="!oneRow['fixedHoldObj']['disp_flag']">展开</template>
                   <template v-else>折叠</template>
                 </button>
@@ -679,7 +688,9 @@ import {useComposeStore} from "../store/composeStore.js";
 import {useZskbStore} from "../store/zskbStore.js"
 import {Modal} from "bootstrap";
 import {useBuyInOutStore} from "../store/buyInOutStore.js";
+import { useRoute } from 'vue-router'
 
+const route = useRoute()
 const composeStore = useComposeStore()
 const {composeObjs, fixedHoldObjs} = storeToRefs(composeStore)
 const {getAllCompose, setComposeProperty, setComposeSoldDate, getComposeFixedHold} = composeStore
@@ -737,30 +748,54 @@ const totSetBuy = ref(0)
 const totPlanBuy = ref(0)
 const diffBuySet = ref(0)
 const showLostOnly = ref(false)
+const showPauseOnly = ref(false)
 const totPositiveNum = ref(0)
-watch([composeObjs, compose_name, fixedHoldObjs, buyoutRecords, showLostOnly], () => {
+const dtFundId = ref(null)
+const totLostNum = ref(0)
+const totPauseNum = ref(0)
+watch([composeObjs, compose_name, fixedHoldObjs, buyoutRecords, showLostOnly, showPauseOnly], () => {
   composeViewObjs.value = []
   if (composeObjs && composeObjs.value && composeObjs.value.length > 0) {
     if (compose_name.value === 'all') {
       composeObjs.value.forEach(item => {
-        if (!showLostOnly.value) {
+        if (!showLostOnly.value && !showPauseOnly.value) {
           composeViewObjs.value.push(...item['compose_objs'])
         } else {
           item['compose_objs'].forEach(_obj => {
-            if (_obj['lost_in_aggressive']) {
-              composeViewObjs.value.push(_obj)
+            let _added_in = false
+            if (showLostOnly.value) {
+              if (_obj['lost_in_aggressive'] || _obj['lost_in_dtconvg']) {
+                composeViewObjs.value.push(_obj)
+                _added_in = true
+              }
+            }
+            if (showPauseOnly.value && !_added_in) {
+              if ((!_obj.hasOwnProperty('money') || _obj['money'] <= 0) &&
+                  (!_obj['lost_in_aggressive'] && !_obj['lost_in_dtconvg'])) {
+                composeViewObjs.value.push(_obj)
+              }
             }
           })
         }
       })
     } else {
-      if (!showLostOnly.value) {
+      if (!showLostOnly.value && !showPauseOnly.value) {
         composeViewObjs.value = composeObjs.value.find(item => item['compose_name'] === compose_name.value)['compose_objs']
       } else {
         let _match_composes = composeObjs.value.find(item => item['compose_name'] === compose_name.value)
         _match_composes['compose_objs'].forEach(_obj => {
-          if (_obj['lost_in_aggressive']) {
-            composeViewObjs.value.push(_obj)
+          let _added_in = false
+          if (showLostOnly.value) {
+            if (_obj['lost_in_aggressive'] || _obj['lost_in_dtconvg']) {
+              composeViewObjs.value.push(_obj)
+              _added_in = true
+            }
+          }
+          if (showPauseOnly.value && !_added_in) {
+            if ((!_obj.hasOwnProperty('money') || _obj['money'] <= 0) &&
+                (!_obj['lost_in_aggressive'] && !_obj['lost_in_dtconvg'])) {
+              composeViewObjs.value.push(_obj)
+            }
           }
         })
       }
@@ -794,6 +829,8 @@ watch([composeObjs, compose_name, fixedHoldObjs, buyoutRecords, showLostOnly], (
   totSetBuy.value = 0
   totPlanBuy.value = 0
   totPositiveNum.value = 0
+  totLostNum.value = 0
+  totPauseNum.value = 0
 
   if (composeViewObjs.value.length > 0) {
     composeViewObjs.value.forEach(elem => {
@@ -815,7 +852,21 @@ watch([composeObjs, compose_name, fixedHoldObjs, buyoutRecords, showLostOnly], (
           }
         }
       }
+
+      if ((elem.hasOwnProperty('lost_in_aggressive') && elem['lost_in_aggressive'])
+          || (elem.hasOwnProperty('lost_in_dtconvg') && elem['lost_in_dtconvg'])) {
+        totLostNum.value = totLostNum.value + 1
+      } else if (!elem.hasOwnProperty('money') || elem['money'] <= 0) {
+        totPauseNum.value = totPauseNum.value + 1
+      }
+
+
+      if (dtFundId.value && dtFundId.value === elem['fund_id']) {
+        elem['currSelected'] = true
+        dtFundId.value = null
+      }
     })
+
     if (totMoney.value > 0) {
       let _earn_rate = totEarnMoney.value / totMoney.value * 100
       totEarnRate.value = _earn_rate.toFixed(0) + '%'
@@ -824,6 +875,9 @@ watch([composeObjs, compose_name, fixedHoldObjs, buyoutRecords, showLostOnly], (
       diffBuySet.value = (totPlanBuy.value - totSetBuy.value) / totSetBuy.value
     }
   }
+
+  scrollViewBySelection()
+
 }, {immediate: true})
 
 getAllBuyoutRecords()
@@ -835,6 +889,17 @@ const dlgController = ref({soldDlg: null, removeDlg: null})
 onMounted(() => {
   dlgController.value.soldDlg = new Modal('#soldDialog', {})
   dlgController.value.removeDlg = new Modal('#removeDialog', {})
+
+  if (route.query.hasOwnProperty('dt_compose') && route.query['dt_compose']) {
+    if (['ovtree', 'dolphin', 'trident', 'gdngoat'].indexOf(route.query['dt_compose'].trim()) !== -1) {
+      compose_name.value = route.query['dt_compose'].trim();
+    } else {
+      console.error("Internal error as query string can not find: ", route.query['dt_compose'])
+    }
+  }
+  if (route.query.hasOwnProperty('dt_fund_id') && route.query['dt_fund_id']) {
+    dtFundId.value = route.query['dt_fund_id'].trim();
+  }
 })
 const fund_id_sold = ref('')
 const fund_name_sold = ref('')
@@ -1037,35 +1102,29 @@ function sortByField(_field) {
   } else if (_field === 'buy_money') {
     if (sortFieldFlag.value) {
       composeViewObjs.value.sort((a, b) => {
-        if (a['money'] && b['money']) {
-          return a['money'] - b['money'];
-        } else {
-          return 0;
-        }
+        let _a = (a.hasOwnProperty('money') && a['money'] !== null) ? a['money'] : -1
+        let _b = (b.hasOwnProperty('money') && b['money'] !== null) ? b['money'] : -1
+        return _a -_b
       });
     } else {
       composeViewObjs.value.sort((a, b) => {
-        if (a['money'] && b['money']) {
-          return b['money'] - a['money'];
-        } else {
-          return 0;
-        }
+        let _a = (a.hasOwnProperty('money') && a['money'] !== null) ? a['money'] : -1
+        let _b = (b.hasOwnProperty('money') && b['money'] !== null) ? b['money'] : -1
+        return _b - _a
       });
     }
   } else if (_field === 'set_money') {
     if (sortFieldFlag.value) {
       composeViewObjs.value.sort((a, b) => {
-        if (a['adjust_money'] && b['adjust_money']) {
-          return a['adjust_money'] - b['adjust_money'];
-        }
+        let _a = (a.hasOwnProperty('adjust_money') && a['adjust_money'] !== null) ? a['adjust_money'] : -1
+        let _b = (b.hasOwnProperty('adjust_money') && b['adjust_money'] !== null) ? b['adjust_money'] : -1
+        return _a -_b
       });
     } else {
       composeViewObjs.value.sort((a, b) => {
-        if (a['adjust_money'] && b['adjust_money']) {
-          return b['adjust_money'] - a['adjust_money'];
-        } else {
-          return 0;
-        }
+        let _a = (a.hasOwnProperty('adjust_money') && a['adjust_money'] !== null) ? a['adjust_money'] : -1
+        let _b = (b.hasOwnProperty('adjust_money') && b['adjust_money'] !== null) ? b['adjust_money'] : -1
+        return _b - _a
       });
     }
   } else if (_field === 'fund_len') {
@@ -1108,7 +1167,49 @@ function sortByField(_field) {
         }
       });
     }
+  } else if (_field === 'selected') {
+    composeViewObjs.value.sort((a, b) => {
+      if (a.hasOwnProperty('currSelected') && b.hasOwnProperty('currSelected')) {
+        if (a['currSelected'] && b['currSelected']) {
+          return 0
+        } else if (a['currSelected']) {
+          return -1
+        }
+        return 1
+      } else if (!a.hasOwnProperty('currSelected')) {
+        return 1
+      } else {
+        return -1
+      }
+    });
   }
+  //
+  scrollViewBySelection()
+}
+
+const rowElements = ref({})
+const currSelectedNum = ref(0)
+watch(composeViewObjs, () => {
+  let _filtered = composeViewObjs.value.filter((elem => elem['currSelected']))
+  currSelectedNum.value = _filtered.length
+}, {
+  deep: true
+})
+
+function scrollViewBySelection() {
+  nextTick(() => {
+    if (currSelectedNum.value >= 1) {
+      const func = elem => elem['currSelected']
+      let _idx = composeViewObjs.value.findIndex(func)
+      if (_idx != -1) {
+        let _rowObj = composeViewObjs.value[_idx]
+        rowElements.value[_rowObj['fund_id']].scrollIntoView({block: "center", behavior: "smooth"})
+      }
+    } else if (composeViewObjs.value.length > 0) {
+      let _fund_id = composeViewObjs.value[0]['fund_id']
+      rowElements.value[_fund_id].scrollIntoView({block: "center", behavior: "smooth"})
+    }
+  })
 }
 
 function switchWavDisp(oneRowObj) {
@@ -1117,6 +1218,18 @@ function switchWavDisp(oneRowObj) {
   } else {
     oneRowObj['show_wav'] = !oneRowObj['show_wav'];
   }
+}
+
+function selOrDesRow(oneRowObj) {
+  if (oneRowObj.hasOwnProperty('currSelected')) {
+    oneRowObj['currSelected'] = !oneRowObj['currSelected']
+  } else {
+    oneRowObj['currSelected'] = true
+  }
+}
+
+function clearSelected() {
+  composeViewObjs.value.forEach((elem) => elem['currSelected'] = false)
 }
 </script>
 

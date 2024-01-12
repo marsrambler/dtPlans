@@ -42,6 +42,14 @@ export const useReportStore = defineStore('report-store', () => {
             const response = await axiosInst.get("dt-plans/api/get-fund-records-rate/" + _refresh)
             if (response.status === 200) {
                 dynRecordObjs.value = await response.data
+                dynRecordObjs.value.forEach(elem => {
+                    if (elem['soldHistoryWrapper'] && elem['soldHistoryWrapper'].length > 0) {
+                        let _soldHistoryWrapper = [...elem['soldHistoryWrapper']] //JSON.parse(JSON.stringify(elem['soldHistoryWrapper']))
+                        elem['soldHistoryWrapper_reverse'] = _soldHistoryWrapper.reverse()
+                    } else {
+                        elem['soldHistoryWrapper_reverse'] = []
+                    }
+                })
             } else {
                 console.error("axios get records and rates failed: ", response)
                 dynRecordObjs.value = []
