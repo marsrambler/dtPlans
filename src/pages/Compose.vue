@@ -1,8 +1,8 @@
 <template>
   <div :style="topSecClass">
-    <div id="op_pane" :style="{ 'height': opPaneHeight + 'rem' }" class="grid_pane_c12">
+    <div id="op_pane" :style="{ 'height': opPaneHeight + 'rem' }" class="grid_pane_c11">
       <div style="grid-column: 1 / span 2;">组合名称:&nbsp;
-        <select class="form-select" style="width: 6.5rem;"  v-model="compose_name">
+        <select class="form-select" style="width: 6.5rem;" v-model="compose_name">
           <option v-for="option in buy_in_from_plan" v-bind:value="option.source_val">
             {{ option.source_name }}
           </option>
@@ -11,40 +11,37 @@
       <div class="form-check form_check_cust">
         <input class="form-check-input" type="checkbox" v-model="showLostOnly">
         <label class="form-check-label" for="flexCheckDefault">缺失&nbsp;</label>
-        <span class="badge bg-warning">{{totLostNum}}</span>
+        <span class="badge bg-warning">{{ totLostNum }}</span>
       </div>
       <div class="form-check form_check_cust">
         <input class="form-check-input" type="checkbox" v-model="showPauseOnly">
         <label class="form-check-label" for="flexCheckDefault">暂停&nbsp;</label>
-        <span class="badge bg-warning">{{totPauseNum}}</span>
+        <span class="badge bg-warning">{{ totPauseNum }}</span>
       </div>
-      <div>买入:&nbsp;{{totMoney}}</div>
-      <div>盈利:&nbsp;
-        <template v-if="totEarnMoney > 0">
-          <span class="badge bg-danger">{{totEarnMoney}}</span>
-        </template>
-        <template v-else>
-          <span class="badge bg-success">{{totEarnMoney}}</span>
-        </template>
+      <div class="form-check form_check_cust">
+        <input class="form-check-input" type="checkbox" v-model="showAdjustOnly">
+        <label class="form-check-label" for="flexCheckDefault">调整&nbsp;</label>
+        <span class="badge bg-warning">{{ totAdjustNum }}</span>
       </div>
-      <div>计:&nbsp;
-        <template v-if="totEarnMoney > 0">
-          <span class="badge bg-danger">{{totEarnRate}}</span>
+      <div>买入:&nbsp;{{ totMoney }}</div>
+      <div>盈:
+        <template v-if="totEarnMoney > 0 && totMoney > 0">
+          <span class="badge bg-danger">{{ totEarnMoney }}&nbsp;|&nbsp;{{ totEarnRate }}</span>
         </template>
-        <template v-else>
-          <span class="badge bg-success">{{totEarnRate}}</span>
+        <template v-else-if="totMoney > 0">
+          <span class="badge bg-success">{{ totEarnMoney }}&nbsp;|&nbsp;{{ totEarnRate }}</span>
         </template>
       </div>
-      <div>已设:&nbsp;{{totSetBuy}}</div>
-      <div>预设:&nbsp;
+      <div>设:
+        {{ totSetBuy }}&nbsp;|
         <template v-if="diffBuySet >= 0.1">
-          <span class="badge bg-warning">{{totPlanBuy}}</span>
+          <span class="badge bg-warning">{{ totPlanBuy }}</span>
         </template>
         <template v-else-if="diffBuySet <= -0.1">
-          <span class="badge bg-danger">{{totPlanBuy}}</span>
+          <span class="badge bg-danger">{{ totPlanBuy }}</span>
         </template>
         <template v-else>
-          <span>{{totPlanBuy}}</span>
+          <span>{{ totPlanBuy }}</span>
         </template>
       </div>
       <template v-if="totPositiveNum > 0">
@@ -61,109 +58,109 @@
     </div>
     <table id="table_header" class="table table-bordered" style="margin-bottom: 0;">
       <thead style="">
-      <tr :style="{ 'height': tabHeaderHeight + 'rem' }">
-        <th :style="{ 'width': colWidMap['col_1'] + 'rem' }">
-          <div>
-            <div class="w33_w_br">
-              <span>名称</span>
+        <tr :style="{ 'height': tabHeaderHeight + 'rem' }">
+          <th :style="{ 'width': colWidMap['col_1'] + 'rem' }">
+            <div>
+              <div class="w33_w_br">
+                <span>名称</span>
+              </div>
+              <div class="w33_w_br" @click="sortByField('fund_len')">
+                <template v-if="sortFieldName === 'fund_len'">
+                  <span v-if="sortFieldFlag"><i class="bi bi-arrow-up"></i></span>
+                  <span v-else><i class="bi bi-arrow-down"></i></span>
+                </template>
+                <span>长度</span>
+              </div>
+              <div class="w33_w_br" @click="sortByField('update_date')" style="border: none;">
+                <template v-if="sortFieldName === 'update_date'">
+                  <span v-if="sortFieldFlag"><i class="bi bi-arrow-up"></i></span>
+                  <span v-else><i class="bi bi-arrow-down"></i></span>
+                </template>
+                <span>更新</span>
+              </div>
             </div>
-            <div class="w33_w_br" @click="sortByField('fund_len')">
-              <template v-if="sortFieldName === 'fund_len'">
-                <span v-if="sortFieldFlag"><i class="bi bi-arrow-up"></i></span>
-                <span v-else><i class="bi bi-arrow-down"></i></span>
-              </template>
-              <span>长度</span>
-            </div>
-            <div class="w33_w_br" @click="sortByField('update_date')" style="border: none;">
-              <template v-if="sortFieldName === 'update_date'">
-                <span v-if="sortFieldFlag"><i class="bi bi-arrow-up"></i></span>
-                <span v-else><i class="bi bi-arrow-down"></i></span>
-              </template>
-              <span>更新</span>
-            </div>
-          </div>
-        </th>
-        <th :style="{ 'width': colWidMap['col_2'] + 'rem' }" @click="sortByField('min_earn')">
-          <template v-if="sortFieldName === 'min_earn'">
-            <span v-if="sortFieldFlag"><i class="bi bi-arrow-up"></i></span>
-            <span v-else><i class="bi bi-arrow-down"></i></span>
-          </template>
-          <span>最小</span>
-        </th>
-        <th :style="{ 'width': colWidMap['col_3'] + 'rem' }" @click="sortByField('avg_earn')">
-          <template v-if="sortFieldName === 'avg_earn'">
-            <span v-if="sortFieldFlag"><i class="bi bi-arrow-up"></i></span>
-            <span v-else><i class="bi bi-arrow-down"></i></span>
-          </template>
-          <span>平均</span>
-        </th>
-        <th :style="{ 'width': colWidMap['col_4'] + 'rem' }" @click="sortByField('max_earn')">
-          <template v-if="sortFieldName === 'max_earn'">
-            <span v-if="sortFieldFlag"><i class="bi bi-arrow-up"></i></span>
-            <span v-else><i class="bi bi-arrow-down"></i></span>
-          </template>
-          <span>最大</span>
-        </th>
-        <th :style="{ 'width': colWidMap['col_5'] + colWidMap['col_6'] + 'rem' }" colspan="2">
-          <div>
-            <div class="w33_w_br" @click="sortByField('positive')">
-              <template v-if="sortFieldName === 'positive'">
-                <span v-if="sortFieldFlag"><i class="bi bi-arrow-up"></i></span>
-                <span v-else><i class="bi bi-arrow-down"></i></span>
-              </template>
-              <span>高点</span>
-            </div>
-            <div class="w33_w_br" @click="sortByField('negative')">
-              <template v-if="sortFieldName === 'negative'">
-                <span v-if="sortFieldFlag"><i class="bi bi-arrow-up"></i></span>
-                <span v-else><i class="bi bi-arrow-down"></i></span>
-              </template>
-              <span>低点</span>
-            </div>
-            <div class="w33_w_br" @click="sortByField('wav_rate')" style="border: none;">
-              <template v-if="sortFieldName === 'wav_rate'">
-                <span v-if="sortFieldFlag"><i class="bi bi-arrow-up"></i></span>
-                <span v-else><i class="bi bi-arrow-down"></i></span>
-              </template>
-              <span>波动</span>
-            </div>
-          </div>
-        </th>
-        <th :style="{ 'width': colWidMap['col_7'] + 'rem' }">
-          <div class="w50_w_br" @click="sortByField('hold_money')">
-            <template v-if="sortFieldName === 'hold_money'">
+          </th>
+          <th :style="{ 'width': colWidMap['col_2'] + 'rem' }" @click="sortByField('min_earn')">
+            <template v-if="sortFieldName === 'min_earn'">
               <span v-if="sortFieldFlag"><i class="bi bi-arrow-up"></i></span>
               <span v-else><i class="bi bi-arrow-down"></i></span>
             </template>
-            <span>持有</span>
-          </div>
-          <div class="w50_w_br" @click="sortByField('hold_rate')" style="border: none;">
-            <template v-if="sortFieldName === 'hold_rate'">
+            <span>最小</span>
+          </th>
+          <th :style="{ 'width': colWidMap['col_3'] + 'rem' }" @click="sortByField('avg_earn')">
+            <template v-if="sortFieldName === 'avg_earn'">
               <span v-if="sortFieldFlag"><i class="bi bi-arrow-up"></i></span>
               <span v-else><i class="bi bi-arrow-down"></i></span>
             </template>
-            <span>盈利</span>
-          </div>
-        </th>
-        <th :style="{ 'width': colWidMap['col_8'] + 'rem' }">
-          <div class="w50_w_br" @click="sortByField('buy_money')">
-            <template v-if="sortFieldName === 'buy_money'">
+            <span>平均</span>
+          </th>
+          <th :style="{ 'width': colWidMap['col_4'] + 'rem' }" @click="sortByField('max_earn')">
+            <template v-if="sortFieldName === 'max_earn'">
               <span v-if="sortFieldFlag"><i class="bi bi-arrow-up"></i></span>
               <span v-else><i class="bi bi-arrow-down"></i></span>
             </template>
-            <span>购入</span>
-          </div>
-          <div class="w50_w_br" @click="sortByField('set_money')" style="border: none;">
-            <template v-if="sortFieldName === 'set_money'">
-              <span v-if="sortFieldFlag"><i class="bi bi-arrow-up"></i></span>
-              <span v-else><i class="bi bi-arrow-down"></i></span>
-            </template>
-            <span>设定</span>
-          </div>
-        </th>
-        <th :style="{ 'width': colWidMap['col_9'] + 'rem' }">
-        </th>
-      </tr>
+            <span>最大</span>
+          </th>
+          <th :style="{ 'width': colWidMap['col_5'] + colWidMap['col_6'] + 'rem' }" colspan="2">
+            <div>
+              <div class="w33_w_br" @click="sortByField('positive')">
+                <template v-if="sortFieldName === 'positive'">
+                  <span v-if="sortFieldFlag"><i class="bi bi-arrow-up"></i></span>
+                  <span v-else><i class="bi bi-arrow-down"></i></span>
+                </template>
+                <span>高点</span>
+              </div>
+              <div class="w33_w_br" @click="sortByField('negative')">
+                <template v-if="sortFieldName === 'negative'">
+                  <span v-if="sortFieldFlag"><i class="bi bi-arrow-up"></i></span>
+                  <span v-else><i class="bi bi-arrow-down"></i></span>
+                </template>
+                <span>低点</span>
+              </div>
+              <div class="w33_w_br" @click="sortByField('wav_rate')" style="border: none;">
+                <template v-if="sortFieldName === 'wav_rate'">
+                  <span v-if="sortFieldFlag"><i class="bi bi-arrow-up"></i></span>
+                  <span v-else><i class="bi bi-arrow-down"></i></span>
+                </template>
+                <span>波动</span>
+              </div>
+            </div>
+          </th>
+          <th :style="{ 'width': colWidMap['col_7'] + 'rem' }">
+            <div class="w50_w_br" @click="sortByField('hold_money')">
+              <template v-if="sortFieldName === 'hold_money'">
+                <span v-if="sortFieldFlag"><i class="bi bi-arrow-up"></i></span>
+                <span v-else><i class="bi bi-arrow-down"></i></span>
+              </template>
+              <span>持有</span>
+            </div>
+            <div class="w50_w_br" @click="sortByField('hold_rate')" style="border: none;">
+              <template v-if="sortFieldName === 'hold_rate'">
+                <span v-if="sortFieldFlag"><i class="bi bi-arrow-up"></i></span>
+                <span v-else><i class="bi bi-arrow-down"></i></span>
+              </template>
+              <span>盈利</span>
+            </div>
+          </th>
+          <th :style="{ 'width': colWidMap['col_8'] + 'rem' }">
+            <div class="w50_w_br" @click="sortByField('buy_money')">
+              <template v-if="sortFieldName === 'buy_money'">
+                <span v-if="sortFieldFlag"><i class="bi bi-arrow-up"></i></span>
+                <span v-else><i class="bi bi-arrow-down"></i></span>
+              </template>
+              <span>购入</span>
+            </div>
+            <div class="w50_w_br" @click="sortByField('set_money')" style="border: none;">
+              <template v-if="sortFieldName === 'set_money'">
+                <span v-if="sortFieldFlag"><i class="bi bi-arrow-up"></i></span>
+                <span v-else><i class="bi bi-arrow-down"></i></span>
+              </template>
+              <span>设定</span>
+            </div>
+          </th>
+          <th :style="{ 'width': colWidMap['col_9'] + 'rem' }">
+          </th>
+        </tr>
       </thead>
       <tbody>
       </tbody>
@@ -172,458 +169,496 @@
 
   <div style="position: relative;">
     <table id="cust_table_content" class="table table-bordered cust_table_cls"
-           :style="{ 'position': 'absolute', 'top': tabContTopPos + 'rem', 'min-width': minPaneWidth + 'rem' }">
+      :style="{ 'position': 'absolute', 'top': tabContTopPos + 'rem', 'min-width': minPaneWidth + 'rem' }">
       <thead style="">
-      <tr>
-        <th :style="{ 'width': colWidMap['col_1'] + 'rem' }"></th>
-        <th :style="{ 'width': colWidMap['col_2'] + 'rem' }"></th>
-        <th :style="{ 'width': colWidMap['col_3'] + 'rem' }"></th>
-        <th :style="{ 'width': colWidMap['col_4'] + 'rem' }"></th>
-        <th :style="{ 'width': colWidMap['col_5'] + 'rem' }"></th>
-        <th :style="{ 'width': colWidMap['col_6'] + 'rem' }"></th>
-        <th :style="{ 'width': colWidMap['col_7'] + 'rem' }"></th>
-        <th :style="{ 'width': colWidMap['col_8'] + 'rem' }"></th>
-        <th :style="{ 'width': colWidMap['col_9'] + 'rem' }"></th>
-      </tr>
+        <tr>
+          <th :style="{ 'width': colWidMap['col_1'] + 'rem' }"></th>
+          <th :style="{ 'width': colWidMap['col_2'] + 'rem' }"></th>
+          <th :style="{ 'width': colWidMap['col_3'] + 'rem' }"></th>
+          <th :style="{ 'width': colWidMap['col_4'] + 'rem' }"></th>
+          <th :style="{ 'width': colWidMap['col_5'] + 'rem' }"></th>
+          <th :style="{ 'width': colWidMap['col_6'] + 'rem' }"></th>
+          <th :style="{ 'width': colWidMap['col_7'] + 'rem' }"></th>
+          <th :style="{ 'width': colWidMap['col_8'] + 'rem' }"></th>
+          <th :style="{ 'width': colWidMap['col_9'] + 'rem' }"></th>
+        </tr>
       </thead>
       <tbody>
-      <template v-for="oneRow in composeViewObjs" :key="oneRow.fund_id">
-        <template v-if="oneRow['lost_in_aggressive'] || oneRow['lost_in_dtconvg']">
-          <tr v-bind:id="oneRow.fund_id" style="cursor: pointer;" @click="selOrDesRow(oneRow)"
+        <template v-for="oneRow in composeViewObjs" :key="oneRow.fund_id">
+          <template v-if="oneRow['lost_in_aggressive'] || oneRow['lost_in_dtconvg']">
+            <tr v-bind:id="oneRow.fund_id" style="cursor: pointer;" @click="selOrDesRow(oneRow)"
               v-bind:class="{ sel_row: oneRow['currSelected'] }"
               :ref="(el) => { if (el) { rowElements[oneRow.fund_id] = el; } }">
-            <td v-bind:class="{ sel_row: oneRow['currSelected'] }">
-              <div>
-                <template v-if="oneRow['has_bonus']">
-                  <span style="color: red; font-weight: bold;">{{ oneRow.fund_id }}&nbsp;</span>
-                </template>
-                <template v-else>
-                  <span style="">{{ oneRow.fund_id }}&nbsp;</span>
-                </template>
-              </div>
-              <div>{{ oneRow.fund_name }}&nbsp;
-                <template v-if="oneRow['last_sold_date']">
-                  <span>售:&nbsp;{{oneRow['last_sold_date']}}&nbsp;|&nbsp;{{oneRow['last_sold_days']}}</span>
-                </template>
-              </div>
-            </td>
-            <td colspan="5" v-bind:class="{ sel_row: oneRow['currSelected'] }">
-              <span style="color: red; font-weight: 900;">已缺失，可能是经理更换或业绩不再收敛。</span>
-            </td>
-            <td style="line-height: 2rem;" v-bind:class="{ sel_row: oneRow['currSelected'] }">
-              <template v-if="oneRow['kbObj']">
+              <td v-bind:class="{ sel_row: oneRow['currSelected'] }">
                 <div>
-                  持有:&nbsp;
-                  <template v-if="oneRow['hold_accu_money']">
+                  <template v-if="oneRow['has_bonus']">
+                    <span style="color: red; font-weight: bold;">{{ oneRow.fund_id }}&nbsp;</span>
+                  </template>
+                  <template v-else>
+                    <span style="">{{ oneRow.fund_id }}&nbsp;</span>
+                  </template>
+                </div>
+                <div>{{ oneRow.fund_name }}&nbsp;
+                  <template v-if="oneRow['last_sold_date']">
+                    <span>售:&nbsp;{{ oneRow['last_sold_date'] }}&nbsp;|&nbsp;{{ oneRow['last_sold_days'] }}</span>
+                  </template>
+                </div>
+              </td>
+              <td colspan="5" v-bind:class="{ sel_row: oneRow['currSelected'] }">
+                <span style="color: red; font-weight: 900;">已缺失，可能是经理更换或业绩不再收敛。</span>
+              </td>
+              <td style="line-height: 2rem;" v-bind:class="{ sel_row: oneRow['currSelected'] }">
+                <template v-if="oneRow['kbObj']">
+                  <div>
+                    持有:&nbsp;
+                    <template v-if="oneRow['hold_accu_money']">
                       <span>
                         {{ oneRow['hold_accu_money'] }}
                       </span>
-                  </template>
-                </div>
-                <div>
-                  盈利:&nbsp;
-                  <template
-                      v-if="oneRow['hold_accu_pure_profit']">
-                      <span :style="{color: (oneRow['hold_accu_pure_profit'] >= 0? 'red' : 'darkgreen'), 'font-weight': 'bold'}">
+                    </template>
+                  </div>
+                  <div>
+                    盈利:&nbsp;
+                    <template v-if="oneRow['hold_accu_pure_profit']">
+                      <span
+                        :style="{ color: (oneRow['hold_accu_pure_profit'] >= 0 ? 'red' : 'darkgreen'), 'font-weight': 'bold' }">
                         {{ oneRow['hold_accu_pure_profit'] }}
                       </span>
+                    </template>
+                  </div>
+                  <div>
+                    计:&nbsp;
+                    <template v-if="oneRow['hold_accu_pure_percent_str']">
+                      <span
+                        :style="{ color: (oneRow['hold_accu_pure_profit'] >= 0 ? 'red' : 'darkgreen'), 'font-weight': 'bold' }">
+                        {{ oneRow['hold_accu_pure_percent_str'] }}
+                      </span>
+                    </template>
+                  </div>
+                </template>
+              </td>
+              <td style="line-height: 2rem;" v-bind:class="{ sel_row: oneRow['currSelected'] }">
+                <div>
+                  当前:&nbsp;
+                  <input type="number" style="width: 4rem; border-radius: 5px;" v-model="oneRow['money']" @click.stop>
+                </div>
+                <div>
+                  决策:&nbsp;&nbsp;{{ oneRow['adjust_money'] }}
+                  <template v-if="oneRow['adjust_money']">
+                    <span class="red_card less_height" v-if="oneRow['money'] - oneRow['adjust_money'] >= 5">&nbsp;</span><!--
+                    --><span class="darkgolden_card less_height"
+                      v-if="oneRow['adjust_money'] - oneRow['money'] >= 5">&nbsp;</span><!--
+                    --><span class="red_card less_height"
+                      v-if="oneRow['money'] - oneRow['adjust_money'] >= 10">&nbsp;</span><!--
+                    --><span class="darkgolden_card less_height"
+                      v-if="oneRow['adjust_money'] - oneRow['money'] >= 10">&nbsp;</span><!--
+                    --><span class="red_card less_height"
+                      v-if="oneRow['money'] - oneRow['adjust_money'] >= 15">&nbsp;</span><!--
+                    --><span class="darkgolden_card less_height"
+                      v-if="oneRow['adjust_money'] - oneRow['money'] >= 15">&nbsp;</span><!--
+                    --><span class="red_card less_height"
+                      v-if="oneRow['money'] - oneRow['adjust_money'] >= 20">&nbsp;</span><!--
+                    --><span class="darkgolden_card less_height"
+                      v-if="oneRow['adjust_money'] - oneRow['money'] >= 20">&nbsp;</span><!--
+                    --><span class="red_card less_height"
+                      v-if="oneRow['money'] - oneRow['adjust_money'] >= 25">&nbsp;</span><!--
+                    --><span class="darkgolden_card less_height"
+                      v-if="oneRow['adjust_money'] - oneRow['money'] >= 25">&nbsp;</span><!--
+                    --><span class="red_card less_height"
+                      v-if="oneRow['money'] - oneRow['adjust_money'] >= 30">&nbsp;</span><!--
+                    --><span class="darkgolden_card less_height"
+                      v-if="oneRow['adjust_money'] - oneRow['money'] >= 30">&nbsp;</span><!--
+                    --><span class="red_card less_height"
+                      v-if="oneRow['money'] - oneRow['adjust_money'] >= 35">&nbsp;</span><!--
+                    --><span class="darkgolden_card less_height"
+                      v-if="oneRow['adjust_money'] - oneRow['money'] >= 35">&nbsp;</span><!--
+                    --><span class="red_card less_height"
+                      v-if="oneRow['money'] - oneRow['adjust_money'] >= 40">&nbsp;</span><!--
+                    --><span class="darkgolden_card less_height"
+                      v-if="oneRow['adjust_money'] - oneRow['money'] >= 40">&nbsp;</span>
                   </template>
                 </div>
                 <div>
-                  计:&nbsp;
-                  <template v-if="oneRow['hold_accu_pure_percent_str']">
-                      <span :style="{color: (oneRow['hold_accu_pure_profit'] >= 0? 'red' : 'darkgreen'), 'font-weight': 'bold'}">
-                        {{ oneRow['hold_accu_pure_percent_str'] }}
-                      </span>
-                  </template>
+                  <span style="font-size: 1rem; font-style: italic;text-decoration: underline;">{{
+                    oneRow['last_adjust_money_date'] }}</span>&nbsp;
+                  <input class="btn btn-outline-danger btn-sm" type="button" value="保存"
+                    @click.stop="setComposeProperty(oneRow['fund_id'], oneRow['fund_name'], oneRow['compose_name'], parseInt(oneRow['money']), oneRow['buyin_source'])">
                 </div>
-              </template>
-            </td>
-            <td style="line-height: 2rem;" v-bind:class="{ sel_row: oneRow['currSelected'] }">
-              <div>
-                当前:&nbsp;
-                <input type="number" style="width: 4rem; border-radius: 5px;" v-model="oneRow['money']" @click.stop>
-              </div>
-              <div>
-                决策:&nbsp;&nbsp;{{ oneRow['adjust_money'] }}
-                <template v-if="oneRow['adjust_money']">
-                  <span class="red_card less_height" v-if="oneRow['money'] - oneRow['adjust_money'] >= 5">&nbsp;</span><!--
-                    --><span class="darkgolden_card less_height" v-if="oneRow['adjust_money'] - oneRow['money'] >= 5">&nbsp;</span><!--
-                    --><span class="red_card less_height" v-if="oneRow['money'] - oneRow['adjust_money'] >= 10">&nbsp;</span><!--
-                    --><span class="darkgolden_card less_height" v-if="oneRow['adjust_money'] - oneRow['money'] >= 10">&nbsp;</span><!--
-                    --><span class="red_card less_height" v-if="oneRow['money'] - oneRow['adjust_money'] >= 15">&nbsp;</span><!--
-                    --><span class="darkgolden_card less_height" v-if="oneRow['adjust_money'] - oneRow['money'] >= 15">&nbsp;</span><!--
-                    --><span class="red_card less_height" v-if="oneRow['money'] - oneRow['adjust_money'] >= 20">&nbsp;</span><!--
-                    --><span class="darkgolden_card less_height" v-if="oneRow['adjust_money'] - oneRow['money'] >= 20">&nbsp;</span><!--
-                    --><span class="red_card less_height" v-if="oneRow['money'] - oneRow['adjust_money'] >= 25">&nbsp;</span><!--
-                    --><span class="darkgolden_card less_height" v-if="oneRow['adjust_money'] - oneRow['money'] >= 25">&nbsp;</span><!--
-                    --><span class="red_card less_height" v-if="oneRow['money'] - oneRow['adjust_money'] >= 30">&nbsp;</span><!--
-                    --><span class="darkgolden_card less_height" v-if="oneRow['adjust_money'] - oneRow['money'] >= 30">&nbsp;</span><!--
-                    --><span class="red_card less_height" v-if="oneRow['money'] - oneRow['adjust_money'] >= 35">&nbsp;</span><!--
-                    --><span class="darkgolden_card less_height" v-if="oneRow['adjust_money'] - oneRow['money'] >= 35">&nbsp;</span><!--
-                    --><span class="red_card less_height" v-if="oneRow['money'] - oneRow['adjust_money'] >= 40">&nbsp;</span><!--
-                    --><span class="darkgolden_card less_height" v-if="oneRow['adjust_money'] - oneRow['money'] >= 40">&nbsp;</span>
+              </td>
+              <td style="text-align: center;" v-bind:class="{ sel_row: oneRow['currSelected'] }">
+                <template v-if="oneRow['fixedHoldObj']">
+                  <button type="button" class="btn"
+                    :class="{ 'btn-primary': !oneRow['fixedHoldObj']['disp_flag'], 'btn-secondary': oneRow['fixedHoldObj']['disp_flag'] }"
+                    @click.stop="oneRow['fixedHoldObj']['disp_flag'] = !oneRow['fixedHoldObj']['disp_flag'];">
+                    <template v-if="!oneRow['fixedHoldObj']['disp_flag']">展开</template>
+                    <template v-else>折叠</template>
+                  </button>
                 </template>
-              </div>
-              <div>
-                <span style="font-size: 1rem; font-style: italic;text-decoration: underline;">{{ oneRow['last_adjust_money_date'] }}</span>&nbsp;
-                <input class="btn btn-outline-danger btn-sm" type="button" value="保存"
-                       @click.stop="setComposeProperty(oneRow['fund_id'], oneRow['fund_name'], oneRow['compose_name'], parseInt(oneRow['money']), oneRow['buyin_source'])">
-              </div>
-            </td>
-            <td style="text-align: center;" v-bind:class="{ sel_row: oneRow['currSelected'] }">
-              <template v-if="oneRow['fixedHoldObj']">
-                <button type="button" class="btn"
-                        :class="{'btn-primary': !oneRow['fixedHoldObj']['disp_flag'], 'btn-secondary': oneRow['fixedHoldObj']['disp_flag']}"
-                        @click.stop="oneRow['fixedHoldObj']['disp_flag'] = !oneRow['fixedHoldObj']['disp_flag'];">
-                  <template v-if="!oneRow['fixedHoldObj']['disp_flag']">展开</template>
-                  <template v-else>折叠</template>
-                </button>
-              </template>
-            </td>
-          </tr>
-        </template>
-        <template v-else>
-          <tr v-bind:id="oneRow.fund_id" style="cursor: pointer;" @click="selOrDesRow(oneRow)"
+              </td>
+            </tr>
+          </template>
+          <template v-else>
+            <tr v-bind:id="oneRow.fund_id" style="cursor: pointer;" @click="selOrDesRow(oneRow)"
               v-bind:class="{ sel_row: oneRow['currSelected'] }"
               :ref="(el) => { if (el) { rowElements[oneRow.fund_id] = el; } }">
-            <td v-bind:class="{ sel_row: oneRow['currSelected'] }">
-              <div>
-                <template v-if="oneRow['fixedHoldObj'] && oneRow['fixedHoldObj']['has_bonus']">
-                  <span style="color: red; font-weight: bold;">{{ oneRow.fund_id }}&nbsp;</span>
-                </template>
-                <template v-else>
-                  <span style="">{{ oneRow.fund_id }}&nbsp;</span>
-                </template>                
-                <template v-if="oneRow['kbObj']">
+              <td v-bind:class="{ sel_row: oneRow['currSelected'] }">
+                <div>
+                  <template v-if="oneRow['fixedHoldObj'] && oneRow['fixedHoldObj']['has_bonus']">
+                    <span style="color: red; font-weight: bold;">{{ oneRow.fund_id }}&nbsp;</span>
+                  </template>
+                  <template v-else>
+                    <span style="">{{ oneRow.fund_id }}&nbsp;</span>
+                  </template>
+                  <template v-if="oneRow['kbObj']">
                     <span style="font-size: 1rem; font-style: italic;text-decoration: underline;">
                       {{ oneRow.kbObj.statistics.last_perc_date_str }}
                     </span>
-                </template>
-              </div>
-              <div>{{ oneRow.fund_name }}&nbsp;
-                <template v-if="oneRow['kbObj']">
+                  </template>
+                </div>
+                <div>{{ oneRow.fund_name }}&nbsp;
+                  <template v-if="oneRow['kbObj']">
                     <span style="font-size: 1rem; font-style: italic;text-decoration: underline;">
                       {{ oneRow.kbObj.statistics.fund_perc_len }}
                     </span>
-                </template>
-                <template v-if="oneRow['last_sold_date']">
-                  <span>售:&nbsp;{{oneRow['last_sold_date']}}&nbsp;|&nbsp;{{oneRow['last_sold_days']}}</span>
-                </template>
-              </div>
-              <div>
+                  </template>
+                  <template v-if="oneRow['last_sold_date']">
+                    <span>售:&nbsp;{{ oneRow['last_sold_date'] }}&nbsp;|&nbsp;{{ oneRow['last_sold_days'] }}</span>
+                  </template>
+                </div>
+                <div>
+                  <template v-if="oneRow['kbObj']">
+                    <span v-bind:class="getCardStyle(oneRow.kbObj.statistics.day_200_thres)">&nbsp;</span>
+                    <span v-bind:class="getCardStyle(oneRow.kbObj.statistics.day_300_thres)">&nbsp;</span>
+                    <span v-bind:class="getCardStyle(oneRow.kbObj.statistics.day_400_thres)">&nbsp;</span>
+                    <span v-bind:class="getCardStyle(oneRow.kbObj.statistics.day_500_thres)">&nbsp;</span>
+                    <span v-bind:class="getCardStyle(oneRow.kbObj.statistics.day_600_thres)">&nbsp;</span>
+                  </template>
+                </div>
+              </td>
+              <td v-bind:class="{ sel_row: oneRow['currSelected'] }">
+                <div>
+                  {{ oneRow?.kbObj?.statistics?.min_earn_str }}
+                </div>
+                <div>
+                  {{ oneRow?.kbObj?.statistics?.min_earn_aux_str }}
+                </div>
+                <div>
+                  {{ oneRow?.kbObj?.statistics?.min_earn_tri_str }}
+                </div>
+              </td>
+              <td v-bind:class="{ sel_row: oneRow['currSelected'] }">
+                <div>
+                  {{ oneRow?.kbObj?.statistics?.avg_earn_str }}
+                </div>
+                <div>
+                  {{ oneRow?.kbObj?.statistics?.avg_earn_aux_str }}
+                </div>
+                <div>
+                  {{ oneRow?.kbObj?.statistics?.avg_earn_tri_str }}
+                </div>
+              </td>
+              <td v-bind:class="{ sel_row: oneRow['currSelected'] }">
+                <div>
+                  {{ oneRow?.kbObj?.statistics?.max_earn_str }}
+                </div>
+                <div>
+                  {{ oneRow?.kbObj?.statistics?.max_earn_aux_str }}
+                </div>
+                <div>
+                  {{ oneRow?.kbObj?.statistics?.max_earn_tri_str }}
+                </div>
+              </td>
+              <td v-bind:class="{ sel_row: oneRow['currSelected'] }">
                 <template v-if="oneRow['kbObj']">
-                  <span v-bind:class="getCardStyle(oneRow.kbObj.statistics.day_200_thres)">&nbsp;</span>
-                  <span v-bind:class="getCardStyle(oneRow.kbObj.statistics.day_300_thres)">&nbsp;</span>
-                  <span v-bind:class="getCardStyle(oneRow.kbObj.statistics.day_400_thres)">&nbsp;</span>
-                  <span v-bind:class="getCardStyle(oneRow.kbObj.statistics.day_500_thres)">&nbsp;</span>
-                  <span v-bind:class="getCardStyle(oneRow.kbObj.statistics.day_600_thres)">&nbsp;</span>
-                </template>
-              </div>
-            </td>
-            <td v-bind:class="{ sel_row: oneRow['currSelected'] }">
-              <div>
-                {{ oneRow?.kbObj?.statistics?.min_earn_str }}
-              </div>
-              <div>
-                {{ oneRow?.kbObj?.statistics?.min_earn_aux_str }}
-              </div>
-              <div>
-                {{ oneRow?.kbObj?.statistics?.min_earn_tri_str }}
-              </div>
-            </td>
-            <td v-bind:class="{ sel_row: oneRow['currSelected'] }">
-              <div>
-                {{ oneRow?.kbObj?.statistics?.avg_earn_str }}
-              </div>
-              <div>
-                {{ oneRow?.kbObj?.statistics?.avg_earn_aux_str }}
-              </div>
-              <div>
-                {{ oneRow?.kbObj?.statistics?.avg_earn_tri_str }}
-              </div>
-            </td>
-            <td v-bind:class="{ sel_row: oneRow['currSelected'] }">
-              <div>
-                {{ oneRow?.kbObj?.statistics?.max_earn_str }}
-              </div>
-              <div>
-                {{ oneRow?.kbObj?.statistics?.max_earn_aux_str }}
-              </div>
-              <div>
-                {{ oneRow?.kbObj?.statistics?.max_earn_tri_str }}
-              </div>
-            </td>
-            <td v-bind:class="{ sel_row: oneRow['currSelected'] }">
-              <template v-if="oneRow['kbObj']">
-                <div style="height: 1.8em; position: relative;"
-                     v-bind:class="getPosColor(oneRow.kbObj.positive.positive_reach_len)">
+                  <div style="height: 1.8em; position: relative;"
+                    v-bind:class="getPosColor(oneRow.kbObj.positive.positive_reach_len)">
                     <span v-if="oneRow.kbObj.positive.positive_reach_len >= 4" class="icon_pos">
                       <i class="bi bi-arrow-up-circle-fill"></i>
                       <span class="lv_font">{{ oneRow.kbObj.positive.positive_reach_len }}</span>
                     </span>
-                </div>
-                <div style="height: 1.8em; position: relative;"
-                     v-bind:class="getNegColor(oneRow.kbObj.negative.negative_reach_len)">
+                  </div>
+                  <div style="height: 1.8em; position: relative;"
+                    v-bind:class="getNegColor(oneRow.kbObj.negative.negative_reach_len)">
                     <span v-if="oneRow.kbObj.negative.negative_reach_len >= 3" class="icon_pos">
                       <i class="bi bi-arrow-down-circle-fill"></i>
                       <span class="lv_font">{{ oneRow.kbObj.negative.negative_reach_len }}</span>
                     </span>
-                </div>
-                <div style="height: 3em; position: relative;">
-                </div>
-              </template>
-            </td>
-            <td style="text-align: center;" v-bind:class="{ sel_row: oneRow['currSelected'] }">
-              <template v-if="oneRow['kbObj']">
-                <div style="height: 1.8em;">
-                  <span v-bind:class="getHitStyle(oneRow.kbObj.positive.day_5_positive_reach)">&nbsp;</span>
-                  <span v-bind:class="getHitStyle(oneRow.kbObj.positive.day_10_positive_reach)">&nbsp;</span>
-                  <span v-bind:class="getHitStyle(oneRow.kbObj.positive.day_20_positive_reach)">&nbsp;</span>
-                  <span v-bind:class="getHitStyle(oneRow.kbObj.positive.day_60_positive_reach)">&nbsp;</span>
-                  <span v-bind:class="getHitStyle(oneRow.kbObj.positive.day_90_positive_reach)">&nbsp;</span>
-                  <span v-bind:class="getHitStyle(oneRow.kbObj.positive.day_120_positive_reach)">&nbsp;</span>
-                  <span v-bind:class="getHitStyle(oneRow.kbObj.positive.day_160_positive_reach)">&nbsp;</span>
-                  <template v-if="oneRow.kbObj.positive.hasOwnProperty('day_200_positive_reach')">
-                    <span v-bind:class="getHitStyle(oneRow.kbObj.positive.day_200_positive_reach)">&nbsp;</span>
-                  </template>
-                  <template v-else>
-                    <span v-bind:class="getHitStyle(oneRow.kbObj.positive.day_220_positive_reach)">&nbsp;</span>
-                  </template>
-                </div>
-                <div style="height: 1.8em;">
-                  <span v-bind:class="getHitStyle(oneRow.kbObj.negative.day_5_negative_reach)">&nbsp;</span>
-                  <span v-bind:class="getHitStyle(oneRow.kbObj.negative.day_10_negative_reach)">&nbsp;</span>
-                  <span v-bind:class="getHitStyle(oneRow.kbObj.negative.day_20_negative_reach)">&nbsp;</span>
-                  <span v-bind:class="getHitStyle(oneRow.kbObj.negative.day_60_negative_reach)">&nbsp;</span>
-                  <span v-bind:class="getHitStyle(oneRow.kbObj.negative.day_90_negative_reach)">&nbsp;</span>
-                  <span v-bind:class="getHitStyle(oneRow.kbObj.negative.day_120_negative_reach)">&nbsp;</span>
-                  <span v-bind:class="getHitStyle(oneRow.kbObj.negative.day_160_negative_reach)">&nbsp;</span>
-                  <template v-if="oneRow.kbObj.negative.hasOwnProperty('day_200_negative_reach')">
-                    <span v-bind:class="getHitStyle(oneRow.kbObj.negative.day_200_negative_reach)">&nbsp;</span>
-                  </template>
-                  <template v-else>
-                    <span v-bind:class="getHitStyle(oneRow.kbObj.negative.day_220_negative_reach)">&nbsp;</span>
-                  </template>
-                </div>
-                <div style="height: 3em; margin-top: 0.4rem; border-top: solid 1px darkgray; cursor: pointer;"
-                     :style="{'background-color': (oneRow['show_wav']? 'cornsilk' : ''), 'font-style':  (oneRow['show_wav']? 'italic' : '')}"
-                     v-if="oneRow.wav_obj" @click.stop="switchWavDisp(oneRow);">
+                  </div>
+                  <div style="height: 3em; position: relative;">
+                  </div>
+                </template>
+              </td>
+              <td style="text-align: center;" v-bind:class="{ sel_row: oneRow['currSelected'] }">
+                <template v-if="oneRow['kbObj']">
+                  <div style="height: 1.8em;">
+                    <span v-bind:class="getHitStyle(oneRow.kbObj.positive.day_5_positive_reach)">&nbsp;</span>
+                    <span v-bind:class="getHitStyle(oneRow.kbObj.positive.day_10_positive_reach)">&nbsp;</span>
+                    <span v-bind:class="getHitStyle(oneRow.kbObj.positive.day_20_positive_reach)">&nbsp;</span>
+                    <span v-bind:class="getHitStyle(oneRow.kbObj.positive.day_60_positive_reach)">&nbsp;</span>
+                    <span v-bind:class="getHitStyle(oneRow.kbObj.positive.day_90_positive_reach)">&nbsp;</span>
+                    <span v-bind:class="getHitStyle(oneRow.kbObj.positive.day_120_positive_reach)">&nbsp;</span>
+                    <span v-bind:class="getHitStyle(oneRow.kbObj.positive.day_160_positive_reach)">&nbsp;</span>
+                    <template v-if="oneRow.kbObj.positive.hasOwnProperty('day_200_positive_reach')">
+                      <span v-bind:class="getHitStyle(oneRow.kbObj.positive.day_200_positive_reach)">&nbsp;</span>
+                    </template>
+                    <template v-else>
+                      <span v-bind:class="getHitStyle(oneRow.kbObj.positive.day_220_positive_reach)">&nbsp;</span>
+                    </template>
+                  </div>
+                  <div style="height: 1.8em;">
+                    <span v-bind:class="getHitStyle(oneRow.kbObj.negative.day_5_negative_reach)">&nbsp;</span>
+                    <span v-bind:class="getHitStyle(oneRow.kbObj.negative.day_10_negative_reach)">&nbsp;</span>
+                    <span v-bind:class="getHitStyle(oneRow.kbObj.negative.day_20_negative_reach)">&nbsp;</span>
+                    <span v-bind:class="getHitStyle(oneRow.kbObj.negative.day_60_negative_reach)">&nbsp;</span>
+                    <span v-bind:class="getHitStyle(oneRow.kbObj.negative.day_90_negative_reach)">&nbsp;</span>
+                    <span v-bind:class="getHitStyle(oneRow.kbObj.negative.day_120_negative_reach)">&nbsp;</span>
+                    <span v-bind:class="getHitStyle(oneRow.kbObj.negative.day_160_negative_reach)">&nbsp;</span>
+                    <template v-if="oneRow.kbObj.negative.hasOwnProperty('day_200_negative_reach')">
+                      <span v-bind:class="getHitStyle(oneRow.kbObj.negative.day_200_negative_reach)">&nbsp;</span>
+                    </template>
+                    <template v-else>
+                      <span v-bind:class="getHitStyle(oneRow.kbObj.negative.day_220_negative_reach)">&nbsp;</span>
+                    </template>
+                  </div>
+                  <div style="height: 3em; margin-top: 0.4rem; border-top: solid 1px darkgray; cursor: pointer;"
+                    :style="{ 'background-color': (oneRow['show_wav'] ? 'cornsilk' : ''), 'font-style': (oneRow['show_wav'] ? 'italic' : '') }"
+                    v-if="oneRow.wav_obj" @click.stop="switchWavDisp(oneRow);">
+                    <div>
+                      <span>{{ oneRow.wav_obj.avg_duration }}日</span>
+                      <span>&nbsp;{{ oneRow.wav_obj.avg_exp_earn }}%</span>
+                      <span>&nbsp;{{ oneRow.wav_obj.avg_exp_cnt }}次</span>
+                      <span
+                        :style="{ 'color': (oneRow.wav_obj.wav_dur_level < 3 ? 'red' : oneRow.wav_obj.wav_dur_level < 6 ? 'orange' : ''), 'font-weight': 'bold' }">
+                        &nbsp;L{{ oneRow.wav_obj.wav_dur_level }}
+                      </span>
+                    </div>
+                    <div style="margin-top: -6px;">
+                      <span v-html="get_suggestion_by_wav(oneRow.wav_obj)"></span>
+                    </div>
+                  </div>
+                </template>
+              </td>
+              <td style="line-height: 2rem;" v-bind:class="{ sel_row: oneRow['currSelected'] }">
+                <template v-if="oneRow['kbObj']">
                   <div>
-                    <span>{{oneRow.wav_obj.avg_duration}}日</span>
-                    <span>&nbsp;{{oneRow.wav_obj.avg_exp_earn}}%</span>
-                    <span>&nbsp;{{oneRow.wav_obj.avg_exp_cnt}}次</span>
-                    <span :style="{'color': (oneRow.wav_obj.wav_dur_level < 3? 'red' :  oneRow.wav_obj.wav_dur_level < 6? 'orange': ''), 'font-weight':  'bold'}">
-                      &nbsp;L{{oneRow.wav_obj.wav_dur_level}}
-                    </span>
-                  </div>
-                  <div style="margin-top: -6px;">
-                    <span v-html="get_suggestion_by_wav(oneRow.wav_obj)"></span>
-                  </div>
-                </div>
-              </template>
-            </td>
-            <td style="line-height: 2rem;" v-bind:class="{ sel_row: oneRow['currSelected'] }">
-              <template v-if="oneRow['kbObj']">
-                <div>
-                  持有:&nbsp;
-                  <template
+                    持有:&nbsp;
+                    <template
                       v-if="oneRow['fixedHoldObj'] && oneRow['fixedHoldObj']['hold_objs'] && oneRow['fixedHoldObj']['hold_objs'].length > 0">
                       <span
-                          :set="accu_money = oneRow['fixedHoldObj']['hold_objs'][oneRow['fixedHoldObj']['hold_objs'].length - 1]['accu_money']">
+                        :set="accu_money = oneRow['fixedHoldObj']['hold_objs'][oneRow['fixedHoldObj']['hold_objs'].length - 1]['accu_money']">
                         {{ accu_money }}
                       </span>
-                  </template>
-                </div>
-                <div>
-                  盈利:
-                  <template
+                    </template>
+                  </div>
+                  <div>
+                    盈利:
+                    <template
                       v-if="oneRow['fixedHoldObj'] && oneRow['fixedHoldObj']['hold_objs'] && oneRow['fixedHoldObj']['hold_objs'].length > 0">
                       <span
-                          :set="accu_pure_profit = oneRow['fixedHoldObj']['hold_objs'][oneRow['fixedHoldObj']['hold_objs'].length - 1]['accu_pure_profit']"
-                          :style="{color: (accu_pure_profit >= 0? 'red' : 'darkgreen'), 'font-weight': 'bold'}">
+                        :set="accu_pure_profit = oneRow['fixedHoldObj']['hold_objs'][oneRow['fixedHoldObj']['hold_objs'].length - 1]['accu_pure_profit']"
+                        :style="{ color: (accu_pure_profit >= 0 ? 'red' : 'darkgreen'), 'font-weight': 'bold' }">
                         {{ accu_pure_profit }}
                       </span>
+                    </template>
+                  </div>
+                  <div>
+                    计:
+                    <template
+                      v-if="oneRow['fixedHoldObj'] && oneRow['fixedHoldObj']['hold_objs'] && oneRow['fixedHoldObj']['hold_objs'].length > 0">
+                      <span
+                        :set="accu_pure_percent_str = oneRow['fixedHoldObj']['hold_objs'][oneRow['fixedHoldObj']['hold_objs'].length - 1]['accu_pure_percent_str']"
+                        :style="{ color: (accu_pure_profit >= 0 ? 'red' : 'darkgreen'), 'font-weight': 'bold' }">
+                        {{ accu_pure_percent_str }}
+                      </span>
+                    </template>
+                  </div>
+                </template>
+              </td>
+              <td style="line-height: 2rem;" v-bind:class="{ sel_row: oneRow['currSelected'] }">
+                <div>
+                  当前:&nbsp;
+                  <input type="number" style="width: 4rem; border-radius: 5px;" v-model="oneRow['money']" @click.stop>
+                </div>
+                <div>
+                  决策:&nbsp;&nbsp;{{ oneRow['adjust_money'] }}
+                  <template v-if="oneRow['adjust_money']">
+                    <span class="red_card less_height" v-if="oneRow['money'] - oneRow['adjust_money'] >= 5">&nbsp;</span><!--
+                    --><span class="darkgolden_card less_height"
+                      v-if="oneRow['adjust_money'] - oneRow['money'] >= 5">&nbsp;</span><!--
+                    --><span class="red_card less_height"
+                      v-if="oneRow['money'] - oneRow['adjust_money'] >= 10">&nbsp;</span><!--
+                    --><span class="darkgolden_card less_height"
+                      v-if="oneRow['adjust_money'] - oneRow['money'] >= 10">&nbsp;</span><!--
+                    --><span class="red_card less_height"
+                      v-if="oneRow['money'] - oneRow['adjust_money'] >= 15">&nbsp;</span><!--
+                    --><span class="darkgolden_card less_height"
+                      v-if="oneRow['adjust_money'] - oneRow['money'] >= 15">&nbsp;</span><!--
+                    --><span class="red_card less_height"
+                      v-if="oneRow['money'] - oneRow['adjust_money'] >= 20">&nbsp;</span><!--
+                    --><span class="darkgolden_card less_height"
+                      v-if="oneRow['adjust_money'] - oneRow['money'] >= 20">&nbsp;</span><!--
+                    --><span class="red_card less_height"
+                      v-if="oneRow['money'] - oneRow['adjust_money'] >= 25">&nbsp;</span><!--
+                    --><span class="darkgolden_card less_height"
+                      v-if="oneRow['adjust_money'] - oneRow['money'] >= 25">&nbsp;</span><!--
+                    --><span class="red_card less_height"
+                      v-if="oneRow['money'] - oneRow['adjust_money'] >= 30">&nbsp;</span><!--
+                    --><span class="darkgolden_card less_height"
+                      v-if="oneRow['adjust_money'] - oneRow['money'] >= 30">&nbsp;</span><!--
+                    --><span class="red_card less_height"
+                      v-if="oneRow['money'] - oneRow['adjust_money'] >= 35">&nbsp;</span><!--
+                    --><span class="darkgolden_card less_height"
+                      v-if="oneRow['adjust_money'] - oneRow['money'] >= 35">&nbsp;</span><!--
+                    --><span class="red_card less_height"
+                      v-if="oneRow['money'] - oneRow['adjust_money'] >= 40">&nbsp;</span><!--
+                    --><span class="darkgolden_card less_height"
+                      v-if="oneRow['adjust_money'] - oneRow['money'] >= 40">&nbsp;</span>
                   </template>
                 </div>
                 <div>
-                  计:
-                  <template
-                      v-if="oneRow['fixedHoldObj'] && oneRow['fixedHoldObj']['hold_objs'] && oneRow['fixedHoldObj']['hold_objs'].length > 0">
-                      <span
-                          :set="accu_pure_percent_str = oneRow['fixedHoldObj']['hold_objs'][oneRow['fixedHoldObj']['hold_objs'].length - 1]['accu_pure_percent_str']"
-                          :style="{color: (accu_pure_profit >= 0? 'red' : 'darkgreen'), 'font-weight': 'bold'}">
-                        {{ accu_pure_percent_str }}
-                      </span>
-                  </template>
+                  <span style="font-size: 1rem; font-style: italic;text-decoration: underline;">{{
+                    oneRow['last_adjust_money_date'] }}</span>&nbsp;
+                  <input class="btn btn-outline-danger btn-sm" type="button" value="保存"
+                    @click.stop="setComposeProperty(oneRow['fund_id'], oneRow['fund_name'], oneRow['compose_name'], parseInt(oneRow['money']), oneRow['buyin_source'])">
                 </div>
-              </template>
-            </td>
-            <td style="line-height: 2rem;" v-bind:class="{ sel_row: oneRow['currSelected'] }">
-              <div>
-                当前:&nbsp;
-                <input type="number" style="width: 4rem; border-radius: 5px;" v-model="oneRow['money']" @click.stop>
-              </div>
-              <div>
-                决策:&nbsp;&nbsp;{{ oneRow['adjust_money'] }}
-                <template v-if="oneRow['adjust_money']">
-                  <span class="red_card less_height" v-if="oneRow['money'] - oneRow['adjust_money'] >= 5">&nbsp;</span><!--
-                    --><span class="darkgolden_card less_height" v-if="oneRow['adjust_money'] - oneRow['money'] >= 5">&nbsp;</span><!--
-                    --><span class="red_card less_height" v-if="oneRow['money'] - oneRow['adjust_money'] >= 10">&nbsp;</span><!--
-                    --><span class="darkgolden_card less_height" v-if="oneRow['adjust_money'] - oneRow['money'] >= 10">&nbsp;</span><!--
-                    --><span class="red_card less_height" v-if="oneRow['money'] - oneRow['adjust_money'] >= 15">&nbsp;</span><!--
-                    --><span class="darkgolden_card less_height" v-if="oneRow['adjust_money'] - oneRow['money'] >= 15">&nbsp;</span><!--
-                    --><span class="red_card less_height" v-if="oneRow['money'] - oneRow['adjust_money'] >= 20">&nbsp;</span><!--
-                    --><span class="darkgolden_card less_height" v-if="oneRow['adjust_money'] - oneRow['money'] >= 20">&nbsp;</span><!--
-                    --><span class="red_card less_height" v-if="oneRow['money'] - oneRow['adjust_money'] >= 25">&nbsp;</span><!--
-                    --><span class="darkgolden_card less_height" v-if="oneRow['adjust_money'] - oneRow['money'] >= 25">&nbsp;</span><!--
-                    --><span class="red_card less_height" v-if="oneRow['money'] - oneRow['adjust_money'] >= 30">&nbsp;</span><!--
-                    --><span class="darkgolden_card less_height" v-if="oneRow['adjust_money'] - oneRow['money'] >= 30">&nbsp;</span><!--
-                    --><span class="red_card less_height" v-if="oneRow['money'] - oneRow['adjust_money'] >= 35">&nbsp;</span><!--
-                    --><span class="darkgolden_card less_height" v-if="oneRow['adjust_money'] - oneRow['money'] >= 35">&nbsp;</span><!--
-                    --><span class="red_card less_height" v-if="oneRow['money'] - oneRow['adjust_money'] >= 40">&nbsp;</span><!--
-                    --><span class="darkgolden_card less_height" v-if="oneRow['adjust_money'] - oneRow['money'] >= 40">&nbsp;</span>
+              </td>
+              <td style="text-align: center;" v-bind:class="{ sel_row: oneRow['currSelected'] }">
+                <template v-if="oneRow['fixedHoldObj']">
+                  <button type="button" class="btn"
+                    :class="{ 'btn-primary': !oneRow['fixedHoldObj']['disp_flag'], 'btn-secondary': oneRow['fixedHoldObj']['disp_flag'] }"
+                    @click.stop="oneRow['fixedHoldObj']['disp_flag'] = !oneRow['fixedHoldObj']['disp_flag'];">
+                    <template v-if="!oneRow['fixedHoldObj']['disp_flag']">展开</template>
+                    <template v-else>折叠</template>
+                  </button>
                 </template>
-              </div>
-              <div>
-                <span style="font-size: 1rem; font-style: italic;text-decoration: underline;">{{ oneRow['last_adjust_money_date'] }}</span>&nbsp;
-                <input class="btn btn-outline-danger btn-sm" type="button" value="保存"
-                       @click.stop="setComposeProperty(oneRow['fund_id'], oneRow['fund_name'], oneRow['compose_name'], parseInt(oneRow['money']), oneRow['buyin_source'])">
-              </div>
-            </td>
-            <td style="text-align: center;" v-bind:class="{ sel_row: oneRow['currSelected'] }">
-              <template v-if="oneRow['fixedHoldObj']">
-                <button type="button" class="btn"
-                        :class="{'btn-primary': !oneRow['fixedHoldObj']['disp_flag'], 'btn-secondary': oneRow['fixedHoldObj']['disp_flag']}"
-                        @click.stop="oneRow['fixedHoldObj']['disp_flag'] = !oneRow['fixedHoldObj']['disp_flag'];">
-                  <template v-if="!oneRow['fixedHoldObj']['disp_flag']">展开</template>
-                  <template v-else>折叠</template>
-                </button>
-              </template>
-            </td>
-          </tr>
-          <tr v-if="oneRow['show_wav']">
-            <td colspan="9" style="background-color: lightblue;">
-              <img v-bind:src="'../wav-report/'+oneRow['fund_id']+'.png'"
-                   style="width: 100%; height: 100%; max-width: 100%;" class="img-fluid" alt="Responsive image">
-            </td>
-          </tr>
-        </template>
-        <template
+              </td>
+            </tr>
+            <tr v-if="oneRow['show_wav']">
+              <td colspan="9" style="background-color: lightblue;">
+                <img v-bind:src="'../wav-report/' + oneRow['fund_id'] + '.png'"
+                  style="width: 100%; height: 100%; max-width: 100%;" class="img-fluid" alt="Responsive image">
+              </td>
+            </tr>
+          </template>
+          <template
             v-if="oneRow['fixedHoldObj'] && oneRow['fixedHoldObj']['disp_flag'] && oneRow['fixedHoldObj']['hold_objs'] && oneRow['fixedHoldObj']['hold_objs'].length > 0">
-          <tr>
-            <td colspan="9" id="table_container">
-              <div style="border: solid 2px black;">
-                <table id="detail_container" class="table" style="margin-bottom: 0;">
-                  <thead>
-                  <tr>
-                    <th :style="{ 'width': colWidMapSub['col_1'] + 'rem' }"></th>
-                    <th :style="{ 'width': colWidMapSub['col_2'] + 'rem' }"></th>
-                    <th :style="{ 'width': colWidMapSub['col_3'] + 'rem' }"></th>
-                    <th :style="{ 'width': colWidMapSub['col_4'] + 'rem' }"></th>
-                    <th :style="{ 'width': colWidMapSub['col_5'] + 'rem' }"></th>
-                    <th :style="{ 'width': colWidMapSub['col_6'] + 'rem' }"></th>
-                    <th :style="{ 'width': colWidMapSub['col_7'] + 'rem' }"></th>
-                    <th :style="{ 'width': colWidMapSub['col_8'] + 'rem' }"></th>
-                    <th :style="{ 'width': colWidMapSub['col_9'] + 'rem' }"></th>
-                    <th :style="{ 'width': colWidMapSub['col_10'] + 'rem' }"></th>
-                    <th :style="{ 'width': colWidMapSub['col_11'] + 'rem' }"></th>
-                    <th :style="{ 'width': colWidMapSub['col_12'] + 'rem' }"></th>
-                  </tr>
-                  </thead>
-                  <tbody>
-                  <template v-for="one_hold_obj in oneRow['fixedHoldObj']['hold_objs']">
-                    <tr :set="cust_color = (one_hold_obj['accu_pure_percent'] < 0? 'darkgreen' : (one_hold_obj['accu_pure_percent'] < 1? 'darkgrey' : 'red'))">
-                      <td :style="{color: cust_color, 'text-align': 'center'}">
-                        <template v-if="one_hold_obj['bonus_day']">
-                          <span style="border: solid 1px red; border-radius: 5px;">
-                          {{ one_hold_obj['fund_order'] }}
-                          </span>
-                        </template>
-                        <template v-else>
-                          <span>
-                          {{ one_hold_obj['fund_order'] }}
-                          </span>
-                        </template>
-                      </td>
-                      <td :style="{color: cust_color}">
-                        {{ one_hold_obj['dateStr'] }}
-                      </td>
-                      <td :style="{color: cust_color}">
-                        至:&nbsp;{{ one_hold_obj['lastPriceDateStr'] }}
-                      </td>
-                      <td :style="{color: cust_color}">
-                        {{ one_hold_obj['distance'] }}日
-                      </td>
-                      <td :style="{color: cust_color}">
-                        金额:&nbsp;{{ one_hold_obj['accu_money'] }}
-                      </td>
-                      <td :style="{color: cust_color}">
-                        份额:&nbsp;{{ one_hold_obj['accu_pure_amount'] }}
-                      </td>
-                      <td :style="{color: cust_color}">
-                        盈:&nbsp;{{ one_hold_obj['accu_pure_profit'] }}
-                      </td>
-                      <td :style="{color: cust_color}">
-                        合:&nbsp;
-                        <span :class="{'circle_border': one_hold_obj['max_pole']}">
-                          {{ one_hold_obj['accu_pure_percent_str'] }}
-                        </span>
-                      </td>
-                      <td :style="{color: cust_color}">
-                        <div>
-                          <span style="">单:&nbsp;</span><!--
+            <tr>
+              <td colspan="9" id="table_container">
+                <div style="border: solid 2px black;">
+                  <table id="detail_container" class="table" style="margin-bottom: 0;">
+                    <thead>
+                      <tr>
+                        <th :style="{ 'width': colWidMapSub['col_1'] + 'rem' }"></th>
+                        <th :style="{ 'width': colWidMapSub['col_2'] + 'rem' }"></th>
+                        <th :style="{ 'width': colWidMapSub['col_3'] + 'rem' }"></th>
+                        <th :style="{ 'width': colWidMapSub['col_4'] + 'rem' }"></th>
+                        <th :style="{ 'width': colWidMapSub['col_5'] + 'rem' }"></th>
+                        <th :style="{ 'width': colWidMapSub['col_6'] + 'rem' }"></th>
+                        <th :style="{ 'width': colWidMapSub['col_7'] + 'rem' }"></th>
+                        <th :style="{ 'width': colWidMapSub['col_8'] + 'rem' }"></th>
+                        <th :style="{ 'width': colWidMapSub['col_9'] + 'rem' }"></th>
+                        <th :style="{ 'width': colWidMapSub['col_10'] + 'rem' }"></th>
+                        <th :style="{ 'width': colWidMapSub['col_11'] + 'rem' }"></th>
+                        <th :style="{ 'width': colWidMapSub['col_12'] + 'rem' }"></th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      <template v-for="one_hold_obj in oneRow['fixedHoldObj']['hold_objs']">
+                        <tr
+                          :set="cust_color = (one_hold_obj['accu_pure_percent'] < 0 ? 'darkgreen' : (one_hold_obj['accu_pure_percent'] < 1 ? 'darkgrey' : 'red'))">
+                          <td :style="{ color: cust_color, 'text-align': 'center' }">
+                            <template v-if="one_hold_obj['bonus_day']">
+                              <span style="border: solid 1px red; border-radius: 5px;">
+                                {{ one_hold_obj['fund_order'] }}
+                              </span>
+                            </template>
+                            <template v-else>
+                              <span>
+                                {{ one_hold_obj['fund_order'] }}
+                              </span>
+                            </template>
+                          </td>
+                          <td :style="{ color: cust_color }">
+                            {{ one_hold_obj['dateStr'] }}
+                          </td>
+                          <td :style="{ color: cust_color }">
+                            至:&nbsp;{{ one_hold_obj['lastPriceDateStr'] }}
+                          </td>
+                          <td :style="{ color: cust_color }">
+                            {{ one_hold_obj['distance'] }}日
+                          </td>
+                          <td :style="{ color: cust_color }">
+                            金额:&nbsp;{{ one_hold_obj['accu_money'] }}
+                          </td>
+                          <td :style="{ color: cust_color }">
+                            份额:&nbsp;{{ one_hold_obj['accu_pure_amount'] }}
+                          </td>
+                          <td :style="{ color: cust_color }">
+                            盈:&nbsp;{{ one_hold_obj['accu_pure_profit'] }}
+                          </td>
+                          <td :style="{ color: cust_color }">
+                            合:&nbsp;
+                            <span :class="{ 'circle_border': one_hold_obj['max_pole'] }">
+                              {{ one_hold_obj['accu_pure_percent_str'] }}
+                            </span>
+                          </td>
+                          <td :style="{ color: cust_color }">
+                            <div>
+                              <span style="">单:&nbsp;</span><!--
                               --><span style="">{{ one_hold_obj['pure_percent_str'] }}</span>
-                        </div>
-                        <div v-if="one_hold_obj['has_thresh_flag']">
-                          <span v-if="one_hold_obj['max_earn_yr1_flag']" class="purple_card">&nbsp;</span><!--
+                            </div>
+                            <div v-if="one_hold_obj['has_thresh_flag']">
+                              <span v-if="one_hold_obj['max_earn_yr1_flag']" class="purple_card">&nbsp;</span><!--
                           --><span v-if="one_hold_obj['avg_earn_yr1_flag']" class="red_card">&nbsp;</span><!--
-                          --><span v-if="!one_hold_obj['max_earn_yr1_flag'] && !one_hold_obj['avg_earn_yr1_flag']" class="white_card">&nbsp;</span><!--
+                          --><span v-if="!one_hold_obj['max_earn_yr1_flag'] && !one_hold_obj['avg_earn_yr1_flag']"
+                                class="white_card">&nbsp;</span><!--
                           --><span v-if="one_hold_obj['max_earn_yr2_flag']" class="purple_card">&nbsp;</span><!--
                           --><span v-if="one_hold_obj['avg_earn_yr2_flag']" class="red_card">&nbsp;</span><!--
-                          --><span v-if="!one_hold_obj['max_earn_yr2_flag'] && !one_hold_obj['avg_earn_yr2_flag']" class="white_card">&nbsp;</span><!--
+                          --><span v-if="!one_hold_obj['max_earn_yr2_flag'] && !one_hold_obj['avg_earn_yr2_flag']"
+                                class="white_card">&nbsp;</span><!--
                           --><span v-if="one_hold_obj['max_earn_yr3_flag']" class="purple_card">&nbsp;</span><!--
                           --><span v-if="one_hold_obj['avg_earn_yr3_flag']" class="red_card">&nbsp;</span><!--
-                          --><span v-if="!one_hold_obj['max_earn_yr3_flag'] && !one_hold_obj['avg_earn_yr3_flag']" class="white_card">&nbsp;</span>
-                        </div>
-                      </td>
-                      <td :style="{color: cust_color}">
-                        账户:&nbsp;{{ one_hold_obj['buyin_source'] }}
-                      </td>
-                      <td style="text-align: center;">
-                        <template v-if="one_hold_obj['already_buyout']">
-                          <span class="badge bg-secondary">已卖出</span>
-                        </template>
-                        <template v-else>
-                          <input class="btn btn-warning btn-sm" type="button" value="卖出"
-                                 @click="soldFixedFundByBulkUi(oneRow['fund_id'], oneRow['fund_name'], one_hold_obj, oneRow['fixedHoldObj']['hold_objs'], oneRow)">
-                        </template>
-                      </td>
-                      <td style="text-align: center;">
-                        <template v-if="one_hold_obj['already_buyout']">
-                          <span>&nbsp;</span>
-                        </template>
-                        <template v-else>
-                          <input class="btn btn-danger btn-sm" type="button" value="删除"
-                                 @click="removeFixedFundUi(oneRow['fund_id'], oneRow['fund_name'], one_hold_obj)">
-                        </template>
-                      </td>
-                    </tr>
-                  </template>
-                  </tbody>
-                </table>
-              </div>
-            </td>
-          </tr>
+                          --><span v-if="!one_hold_obj['max_earn_yr3_flag'] && !one_hold_obj['avg_earn_yr3_flag']"
+                                class="white_card">&nbsp;</span>
+                            </div>
+                          </td>
+                          <td :style="{ color: cust_color }">
+                            账户:&nbsp;{{ one_hold_obj['buyin_source'] }}
+                          </td>
+                          <td style="text-align: center;">
+                            <template v-if="one_hold_obj['already_buyout']">
+                              <span class="badge bg-secondary">已卖出</span>
+                            </template>
+                            <template v-else>
+                              <input class="btn btn-warning btn-sm" type="button" value="卖出"
+                                @click="soldFixedFundByBulkUi(oneRow['fund_id'], oneRow['fund_name'], one_hold_obj, oneRow['fixedHoldObj']['hold_objs'], oneRow)">
+                            </template>
+                          </td>
+                          <td style="text-align: center;">
+                            <template v-if="one_hold_obj['already_buyout']">
+                              <span>&nbsp;</span>
+                            </template>
+                            <template v-else>
+                              <input class="btn btn-danger btn-sm" type="button" value="删除"
+                                @click="removeFixedFundUi(oneRow['fund_id'], oneRow['fund_name'], one_hold_obj)">
+                            </template>
+                          </td>
+                        </tr>
+                      </template>
+                    </tbody>
+                  </table>
+                </div>
+              </td>
+            </tr>
+          </template>
         </template>
-      </template>
       </tbody>
       <tfoot>
-      <tr style="line-height: 5rem; border-color: white;">
-        <td colspan="9">
-          &nbsp;
-        </td>
-      </tr>
+        <tr style="line-height: 5rem; border-color: white;">
+          <td colspan="9">
+            &nbsp;
+          </td>
+        </tr>
       </tfoot>
     </table>
   </div>
@@ -682,30 +717,30 @@ import {
   getHitStyle,
   get_suggestion_by_wav
 } from "../lib/commonUtils.js"
-import {onMounted, computed, ref, watch, nextTick} from "vue";
-import {storeToRefs} from 'pinia'
-import {useComposeStore} from "../store/composeStore.js";
-import {useZskbStore} from "../store/zskbStore.js"
-import {Modal} from "bootstrap";
-import {useBuyInOutStore} from "../store/buyInOutStore.js";
+import { onMounted, computed, ref, watch, nextTick } from "vue";
+import { storeToRefs } from 'pinia'
+import { useComposeStore } from "../store/composeStore.js";
+import { useZskbStore } from "../store/zskbStore.js"
+import { Modal } from "bootstrap";
+import { useBuyInOutStore } from "../store/buyInOutStore.js";
 import { useRoute } from 'vue-router'
 
 const route = useRoute()
 const composeStore = useComposeStore()
-const {composeObjs, fixedHoldObjs} = storeToRefs(composeStore)
-const {getAllCompose, setComposeProperty, setComposeSoldDate, getComposeFixedHold} = composeStore
+const { composeObjs, fixedHoldObjs } = storeToRefs(composeStore)
+const { getAllCompose, setComposeProperty, setComposeSoldDate, getComposeFixedHold } = composeStore
 const buyInOutStore = useBuyInOutStore()
-const {buyoutRecords, wav_reports} = storeToRefs(buyInOutStore)
-const {getAllBuyoutRecords, soldComposeFixedHold, buyOutFixedFund} = buyInOutStore
+const { buyoutRecords, wav_reports } = storeToRefs(buyInOutStore)
+const { getAllBuyoutRecords, soldComposeFixedHold, buyOutFixedFund } = buyInOutStore
 const zskbStore = useZskbStore()
-const {zskbObjs} = storeToRefs(zskbStore)
+const { zskbObjs } = storeToRefs(zskbStore)
 
 const buy_in_from_plan = [
-  {'source_name': '全部', 'source_val': 'all'},
-  {'source_name': '橄榄树', 'source_val': 'ovtree'},
-  {'source_name': '海豚', 'source_val': 'dolphin'},
-  {'source_name': '三叉戟', 'source_val': 'trident'},
-  {'source_name': '金毛羊', 'source_val': 'gdngoat'}
+  { 'source_name': '全部', 'source_val': 'all' },
+  { 'source_name': '橄榄树', 'source_val': 'ovtree' },
+  { 'source_name': '海豚', 'source_val': 'dolphin' },
+  { 'source_name': '三叉戟', 'source_val': 'trident' },
+  { 'source_name': '金毛羊', 'source_val': 'gdngoat' }
 ]
 
 const colWidMap = {
@@ -738,7 +773,7 @@ const colWidMapSub = {
 const compose_name = ref('all')
 watch(compose_name, () => {
   getComposeFixedHold(compose_name.value)
-}, {immediate: true})
+}, { immediate: true })
 
 const composeViewObjs = ref([])
 const totMoney = ref(0)
@@ -749,16 +784,18 @@ const totPlanBuy = ref(0)
 const diffBuySet = ref(0)
 const showLostOnly = ref(false)
 const showPauseOnly = ref(false)
+const showAdjustOnly = ref(false)
 const totPositiveNum = ref(0)
 const dtFundId = ref(null)
 const totLostNum = ref(0)
 const totPauseNum = ref(0)
-watch([composeObjs, compose_name, fixedHoldObjs, buyoutRecords, showLostOnly, showPauseOnly], () => {
+const totAdjustNum = ref(0)
+watch([composeObjs, compose_name, fixedHoldObjs, buyoutRecords, showLostOnly, showPauseOnly, showAdjustOnly], () => {
   composeViewObjs.value = []
   if (composeObjs && composeObjs.value && composeObjs.value.length > 0) {
     if (compose_name.value === 'all') {
       composeObjs.value.forEach(item => {
-        if (!showLostOnly.value && !showPauseOnly.value) {
+        if (!showLostOnly.value && !showPauseOnly.value && !showAdjustOnly.value) {
           composeViewObjs.value.push(...item['compose_objs'])
         } else {
           item['compose_objs'].forEach(_obj => {
@@ -771,15 +808,25 @@ watch([composeObjs, compose_name, fixedHoldObjs, buyoutRecords, showLostOnly, sh
             }
             if (showPauseOnly.value && !_added_in) {
               if ((!_obj.hasOwnProperty('money') || _obj['money'] <= 0) &&
-                  (!_obj['lost_in_aggressive'] && !_obj['lost_in_dtconvg'])) {
+                (!_obj['lost_in_aggressive'] && !_obj['lost_in_dtconvg'])) {
                 composeViewObjs.value.push(_obj)
+                _added_in = true
+              }
+            }
+            if (showAdjustOnly.value && !_added_in) {
+              if (_obj.hasOwnProperty('money') && _obj.hasOwnProperty('adjust_money')) {
+                if (_obj['money'] != null && _obj['adjust_money'] != null) {
+                  if (Math.abs(_obj['money'] - _obj['adjust_money']) >= 3) {
+                    composeViewObjs.value.push(_obj)
+                  }
+                }
               }
             }
           })
         }
       })
     } else {
-      if (!showLostOnly.value && !showPauseOnly.value) {
+      if (!showLostOnly.value && !showPauseOnly.value && !showAdjustOnly.value) {
         composeViewObjs.value = composeObjs.value.find(item => item['compose_name'] === compose_name.value)['compose_objs']
       } else {
         let _match_composes = composeObjs.value.find(item => item['compose_name'] === compose_name.value)
@@ -793,8 +840,18 @@ watch([composeObjs, compose_name, fixedHoldObjs, buyoutRecords, showLostOnly, sh
           }
           if (showPauseOnly.value && !_added_in) {
             if ((!_obj.hasOwnProperty('money') || _obj['money'] <= 0) &&
-                (!_obj['lost_in_aggressive'] && !_obj['lost_in_dtconvg'])) {
+              (!_obj['lost_in_aggressive'] && !_obj['lost_in_dtconvg'])) {
               composeViewObjs.value.push(_obj)
+              _added_in = true
+            }
+          }
+          if (showAdjustOnly.value && !_added_in) {
+            if (_obj.hasOwnProperty('money') && _obj.hasOwnProperty('adjust_money')) {
+              if (_obj['money'] != null && _obj['adjust_money'] != null) {
+                if (Math.abs(_obj['money'] - _obj['adjust_money']) >= 3) {
+                  composeViewObjs.value.push(_obj)
+                }
+              }
             }
           }
         })
@@ -831,6 +888,7 @@ watch([composeObjs, compose_name, fixedHoldObjs, buyoutRecords, showLostOnly, sh
   totPositiveNum.value = 0
   totLostNum.value = 0
   totPauseNum.value = 0
+  totAdjustNum.value = 0
 
   if (composeViewObjs.value.length > 0) {
     composeViewObjs.value.forEach(elem => {
@@ -854,12 +912,16 @@ watch([composeObjs, compose_name, fixedHoldObjs, buyoutRecords, showLostOnly, sh
       }
 
       if ((elem.hasOwnProperty('lost_in_aggressive') && elem['lost_in_aggressive'])
-          || (elem.hasOwnProperty('lost_in_dtconvg') && elem['lost_in_dtconvg'])) {
+        || (elem.hasOwnProperty('lost_in_dtconvg') && elem['lost_in_dtconvg'])) {
         totLostNum.value = totLostNum.value + 1
       } else if (!elem.hasOwnProperty('money') || elem['money'] <= 0) {
         totPauseNum.value = totPauseNum.value + 1
       }
-
+      if (elem.hasOwnProperty('money') && elem.hasOwnProperty('adjust_money') &&
+        elem['money'] != null && elem['adjust_money'] != null &&
+        Math.abs(elem['money'] - elem['adjust_money']) >= 3) {
+        totAdjustNum.value = totAdjustNum.value + 1
+      }
 
       if (dtFundId.value && dtFundId.value === elem['fund_id']) {
         elem['currSelected'] = true
@@ -878,14 +940,14 @@ watch([composeObjs, compose_name, fixedHoldObjs, buyoutRecords, showLostOnly, sh
 
   scrollViewBySelection()
 
-}, {immediate: true})
+}, { immediate: true })
 
 getAllBuyoutRecords()
 
 /*
 * sold by bulk
 * */
-const dlgController = ref({soldDlg: null, removeDlg: null})
+const dlgController = ref({ soldDlg: null, removeDlg: null })
 onMounted(() => {
   dlgController.value.soldDlg = new Modal('#soldDialog', {})
   dlgController.value.removeDlg = new Modal('#removeDialog', {})
@@ -953,7 +1015,7 @@ function sortByField(_field) {
     if (sortFieldFlag.value) {
       composeViewObjs.value.sort((a, b) => {
         if (a['kbObj'] && a['kbObj']['statistics'] && a['kbObj']['statistics']['min_sort_tot_earn'] &&
-            b['kbObj'] && b['kbObj']['statistics'] && b['kbObj']['statistics']['min_sort_tot_earn']) {
+          b['kbObj'] && b['kbObj']['statistics'] && b['kbObj']['statistics']['min_sort_tot_earn']) {
           return a['kbObj']['statistics']['min_sort_tot_earn'] - b['kbObj']['statistics']['min_sort_tot_earn'];
         } else {
           return 0;
@@ -962,7 +1024,7 @@ function sortByField(_field) {
     } else {
       composeViewObjs.value.sort((a, b) => {
         if (a['kbObj'] && a['kbObj']['statistics'] && a['kbObj']['statistics']['min_sort_tot_earn'] &&
-            b['kbObj'] && b['kbObj']['statistics'] && b['kbObj']['statistics']['min_sort_tot_earn']) {
+          b['kbObj'] && b['kbObj']['statistics'] && b['kbObj']['statistics']['min_sort_tot_earn']) {
           return b['kbObj']['statistics']['min_sort_tot_earn'] - a['kbObj']['statistics']['min_sort_tot_earn'];
         } else {
           return 0;
@@ -973,7 +1035,7 @@ function sortByField(_field) {
     if (sortFieldFlag.value) {
       composeViewObjs.value.sort((a, b) => {
         if (a['kbObj'] && a['kbObj']['statistics'] && a['kbObj']['statistics']['avg_sort_tot_earn'] &&
-            b['kbObj'] && b['kbObj']['statistics'] && b['kbObj']['statistics']['avg_sort_tot_earn']) {
+          b['kbObj'] && b['kbObj']['statistics'] && b['kbObj']['statistics']['avg_sort_tot_earn']) {
           return a['kbObj']['statistics']['avg_sort_tot_earn'] - b['kbObj']['statistics']['avg_sort_tot_earn'];
         } else {
           return 0;
@@ -982,7 +1044,7 @@ function sortByField(_field) {
     } else {
       composeViewObjs.value.sort((a, b) => {
         if (a['kbObj'] && a['kbObj']['statistics'] && a['kbObj']['statistics']['avg_sort_tot_earn'] &&
-            b['kbObj'] && b['kbObj']['statistics'] && b['kbObj']['statistics']['avg_sort_tot_earn']) {
+          b['kbObj'] && b['kbObj']['statistics'] && b['kbObj']['statistics']['avg_sort_tot_earn']) {
           return b['kbObj']['statistics']['avg_sort_tot_earn'] - a['kbObj']['statistics']['avg_sort_tot_earn'];
         } else {
           return 0;
@@ -993,7 +1055,7 @@ function sortByField(_field) {
     if (sortFieldFlag.value) {
       composeViewObjs.value.sort((a, b) => {
         if (a['kbObj'] && a['kbObj']['statistics'] && a['kbObj']['statistics']['max_sort_tot_earn'] &&
-            b['kbObj'] && b['kbObj']['statistics'] && b['kbObj']['statistics']['max_sort_tot_earn']) {
+          b['kbObj'] && b['kbObj']['statistics'] && b['kbObj']['statistics']['max_sort_tot_earn']) {
           return a['kbObj']['statistics']['max_sort_tot_earn'] - b['kbObj']['statistics']['max_sort_tot_earn'];
         } else {
           return 0;
@@ -1002,7 +1064,7 @@ function sortByField(_field) {
     } else {
       composeViewObjs.value.sort((a, b) => {
         if (a['kbObj'] && a['kbObj']['statistics'] && a['kbObj']['statistics']['max_sort_tot_earn'] &&
-            b['kbObj'] && b['kbObj']['statistics'] && b['kbObj']['statistics']['max_sort_tot_earn']) {
+          b['kbObj'] && b['kbObj']['statistics'] && b['kbObj']['statistics']['max_sort_tot_earn']) {
           return b['kbObj']['statistics']['max_sort_tot_earn'] - a['kbObj']['statistics']['max_sort_tot_earn'];
         } else {
           return 0;
@@ -1013,7 +1075,7 @@ function sortByField(_field) {
     if (sortFieldFlag.value) {
       composeViewObjs.value.sort((a, b) => {
         if (a['kbObj'] && a['kbObj']['positive'] &&
-            b['kbObj'] && b['kbObj']['positive']) {
+          b['kbObj'] && b['kbObj']['positive']) {
           return a['kbObj']['positive']['positive_reach_len'] - b['kbObj']['positive']['positive_reach_len'];
         } else {
           return 0;
@@ -1022,7 +1084,7 @@ function sortByField(_field) {
     } else {
       composeViewObjs.value.sort((a, b) => {
         if (a['kbObj'] && a['kbObj']['positive'] &&
-            b['kbObj'] && b['kbObj']['positive']) {
+          b['kbObj'] && b['kbObj']['positive']) {
           return b['kbObj']['positive']['positive_reach_len'] - a['kbObj']['positive']['positive_reach_len'];
         } else {
           return 0;
@@ -1033,7 +1095,7 @@ function sortByField(_field) {
     if (sortFieldFlag.value) {
       composeViewObjs.value.sort((a, b) => {
         if (a['kbObj'] && a['kbObj']['negative'] &&
-            b['kbObj'] && b['kbObj']['negative']) {
+          b['kbObj'] && b['kbObj']['negative']) {
           return a['kbObj']['negative']['negative_reach_len'] - b['kbObj']['negative']['negative_reach_len'];
         } else {
           return 0;
@@ -1042,7 +1104,7 @@ function sortByField(_field) {
     } else {
       composeViewObjs.value.sort((a, b) => {
         if (a['kbObj'] && a['kbObj']['negative'] &&
-            b['kbObj'] && b['kbObj']['negative']) {
+          b['kbObj'] && b['kbObj']['negative']) {
           return b['kbObj']['negative']['negative_reach_len'] - a['kbObj']['negative']['negative_reach_len'];
         } else {
           return 0;
@@ -1063,18 +1125,18 @@ function sortByField(_field) {
     if (sortFieldFlag.value) {
       composeViewObjs.value.sort((a, b) => {
         if (a['fixedHoldObj'] && a['fixedHoldObj']['hold_objs'] && a['fixedHoldObj']['hold_objs'].length > 0 &&
-            b['fixedHoldObj'] && b['fixedHoldObj']['hold_objs'] && b['fixedHoldObj']['hold_objs'].length > 0) {
+          b['fixedHoldObj'] && b['fixedHoldObj']['hold_objs'] && b['fixedHoldObj']['hold_objs'].length > 0) {
           return a['fixedHoldObj']['hold_objs'][a['fixedHoldObj']['hold_objs'].length - 1]['accu_money'] -
-              b['fixedHoldObj']['hold_objs'][b['fixedHoldObj']['hold_objs'].length - 1]['accu_money']
+            b['fixedHoldObj']['hold_objs'][b['fixedHoldObj']['hold_objs'].length - 1]['accu_money']
         }
         return 0;
       });
     } else {
       composeViewObjs.value.sort((a, b) => {
         if (a['fixedHoldObj'] && a['fixedHoldObj']['hold_objs'] && a['fixedHoldObj']['hold_objs'].length > 0 &&
-            b['fixedHoldObj'] && b['fixedHoldObj']['hold_objs'] && b['fixedHoldObj']['hold_objs'].length > 0) {
+          b['fixedHoldObj'] && b['fixedHoldObj']['hold_objs'] && b['fixedHoldObj']['hold_objs'].length > 0) {
           return b['fixedHoldObj']['hold_objs'][b['fixedHoldObj']['hold_objs'].length - 1]['accu_money'] -
-              a['fixedHoldObj']['hold_objs'][a['fixedHoldObj']['hold_objs'].length - 1]['accu_money']
+            a['fixedHoldObj']['hold_objs'][a['fixedHoldObj']['hold_objs'].length - 1]['accu_money']
         }
         return 0;
       });
@@ -1083,18 +1145,18 @@ function sortByField(_field) {
     if (sortFieldFlag.value) {
       composeViewObjs.value.sort((a, b) => {
         if (a['fixedHoldObj'] && a['fixedHoldObj']['hold_objs'] && a['fixedHoldObj']['hold_objs'].length > 0 &&
-            b['fixedHoldObj'] && b['fixedHoldObj']['hold_objs'] && b['fixedHoldObj']['hold_objs'].length > 0) {
+          b['fixedHoldObj'] && b['fixedHoldObj']['hold_objs'] && b['fixedHoldObj']['hold_objs'].length > 0) {
           return a['fixedHoldObj']['hold_objs'][a['fixedHoldObj']['hold_objs'].length - 1]['accu_pure_profit'] -
-              b['fixedHoldObj']['hold_objs'][b['fixedHoldObj']['hold_objs'].length - 1]['accu_pure_profit']
+            b['fixedHoldObj']['hold_objs'][b['fixedHoldObj']['hold_objs'].length - 1]['accu_pure_profit']
         }
         return 0;
       });
     } else {
       composeViewObjs.value.sort((a, b) => {
         if (a['fixedHoldObj'] && a['fixedHoldObj']['hold_objs'] && a['fixedHoldObj']['hold_objs'].length > 0 &&
-            b['fixedHoldObj'] && b['fixedHoldObj']['hold_objs'] && b['fixedHoldObj']['hold_objs'].length > 0) {
+          b['fixedHoldObj'] && b['fixedHoldObj']['hold_objs'] && b['fixedHoldObj']['hold_objs'].length > 0) {
           return b['fixedHoldObj']['hold_objs'][b['fixedHoldObj']['hold_objs'].length - 1]['accu_pure_profit'] -
-              a['fixedHoldObj']['hold_objs'][a['fixedHoldObj']['hold_objs'].length - 1]['accu_pure_profit']
+            a['fixedHoldObj']['hold_objs'][a['fixedHoldObj']['hold_objs'].length - 1]['accu_pure_profit']
         }
         return 0;
       });
@@ -1104,7 +1166,7 @@ function sortByField(_field) {
       composeViewObjs.value.sort((a, b) => {
         let _a = (a.hasOwnProperty('money') && a['money'] !== null) ? a['money'] : -1
         let _b = (b.hasOwnProperty('money') && b['money'] !== null) ? b['money'] : -1
-        return _a -_b
+        return _a - _b
       });
     } else {
       composeViewObjs.value.sort((a, b) => {
@@ -1118,7 +1180,7 @@ function sortByField(_field) {
       composeViewObjs.value.sort((a, b) => {
         let _a = (a.hasOwnProperty('adjust_money') && a['adjust_money'] !== null) ? a['adjust_money'] : -1
         let _b = (b.hasOwnProperty('adjust_money') && b['adjust_money'] !== null) ? b['adjust_money'] : -1
-        return _a -_b
+        return _a - _b
       });
     } else {
       composeViewObjs.value.sort((a, b) => {
@@ -1131,7 +1193,7 @@ function sortByField(_field) {
     if (sortFieldFlag.value) {
       composeViewObjs.value.sort((a, b) => {
         if (a['kbObj'] && a['kbObj']['statistics'] && a['kbObj']['statistics']['fund_perc_len'] &&
-            b['kbObj'] && b['kbObj']['statistics'] && b['kbObj']['statistics']['fund_perc_len']) {
+          b['kbObj'] && b['kbObj']['statistics'] && b['kbObj']['statistics']['fund_perc_len']) {
           return a['kbObj']['statistics']['fund_perc_len'] - b['kbObj']['statistics']['fund_perc_len'];
         } else {
           return 0;
@@ -1140,7 +1202,7 @@ function sortByField(_field) {
     } else {
       composeViewObjs.value.sort((a, b) => {
         if (a['kbObj'] && a['kbObj']['statistics'] && a['kbObj']['statistics']['fund_perc_len'] &&
-            b['kbObj'] && b['kbObj']['statistics'] && b['kbObj']['statistics']['fund_perc_len']) {
+          b['kbObj'] && b['kbObj']['statistics'] && b['kbObj']['statistics']['fund_perc_len']) {
           return b['kbObj']['statistics']['fund_perc_len'] - a['kbObj']['statistics']['fund_perc_len'];
         } else {
           return 0;
@@ -1151,7 +1213,7 @@ function sortByField(_field) {
     if (sortFieldFlag.value) {
       composeViewObjs.value.sort((a, b) => {
         if (a['kbObj'] && a['kbObj']['statistics'] && a['kbObj']['statistics']['perc_not_update_days'] &&
-            b['kbObj'] && b['kbObj']['statistics'] && b['kbObj']['statistics']['perc_not_update_days']) {
+          b['kbObj'] && b['kbObj']['statistics'] && b['kbObj']['statistics']['perc_not_update_days']) {
           return b['kbObj']['statistics']['perc_not_update_days'] - a['kbObj']['statistics']['perc_not_update_days'];
         } else {
           return 0;
@@ -1160,7 +1222,7 @@ function sortByField(_field) {
     } else {
       composeViewObjs.value.sort((a, b) => {
         if (a['kbObj'] && a['kbObj']['statistics'] && a['kbObj']['statistics']['perc_not_update_days'] &&
-            b['kbObj'] && b['kbObj']['statistics'] && b['kbObj']['statistics']['perc_not_update_days']) {
+          b['kbObj'] && b['kbObj']['statistics'] && b['kbObj']['statistics']['perc_not_update_days']) {
           return a['kbObj']['statistics']['perc_not_update_days'] - b['kbObj']['statistics']['perc_not_update_days'];
         } else {
           return 0;
@@ -1203,11 +1265,11 @@ function scrollViewBySelection() {
       let _idx = composeViewObjs.value.findIndex(func)
       if (_idx != -1) {
         let _rowObj = composeViewObjs.value[_idx]
-        rowElements.value[_rowObj['fund_id']].scrollIntoView({block: "center", behavior: "smooth"})
+        rowElements.value[_rowObj['fund_id']].scrollIntoView({ block: "center", behavior: "smooth" })
       }
     } else if (composeViewObjs.value.length > 0) {
       let _fund_id = composeViewObjs.value[0]['fund_id']
-      rowElements.value[_fund_id].scrollIntoView({block: "center", behavior: "smooth"})
+      rowElements.value[_fund_id].scrollIntoView({ block: "center", behavior: "smooth" })
     }
   })
 }
