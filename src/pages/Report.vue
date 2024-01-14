@@ -37,12 +37,21 @@
             </template>
             <span>买入</span>
           </th>
-          <th :style="{ 'width': colWidMap['col_4'] + 'rem' }" @click="sortByField('last_sold')">
-            <template v-if="sortFieldName === 'last_sold'">
-              <span v-if="sortFieldFlag"><i class="bi bi-arrow-up"></i></span>
-              <span v-else><i class="bi bi-arrow-down"></i></span>
-            </template>
-            <span>卖出</span>
+          <th :style="{ 'width': colWidMap['col_4'] + 'rem' }">
+            <div class="w50_w_br" @click="sortByField('last_sold')">
+              <template v-if="sortFieldName === 'last_sold'">
+                <span v-if="sortFieldFlag"><i class="bi bi-arrow-up"></i></span>
+                <span v-else><i class="bi bi-arrow-down"></i></span>
+              </template>
+              <span>卖出</span>
+            </div>
+            <div class="w50_w_br" @click="sortByField('rate_after_sold')" style="border: none;">
+              <template v-if="sortFieldName === 'rate_after_sold'">
+                <span v-if="sortFieldFlag"><i class="bi bi-arrow-up"></i></span>
+                <span v-else><i class="bi bi-arrow-down"></i></span>
+              </template>
+              <span>走势</span>
+            </div>
           </th>
           <th :style="{ 'width': colWidMap['col_5'] + 'rem' }" @click="sortByField('action_times')">
             <template v-if="sortFieldName === 'action_times'">
@@ -120,12 +129,13 @@
               </template>
             </td>
             <td v-bind:class="{ sel_row: oneRow['currSelected'] }">
-              <div style="height: 6rem;">
+              <!--<div style="height: 6rem;">-->
                 <div>起:&nbsp;{{ oneRow.statistics?.buy_first_day }}</div>
                 <div>止:&nbsp;{{ oneRow.statistics?.buy_last_day }}</div>
                 <div>计:&nbsp;{{ oneRow.statistics?.tot_exchange_days }}天</div>
                 <div>共:&nbsp;{{ oneRow.statistics?.tot_hold_days }}天</div>
-              </div>
+              <!--</div>-->              
+              <!--
               <template v-if="oneRow.statistics && oneRow.statistics.rate_from_last_sold">
                 <div style="border-top: solid 1px gray; margin-top: 0.5rem; padding-top: 0.5rem; line-height: 1.2rem;">
                   <span v-if="oneRow.statistics.rate_from_last_sold >= 0" class="text-bg-danger">
@@ -136,20 +146,31 @@
                   </span>
                 </div>
               </template>
+              -->
             </td>
             <td style="line-height: 1.2rem;" v-bind:class="{ sel_row: oneRow['currSelected'] }">
               <div style="height: 6rem; overflow: hidden; text-overflow: ellipsis; word-break: break-all;">
                 <template v-if="oneRow.soldHistoryWrapper_reverse" :key="one_sold.date_str">
                   <template v-for="(one_sold, index) in oneRow.soldHistoryWrapper_reverse">
-                    <span v-if="index === 0 && oneRow.soldHistoryWrapper_reverse.length > 1" class="text-bg-warning">&nbsp;{{ one_sold?.date_str }}&nbsp;</span>
-                    <span v-else-if="index === 0 && oneRow.soldHistoryWrapper_reverse.length === 1" class="text-bg-warning">&nbsp;{{ one_sold?.date_str }}&nbsp;</span>
-                    <span v-else-if="index !== oneRow.soldHistoryWrapper_reverse.length - 1">&nbsp;{{ one_sold?.date_str }}&nbsp;</span>
-                    <span v-else>&nbsp;{{ one_sold?.date_str }}&nbsp;</span>
+                    <span v-if="index === 0 && oneRow.soldHistoryWrapper_reverse.length > 1" class="text-bg-warning">
+                      {{ one_sold?.date_str }}<span v-if="oneRow.statistics && oneRow.statistics.rate_from_last_sold">
+                        ({{oneRow.statistics.days_from_last_sold}})</span>
+                    </span>
+                    <span v-else-if="index === 0 && oneRow.soldHistoryWrapper_reverse.length === 1" class="text-bg-warning">
+                      {{ one_sold?.date_str }}<span v-if="oneRow.statistics && oneRow.statistics.rate_from_last_sold">
+                        ({{oneRow.statistics.days_from_last_sold}})</span>
+                    </span>
+                    <span v-else-if="index !== oneRow.soldHistoryWrapper_reverse.length - 1">
+                      &nbsp;{{ one_sold?.date_str }}&nbsp;
+                    </span>
+                    <span v-else>
+                      &nbsp;{{ one_sold?.date_str }}&nbsp;
+                    </span>
                   </template>
                 </template>
               </div>
               <template v-if="oneRow.statistics && oneRow.statistics.rate_from_last_sold">
-                <div style="border-top: solid 1px gray; margin-top: 0.5rem; padding-top: 0.5rem;">
+                <div style="border-top: solid 1px gray; margin-top: 0.5rem; padding-top: 0.5rem; text-align: center;">
                   <span v-if="oneRow.statistics.rate_from_last_sold >= 0" class="text-bg-danger">
                     &nbsp;计:&nbsp;{{oneRow.statistics.rate_from_last_sold_str}}&nbsp;
                   </span>
@@ -424,8 +445,8 @@ const { requireDynValues, getRecordsAndRates, removeLocalDynvalue, getBigPoolFix
 const colWidMap = {
   'col_1': 6,
   'col_2': 5,
-  'col_3': 5,
-  'col_4': 4,
+  'col_3': 4.5,
+  'col_4': 4.5,
   'col_5': 3,
   'col_6': 3.5,
   'col_7': 3.5,
@@ -1063,6 +1084,31 @@ function sortByField(_field) {
           b_val = b['soldHistoryWrapper'][b['soldHistoryWrapper'].length - 1]['date_str'].replaceAll("-", "")
         }
         return parseInt(b_val) - parseInt(a_val)
+      });
+    }
+  }
+  else if (_field === 'rate_after_sold') {
+    if (sortFieldFlag.value) {
+      dynRecordObjs.value.sort((a, b) => {
+        let a_val = 99, b_val = 99
+        if (a['statistics'] && a['statistics']['rate_from_last_sold']) {
+          a_val = a['statistics']['rate_from_last_sold']
+        }
+        if (b['statistics'] && b['statistics']['rate_from_last_sold']) {
+          b_val = b['statistics']['rate_from_last_sold']
+        }
+        return a_val - b_val
+      });
+    } else {
+      dynRecordObjs.value.sort((a, b) => {
+        let a_val = 99, b_val = 99
+        if (a['statistics'] && a['statistics']['rate_from_last_sold']) {
+          a_val = a['statistics']['rate_from_last_sold']
+        }
+        if (b['statistics'] && b['statistics']['rate_from_last_sold']) {
+          b_val = b['statistics']['rate_from_last_sold']
+        }
+        return b_val - a_val
       });
     }
   }
