@@ -334,6 +334,10 @@
           <td class="nr_td" v-bind:class="{ sel_row: oneRow['currSelected'] }">
             <div class="grid_1">
               <template v-if="oneRow['compose_plan'] && oneRow['compose_plan'] === 'noplan'">
+                <div style="text-wrap: nowrap; display: flex; align-items: center;">额:&nbsp;
+                  <input type="number" style="width: 3.5rem; border-radius: 5px; flex-grow: 1;" 
+                  v-model="oneRow['plan_buyin_money']" @click.stop>                  
+               </div>
                 <select class="form-select nr_select" @click.stop v-model="oneRow['target_plan']">
                   <option v-for="option in buy_in_from_plan" v-bind:value="option.source_val">
                     {{ option.source_name }}
@@ -341,11 +345,20 @@
                 </select>
                 <div class="right_pad">
                   <button type="button" class="btn btn-warning mw4_ctl" @click.stop="changeCompose($event, oneRow)"
-                          v-bind:disabled="!oneRow['target_plan'] || oneRow['target_plan'] === 'noplan'">保存
+                          v-bind:disabled="!oneRow['target_plan'] || oneRow['target_plan'] === 'noplan' 
+                          || !oneRow.hasOwnProperty('plan_buyin_money') || !oneRow['plan_buyin_money'] 
+                          || oneRow['plan_buyin_money'] <= 0">保存
                   </button>
                 </div>
               </template>
               <template v-if="oneRow['compose_plan'] && oneRow['compose_plan'] !== 'noplan'">
+                <div style="text-align: center;" 
+                :style="{'color': oneRow['plan_buyin_money'] - oneRow['compose_obj']['money'] >=10? '#f96' : 
+                oneRow['compose_obj']['money'] - oneRow['plan_buyin_money'] >=10? 'red' : '',
+                'font-weight': Math.abs(oneRow['plan_buyin_money'] - oneRow['compose_obj']['money'])>=10? 'bold':'normal'}">
+                  <span style="font-size: 1rem;">初:{{oneRow['plan_buyin_money']}}&nbsp;</span>
+                  <span style="font-size: 1rem;">现:{{oneRow['compose_obj']['money']}}</span>
+                </div>
                 <div>
                   <template v-if="oneRow['compose_plan'] === 'ovtree'">
                       <span class="badge bg-primary text-bg-success big_badge">
@@ -498,20 +511,51 @@ watch([zskbObjs, wideIdxOnly, topicIdxOnly, indusIdxOnly, qdiiIdxOnly, composeOb
   }
   if (composeObjs && composeObjs.value && composeObjs.value.length > 0) {
     let _ovtree_fund_ids = composeObjs.value.find(item => item['compose_name'] === 'ovtree')['compose_objs'].map(item => item['fund_id'])
+    let _ovtree_fund_objs = composeObjs.value.find(item => item['compose_name'] === 'ovtree')['compose_objs']
     let _dolphin_fund_ids = composeObjs.value.find(item => item['compose_name'] === 'dolphin')['compose_objs'].map(item => item['fund_id'])
+    let _dolphin_fund_objs = composeObjs.value.find(item => item['compose_name'] === 'dolphin')['compose_objs']
     let _trident_fund_ids = composeObjs.value.find(item => item['compose_name'] === 'trident')['compose_objs'].map(item => item['fund_id'])
+    let _trident_fund_objs = composeObjs.value.find(item => item['compose_name'] === 'trident')['compose_objs']
     let _gdngoat_fund_ids = composeObjs.value.find(item => item['compose_name'] === 'gdngoat')['compose_objs'].map(item => item['fund_id'])
+    let _gdngoat_fund_objs = composeObjs.value.find(item => item['compose_name'] === 'gdngoat')['compose_objs']
     zskbViewObjs.value.forEach(elem => {
       if (_ovtree_fund_ids.indexOf(elem['fund_id']) != -1) {
         elem['compose_plan'] = 'ovtree'
+        elem['compose_obj'] = _ovtree_fund_objs.find(_obj => _obj['fund_id'] === elem['fund_id'])
       } else if (_dolphin_fund_ids.indexOf(elem['fund_id']) != -1) {
         elem['compose_plan'] = 'dolphin'
+        elem['compose_obj'] = _dolphin_fund_objs.find(_obj => _obj['fund_id'] === elem['fund_id'])
       } else if (_trident_fund_ids.indexOf(elem['fund_id']) != -1) {
         elem['compose_plan'] = 'trident'
+        elem['compose_obj'] = _trident_fund_objs.find(_obj => _obj['fund_id'] === elem['fund_id'])
       } else if (_gdngoat_fund_ids.indexOf(elem['fund_id']) != -1) {
         elem['compose_plan'] = 'gdngoat'
+        elem['compose_obj'] = _gdngoat_fund_objs.find(_obj => _obj['fund_id'] === elem['fund_id'])
       } else {
         elem['compose_plan'] = 'noplan'
+        elem['compose_obj'] = null
+      }
+
+      elem['plan_buyin_money'] = 40
+      if (elem['size'] && elem['size'] < 1100) {
+        elem['plan_buyin_money'] = elem['plan_buyin_money'] - 5
+      }
+      if (elem['size'] && elem['size'] < 880) {
+        elem['plan_buyin_money'] = elem['plan_buyin_money'] - 5
+      }
+      if (elem['wav_obj'] && elem['wav_obj']['wav_sort_level']) {
+        if (elem['wav_obj']['wav_sort_level'] > 2.5) {
+          elem['plan_buyin_money'] = elem['plan_buyin_money'] - 5
+        }
+        if (elem['wav_obj']['wav_sort_level'] > 5) {
+          elem['plan_buyin_money'] = elem['plan_buyin_money'] - 5
+        }
+        if (elem['wav_obj']['wav_sort_level'] > 7.5) {
+          elem['plan_buyin_money'] = elem['plan_buyin_money'] - 5
+        }
+      }
+      if (elem['plan_buyin_money'] < 10) {
+        elem['plan_buyin_money'] = 10
       }
     })
   }
@@ -527,7 +571,7 @@ function saveEstiPe(event, oneRowObj) {
 
 function changeCompose(event, oneRowObj) {
   event.stopPropagation()
-  addOrRemoveCompose(oneRowObj['fund_id'], oneRowObj['fund_name'], oneRowObj['target_plan'])
+  addOrRemoveCompose(oneRowObj['fund_id'], oneRowObj['fund_name'], oneRowObj['target_plan'], oneRow['plan_buyin_money'])
 }
 
 function removeCompose(event, oneRowObj) {

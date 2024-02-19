@@ -98,7 +98,7 @@ export const useBuyInOutStore = defineStore('buyInOut-store', () => {
                 'buyin_source_array': _buyin_source_array
             })
             if (response.status === 200) {
-                useApiStore().pop_alert_msg("批量卖出成功: " + _fund_name)
+                useApiStore().pop_alert_msg("批量卖出成功: " + _fund_name, " 级别更新至4.3")
                 await getAllBuyoutRecords()
             } else {
                 console.error("axios remove local dyn values failed: ", response)

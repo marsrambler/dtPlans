@@ -8,7 +8,7 @@
       <input class="btn btn-warning btn-sm" type="button" value="刷新" @click="getRecordsAndRates('refresh');">
       <input class="btn btn-info btn-sm" type="button" v-bind:value="canAddAllFlag? '全选' : '取消'"
       @click="allAllFundIntoRequestList();">
-      <input type="text" v-model="searchFundName" class="form-control-plaintext search_box"
+      <input type="text" v-model="searchFundNameOrFundId" class="form-control-plaintext search_box"
              style="grid-column: 8 / span 2; padding-left: 0.5rem;" @keyup.enter="excuteSearchFund()">
       <input class="btn btn-primary btn-sm" type="button" value="查找" @click="excuteSearchFund();">
     </div>
@@ -233,24 +233,12 @@
           <tr v-if="currDynValue && currDynValue['fund_id'] == oneRow['fund_id']">
             <td colspan=8>
               <div class="op_pane_sub flex_act_pane">
-                <button type="button" class="btn btn-secondary from_ctl_nr" @click="yAxisTopAdjTimes += 1;">
-                  增加顶
-                </button>
-                <button type="button" class="btn btn-secondary from_ctl_nr" @click="yAxisTopAdjTimes -= 1;">
-                  减小顶
-                </button>
-                <button type="button" class="btn btn-secondary from_ctl_nr" @click="yAxisBtmAdjTimes += 1;">
-                  增加底
-                </button>
-                <button type="button" class="btn btn-secondary from_ctl_nr" @click="yAxisBtmAdjTimes -= 1;">
-                  减小底
-                </button>
-                <button type="button" class="btn btn-secondary from_ctl_nr" @click="picHeightAdjVal += 20;">
-                  增加高
-                </button>
-                <button type="button" class="btn btn-secondary from_ctl_nr" @click="picHeightAdjVal -= 20;">
-                  减小高
-                </button>
+                <button type="button" class="btn btn-secondary from_ctl_nr" @click="yAxisTopAdjTimes += 1;">&nbsp;+&nbsp;顶</button>
+                <button type="button" class="btn btn-secondary from_ctl_nr" @click="yAxisTopAdjTimes -= 1;">&nbsp;-&nbsp;顶</button>
+                <button type="button" class="btn btn-secondary from_ctl_nr" @click="yAxisBtmAdjTimes += 1;">&nbsp;+&nbsp;底</button>
+                <button type="button" class="btn btn-secondary from_ctl_nr" @click="yAxisBtmAdjTimes -= 1;">&nbsp;-&nbsp;底</button>
+                <button type="button" class="btn btn-secondary from_ctl_nr" @click="picHeightAdjVal += 20;">&nbsp;+&nbsp;高</button>
+                <button type="button" class="btn btn-secondary from_ctl_nr" @click="picHeightAdjVal -= 20;">&nbsp;-&nbsp;高</button>
                 <input type="text" class="from_ctl_nr" style="width: 6.5rem;" v-model="oneRow['remove_asc_or_desc_or_sold_date']">
                 <button type="button" class="btn btn-secondary from_ctl_nr" @click="remove_Asc_or_Desc_or_Sold_Date(oneRow)"
                         v-bind:disabled="!oneRow['remove_date_type'] || oneRow['remove_date_type'] ===''">
@@ -290,8 +278,9 @@
                       <div class="stack_2_info">额:&nbsp;{{oneRow['tranStateObj']['money']}}</div>
                     </div>
                   </div>
-                  <template v-if="oneRow['tranStateObj']['orig_summ_level']">
-                    <div class="para_info">
+                  <template v-if="oneRow['tranStateObj'].hasOwnProperty('orig_summ_level') && oneRow['tranStateObj']['orig_summ_level'] != null">
+                    <div class="para_info" style="position: relative; cursor: pointer;" @mouseover="oneRow['show_summ_tip']=true;" 
+                    @mouseleave="oneRow['show_summ_tip']=false;">
                       <div>
                         <div class="stack_2_info">
                           原:&nbsp;<span class="level_info"
@@ -306,6 +295,16 @@
                         {{ oneRow['tranStateObj']['subs_summ_level'] }}</span>
                         </div>
                       </div>
+                      <template v-if="oneRow['show_summ_tip']">
+                        <span style="position:absolute;left:0rem;top:3.2rem;display:inline-block;width:7rem;font-size:0.9rem;background-color:gold;
+                        border-radius:5px;font-weight: bold;z-index: 100;"
+                            :style="{'background-color':summ_level_tips_map[oneRow['tranStateObj']['subs_summ_level']]['bgcolor'],
+                            'color':summ_level_tips_map[oneRow['tranStateObj']['subs_summ_level']]['color'],
+                            'border':summ_level_tips_map[oneRow['tranStateObj']['subs_summ_level']]['bd']}"
+                            >
+                          {{summ_level_tips_map[oneRow['tranStateObj']['subs_summ_level']]['cmt']}}
+                        </span>
+                      </template>	
                     </div>
                   </template>
                   <div class="para_info">
@@ -428,13 +427,15 @@ import {
   minPaneWidth,
   topSecClass
 } from "../lib/commonUtils.js"
-import { onMounted, computed, ref, watch, nextTick } from "vue";
+import { onMounted, onUnmounted, computed, ref, watch, nextTick } from "vue";
 import { storeToRefs } from 'pinia'
 import { useZskbStore } from '../store/zskbStore';
 import { useReportStore } from "../store/reportStore.js";
 import { Modal, Alert } from "bootstrap";
 import {useComposeStore} from "../store/composeStore.js";
+import { useRoute } from 'vue-router'
 
+const route = useRoute()
 const zskbStore = useZskbStore()
 const { zskbObjs } = storeToRefs(zskbStore)
 
@@ -470,12 +471,40 @@ const cfmDlgType = ref("")
 const dlgController = ref({ reportDlg: null })
 const baseUrl4ProbeNav = ref("")
 const baseUrl4ComposeNav = ref("")
+const searchFundNameOrFundId = ref("")
+const searchTimer = ref(null)
+const searchByFundIdFoundFlag = ref(false)
+const searchByFundIdTimes = ref(0)
+
 onMounted(() => {
   dlgController.value.reportDlg = new Modal('#reportDialog', {})
   let _prot = window.location.protocol;
   let _host = window.location.hostname;
   baseUrl4ProbeNav.value = _prot + "//" + _host + "/probe-funds.html?dt_fund_id="
   baseUrl4ComposeNav.value = _prot + "//" + _host + "/dt_plans_web/#/composite?dt_fund_id="
+
+  if (route.query.hasOwnProperty('fund_id') && route.query['fund_id']) {
+    searchFundNameOrFundId.value = route.query['fund_id'].trim();
+    searchByFundIdTimes.value = 0
+    if (searchFundNameOrFundId.value.length === 6) {
+      searchTimer.value = setInterval(() => {
+        excuteSearchFund()
+        if (searchByFundIdFoundFlag.value || searchByFundIdTimes.value >= 10) {
+          if (searchTimer.value) {
+            console.warn("clear search timer")
+            clearInterval(searchTimer.value)
+          }
+        }
+      }, 1000)
+    }
+  }
+})
+
+onUnmounted(() => {
+  if (searchTimer.value) {
+    console.warn("clear search timer")
+    clearInterval(searchTimer.value)
+  }
 })
 
 const requireFundIds = ref("")
@@ -542,36 +571,77 @@ function allAllFundIntoRequestList() {
   }
 }
 
-const searchFundName = ref("")
 function excuteSearchFund() {
   dynRecordObjs.value.forEach((elem) => {
     elem['currSelected'] = false
   });
-  if (searchFundName.value.trim() === '') {
+  currDynValue.value = null
+  if (searchFundNameOrFundId.value.trim() === '') {
     return
   }
   let _foundCnt = 0
-  let arr = searchFundName.value.trim().split(" ")
-  dynRecordObjs.value.forEach((elem) => {
-    if (arr.length === 1) {
-      let _cond_1 = arr[0].trim()
-      if (elem['fund_name'].indexOf(_cond_1) !== -1) {
-        elem['currSelected'] = true
-        _foundCnt += 1
+  let _checkStrBackup = searchFundNameOrFundId.value
+  let _testStr = _checkStrBackup.replace(/[0-9]/g, "")
+  let _pureStr = _testStr.trim()
+  let _searchedRow = null
+  if (_pureStr.length === 0 && searchFundNameOrFundId.value.length === 6) {
+    searchByFundIdTimes.value += 1
+    // fund id
+    let _fundId = searchFundNameOrFundId.value.trim()
+    dynRecordObjs.value.forEach((elem) => {
+        if (elem['fund_id'] === _fundId) {
+          elem['currSelected'] = true
+          _foundCnt += 1
+          searchByFundIdFoundFlag.value = true
+          _searchedRow = elem
+        }
+    })
+  } else {
+    // fund name
+    let arr = searchFundNameOrFundId.value.trim().split(" ")
+    dynRecordObjs.value.forEach((elem) => {
+      if (arr.length === 1) {
+        let _cond_1 = arr[0].trim()
+        if (elem['fund_name'].indexOf(_cond_1) !== -1) {
+          elem['currSelected'] = true
+          _foundCnt += 1
+          _searchedRow = elem
+        }
+      } else if (arr.length === 2) {
+        let _cond_1 = arr[0].trim()
+        let _cond_2 = arr[1].trim()
+        if (elem['fund_name'].indexOf(_cond_1) !== -1 && elem['fund_name'].indexOf(_cond_2) !== -1) {
+          elem['currSelected'] = true
+          _foundCnt += 1
+          _searchedRow = elem
+        }
       }
-    } else if (arr.length === 2) {
-      let _cond_1 = arr[0].trim()
-      let _cond_2 = arr[1].trim()
-      if (elem['fund_name'].indexOf(_cond_1) !== -1 && elem['fund_name'].indexOf(_cond_2) !== -1) {
-        elem['currSelected'] = true
-        _foundCnt += 1
-      }
-    }
-  })
+    })
+  }
   if (_foundCnt > 0) {
     sortByField('selected')
+    if (_foundCnt === 1) {
+      genReport(_searchedRow)
+    }
+    if (searchByFundIdFoundFlag.value) {
+      let _elems = document.getElementsByTagName("body");
+      let _body = _elems[0];
+      let _warning = document.getElementById("warning_wnd");
+      if (_warning) {
+        console.warn("clear warn wnd");
+        _body.removeChild(_warning);
+      }
+      let _quant_wnd = document.getElementById("quant_wnd");
+      if (_quant_wnd) {
+        console.warn("clear quant wnd");
+        _body.removeChild(_quant_wnd);
+      }
+    }
   } else {
-    searchFundName.value = ""  
+    if (_pureStr.length === 0 && searchFundNameOrFundId.value.length === 6) {
+    } else {
+      searchFundNameOrFundId.value = ""
+    }
   }
 }
 
@@ -1373,6 +1443,20 @@ function getFixedRetroClassV2(_int_val) {
   }
   return '';
 }
+
+const summ_level_tips_map = {
+				'0.1': {'cmt': '持有额小|特优', 'bgcolor': 'cornsilk', 'color': 'blue', 'bd': 'dashed 2px blue'},
+				'0.2': {'cmt': '持有额较小|次优', 'bgcolor': 'cornsilk', 'color': 'blue', 'bd': 'dashed 2px blue'},
+				'0': {'cmt': '估值优秀', 'bgcolor': 'blue', 'color': 'white', 'bd': ''},
+				'1': {'cmt': '估值良好', 'bgcolor': 'skyblue', 'color': 'white', 'bd': ''},
+				'2': {'cmt': '估值中等', 'bgcolor': 'grey', 'color': 'white', 'bd': ''},
+				'3': {'cmt': '估值一般', 'bgcolor': 'orange', 'color': 'white', 'bd': ''},
+				'4': {'cmt': '估值较差', 'bgcolor': 'red', 'color': 'white', 'bd': ''},
+				'4.1': {'cmt': '持有额较大|次差', 'bgcolor': 'cornsilk', 'color': 'red', 'bd': 'dashed 2px red'},
+				'4.2': {'cmt': '持有额大|特差', 'bgcolor': 'cornsilk', 'color': 'red', 'bd': 'dashed 2px red'},
+				'4.3': {'cmt': '售出不久', 'bgcolor': 'cornsilk', 'color': 'red', 'bd': 'dashed 2px red'},
+				'-1': {'cmt': '已经终止', 'bgcolor': 'black', 'color': 'white', 'bd': ''}
+			};
 </script>
 
 <style scoped>

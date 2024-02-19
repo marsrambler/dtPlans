@@ -170,7 +170,8 @@
       <tbody>
       <template v-for="oneRow in aggressiveViewObjs" :key="oneRow.fund_id">
         <template v-if="(showOnly3Convg && 
-                            (oneRow['p50_convg_dur_rank'] && oneRow['p65_convg_dur_rank'] && oneRow['p80_convg_dur_rank'])
+                            (oneRow['p50_convg_dur_rank'] && oneRow['p65_convg_dur_rank'] && oneRow['p80_convg_dur_rank']) &&
+                            ((!showHides && !oneRow['hide_disp']) || showHides)
                         ) || 
                         (!showOnly3Convg && 
                             ((!showHides && !oneRow['hide_disp']) || showHides)
@@ -371,6 +372,10 @@
               <td class="nr_td" v-bind:class="{ sel_row: oneRow['currSelected'] }">
                 <div class="grid_1">
                   <template v-if="oneRow['compose_plan'] && oneRow['compose_plan'] === 'noplan'">
+                    <div style="text-wrap: nowrap; display: flex; align-items: center;">额:&nbsp;
+                    <input type="number" style="width: 3.5rem; border-radius: 5px; flex-grow: 1;" 
+                    v-model="oneRow['plan_buyin_money']" @click.stop>                  
+                    </div>
                     <select class="form-select nr_select" @click.stop v-model="oneRow['target_plan']">
                       <option v-for="option in buy_in_from_plan" v-bind:value="option.source_val">
                         {{ option.source_name }}
@@ -379,11 +384,20 @@
                     <div class="right_pad">
                       <button type="button" class="btn btn-warning mw4_ctl"
                               @click.stop="changeCompose($event, oneRow)"
-                              v-bind:disabled="!oneRow['target_plan'] || oneRow['target_plan'] === 'noplan'">保存
+                              v-bind:disabled="!oneRow['target_plan'] || oneRow['target_plan'] === 'noplan'
+                              || !oneRow.hasOwnProperty('plan_buyin_money') || !oneRow['plan_buyin_money']
+                              || oneRow['plan_buyin_money'] <= 0">保存
                       </button>
                     </div>
                   </template>
                   <template v-if="oneRow['compose_plan'] && oneRow['compose_plan'] !== 'noplan'">
+                    <div style="text-align: center;" 
+                    :style="{'color': oneRow['plan_buyin_money'] - oneRow['compose_obj']['money'] >= 10? '#f96' : 
+                    oneRow['compose_obj']['money'] - oneRow['plan_buyin_money'] >= 10? 'red' : '',
+                    'font-weight': Math.abs(oneRow['plan_buyin_money'] - oneRow['compose_obj']['money'])>=10? 'bold':'normal'}">
+                      <span style="font-size: 1rem;">初:{{oneRow['plan_buyin_money']}}&nbsp;</span>
+                      <span style="font-size: 1rem;">现:{{oneRow['compose_obj']['money']}}</span>
+                    </div>
                     <div>
                       <template v-if="oneRow['compose_plan'] === 'ovtree'">
                           <span class="badge bg-primary text-bg-success big_badge">
@@ -699,6 +713,46 @@ watch([aggressiveObjs, aggressiveExcludes, buyin_records], () => {
       }
   })
 
+  let _gdngoat_fund_objs = composeObjs.value.find(item => item['compose_name'] === 'gdngoat')['compose_objs']
+
+  aggressiveViewObjs.value.forEach(elem => {
+    elem['plan_buyin_money'] = 40
+    if (!elem['p50_convg_dur_rank'] || !elem['p65_convg_dur_rank'] || !elem['p80_convg_dur_rank']) {
+      elem['plan_buyin_money'] = elem['plan_buyin_money'] - 10
+    }
+    if (elem['avg_convg_days'] && elem['avg_convg_days'] >= 150) {
+      elem['plan_buyin_money'] = elem['plan_buyin_money'] - 5
+    }
+    if (elem['avg_convg_days'] && elem['avg_convg_days'] >= 180) {
+      elem['plan_buyin_money'] = elem['plan_buyin_money'] - 5
+    }
+    if (elem['size'] && elem['size'] < 1100) {
+      elem['plan_buyin_money'] = elem['plan_buyin_money'] - 5
+    }
+    if (elem['size'] && elem['size'] < 880) {
+      elem['plan_buyin_money'] = elem['plan_buyin_money'] - 5
+    }
+    if (elem['wav_obj'] && elem['wav_obj']['wav_sort_level']) {
+      if (elem['wav_obj']['wav_sort_level'] > 2.5) {
+        elem['plan_buyin_money'] = elem['plan_buyin_money'] - 5
+      }
+      if (elem['wav_obj']['wav_sort_level'] > 5) {
+        elem['plan_buyin_money'] = elem['plan_buyin_money'] - 5
+      }
+      if (elem['wav_obj']['wav_sort_level'] > 7.5) {
+        elem['plan_buyin_money'] = elem['plan_buyin_money'] - 5
+      }
+    }
+
+    if (elem['plan_buyin_money'] < 10) {
+      elem['plan_buyin_money'] = 10
+    }
+
+    if (elem.hasOwnProperty('compose_plan') && elem['compose_plan'] && elem['compose_plan'] === 'gdngoat') {
+      elem['compose_obj'] = _gdngoat_fund_objs.find(_obj => _obj['fund_id'] === elem['fund_id'])
+    }
+  })
+
 }, {immediate: true})
 
 getAllBuyinRecords()
@@ -709,7 +763,7 @@ const currTotNum = computed(() => {
 
 function changeCompose(event, oneRowObj) {
   event.stopPropagation()
-  addOrRemoveCompose(oneRowObj['fund_id'], oneRowObj['fund_name'], oneRowObj['target_plan'])
+  addOrRemoveCompose(oneRowObj['fund_id'], oneRowObj['fund_name'], oneRowObj['target_plan'], oneRowObj['plan_buyin_money'])
 }
 
 const dlgController = ref({removeDlg: null})
@@ -966,7 +1020,7 @@ function scrollViewBySelection() {
 
 const rowElements = ref({})
 
-const searchCond = ref("&l<880;&r<0;&c>150")
+const searchCond = ref("&l<880;&r<0;&c>180")
 
 function searchByCond() {
   if (searchCond.value.trim() === '') {

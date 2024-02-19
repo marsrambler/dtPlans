@@ -24,25 +24,40 @@
         <span class="badge bg-warning">{{ totAdjustNum }}</span>
       </div>
       <div>买入:&nbsp;{{ totMoney }}</div>
-      <div>盈:
+      <div style="display: flex; align-items: center;">
+        <div style="display: inline-block; width: 1.5rem">盈:</div>
         <template v-if="totEarnMoney > 0 && totMoney > 0">
-          <span class="badge bg-danger">{{ totEarnMoney }}&nbsp;|&nbsp;{{ totEarnRate }}</span>
+          <div style="display: inline-block;" class="badge bg-danger">
+            <div style="font-size: 0.8rem;">{{ totEarnMoney }}</div>
+            <div class="sep_line"></div>
+            <div style="font-size: 0.8rem;">{{ totEarnRate }}</div>
+          </div>
         </template>
         <template v-else-if="totMoney > 0">
-          <span class="badge bg-success">{{ totEarnMoney }}&nbsp;|&nbsp;{{ totEarnRate }}</span>
+          <div style="display: inline-block;;" class="badge bg-success">
+            <div style="font-size: 0.8rem;">{{ totEarnMoney }}</div>
+            <div class="sep_line"></div>
+            <div style="font-size: 0.8rem;">{{ totEarnRate }}</div>
+          </div>
         </template>
       </div>
-      <div>设:
-        {{ totSetBuy }}&nbsp;|
-        <template v-if="diffBuySet >= 0.1">
-          <span class="badge bg-warning">{{ totPlanBuy }}</span>
-        </template>
-        <template v-else-if="diffBuySet <= -0.1">
-          <span class="badge bg-danger">{{ totPlanBuy }}</span>
-        </template>
-        <template v-else>
-          <span>{{ totPlanBuy }}</span>
-        </template>
+      <div style="display: flex; align-items: center;">
+        <div style="display: inline-block; width: 1.5rem">设:</div>
+        <div style="display: inline-block; margin-left: 0.5rem;">
+          <div style="font-size: 0.8rem; font-weight: bold; margin-bottom: -3px; text-align: center;">{{ totSetBuy }}</div>
+          <div class="sep_line"></div>
+          <template v-if="diffBuySet >= 0.1">
+            <div class="badge bg-warning"
+              style="font-size: 0.8rem; font-weight: bold; line-height: 0.8 !important;; display: block !important;">{{ totPlanBuy }}</div>
+          </template>
+          <template v-else-if="diffBuySet <= -0.1">
+            <div class="badge bg-danger"
+              style="font-size: 0.8rem; line-height: 0.8 !important;; display: block !important;">{{ totPlanBuy }}</div>
+          </template>
+          <template v-else>
+            <div style="font-size: 0.8rem; font-weight: bold; margin-top: -3px;">{{ totPlanBuy }}</div>
+          </template>
+        </div>
       </div>
       <template v-if="totPositiveNum > 0">
         <span class="blink_me badge bg-danger" style="line-height: 1.5rem; font-size: 1rem;">
@@ -191,6 +206,28 @@
               :ref="(el) => { if (el) { rowElements[oneRow.fund_id] = el; } }">
               <td v-bind:class="{ sel_row: oneRow['currSelected'] }">
                 <div>
+                  <template v-if="oneRow['compose_name'] === 'ovtree'">
+                    <span class="badge bg-primary text-bg-success big_badge">
+                      橄榄树
+                    </span>
+                  </template>
+                  <template v-else-if="oneRow['compose_name'] === 'dolphin'">
+                    <span class="badge bg-info text-bg-success big_badge">
+                      海豚
+                    </span>
+                  </template>
+                  <template v-else-if="oneRow['compose_name'] === 'trident'">
+                    <span class="badge bg-success text-bg-success big_badge">
+                      三叉戟
+                    </span>
+                  </template>
+                  <template v-else-if="oneRow['compose_name'] === 'gdngoat'">
+                    <span class="badge bg-danger text-bg-success big_badge">
+                      金毛羊
+                    </span>
+                  </template>
+                </div>
+                <div>
                   <template v-if="oneRow['has_bonus']">
                     <span style="color: red; font-weight: bold;">{{ oneRow.fund_id }}&nbsp;</span>
                   </template>
@@ -303,6 +340,28 @@
               :ref="(el) => { if (el) { rowElements[oneRow.fund_id] = el; } }">
               <td v-bind:class="{ sel_row: oneRow['currSelected'] }">
                 <div>
+                  <template v-if="oneRow['compose_name'] === 'ovtree'">
+                    <span class="badge bg-primary text-bg-success big_badge">
+                      橄榄树
+                    </span>
+                  </template>
+                  <template v-else-if="oneRow['compose_name'] === 'dolphin'">
+                    <span class="badge bg-info text-bg-success big_badge">
+                      海豚
+                    </span>
+                  </template>
+                  <template v-else-if="oneRow['compose_name'] === 'trident'">
+                    <span class="badge bg-success text-bg-success big_badge">
+                      三叉戟
+                    </span>
+                  </template>
+                  <template v-else-if="oneRow['compose_name'] === 'gdngoat'">
+                    <span class="badge bg-danger text-bg-success big_badge">
+                      金毛羊
+                    </span>
+                  </template>
+                </div>
+                <div>
                   <template v-if="oneRow['fixedHoldObj'] && oneRow['fixedHoldObj']['has_bonus']">
                     <span style="color: red; font-weight: bold;">{{ oneRow.fund_id }}&nbsp;</span>
                   </template>
@@ -370,22 +429,33 @@
               </td>
               <td v-bind:class="{ sel_row: oneRow['currSelected'] }">
                 <template v-if="oneRow['kbObj']">
-                  <div style="height: 1.8em; position: relative;"
+                  <div style="height: 1.8em; position: relative; text-align: center;"
                     v-bind:class="getPosColor(oneRow.kbObj.positive.positive_reach_len)">
                     <span v-if="oneRow.kbObj.positive.positive_reach_len >= 4" class="icon_pos">
                       <i class="bi bi-arrow-up-circle-fill"></i>
                       <span class="lv_font">{{ oneRow.kbObj.positive.positive_reach_len }}</span>
                     </span>
                   </div>
-                  <div style="height: 1.8em; position: relative;"
+                  <div style="height: 1.8em; position: relative; text-align: center;"
                     v-bind:class="getNegColor(oneRow.kbObj.negative.negative_reach_len)">
                     <span v-if="oneRow.kbObj.negative.negative_reach_len >= 3" class="icon_pos">
                       <i class="bi bi-arrow-down-circle-fill"></i>
                       <span class="lv_font">{{ oneRow.kbObj.negative.negative_reach_len }}</span>
                     </span>
                   </div>
-                  <div style="height: 3em; position: relative;">
-                  </div>
+                  <template v-if="oneRow['kbObj'].hasOwnProperty('p50_convg_dur_rank')">
+                    <div style="height: 3em; margin-top: 0.4rem; border-top: solid 1px darkgray; padding-left: 1rem;">
+                      <div style="font-size: 0.9rem; ">P50:&nbsp;{{ oneRow['kbObj']['p50_convg_dur_rank'] }}</div>
+                      <div style="font-size: 0.9rem; margin-top: -6px;">P65:&nbsp;{{ oneRow['kbObj']['p65_convg_dur_rank']
+                      }}</div>
+                      <div style="font-size: 0.9rem; margin-top: -6px;">P80:&nbsp;{{ oneRow['kbObj']['p80_convg_dur_rank']
+                      }}</div>
+                    </div>
+                  </template>
+                  <template v-else>
+                    <div style="height: 3em; position: relative;">
+                    </div>
+                  </template>
                 </template>
               </td>
               <td style="text-align: center;" v-bind:class="{ sel_row: oneRow['currSelected'] }">
@@ -475,11 +545,19 @@
                 </template>
               </td>
               <td style="line-height: 2rem;" v-bind:class="{ sel_row: oneRow['currSelected'] }">
-                <div>
+                <template v-if="oneRow['plan_buyin_money']">
+                  <div :style="{'color': oneRow['plan_buyin_money'] - oneRow['money'] >=10? '#f96' : 
+                    oneRow['money'] - oneRow['plan_buyin_money'] >=10? 'red' : '',
+                    'font-weight': Math.abs(oneRow['plan_buyin_money'] - oneRow['money']) >=10? 'bold': 'normal'}"
+                    style="height: 1.8rem;">
+                    初始:&nbsp;&nbsp;{{ oneRow['plan_buyin_money'] }}
+                  </div>
+                  </template>
+                <div style="height: 1.8rem;">
                   当前:&nbsp;
                   <input type="number" style="width: 4rem; border-radius: 5px;" v-model="oneRow['money']" @click.stop>
                 </div>
-                <div>
+                <div style="height: 1.8rem;">
                   决策:&nbsp;&nbsp;{{ oneRow['adjust_money'] }}
                   <template v-if="oneRow['adjust_money']">
                     <span class="red_card less_height" v-if="oneRow['money'] - oneRow['adjust_money'] >= 5">&nbsp;</span><!--
@@ -515,7 +593,7 @@
                       v-if="oneRow['adjust_money'] - oneRow['money'] >= 40">&nbsp;</span>
                   </template>
                 </div>
-                <div>
+                <div style="height: 1.8rem;">
                   <span style="font-size: 1rem; font-style: italic;text-decoration: underline;">{{
                     oneRow['last_adjust_money_date'] }}</span>&nbsp;
                   <input class="btn btn-outline-danger btn-sm" type="button" value="保存"
@@ -744,11 +822,11 @@ const buy_in_from_plan = [
 ]
 
 const colWidMap = {
-  'col_1': 12,
+  'col_1': 10,
   'col_2': 3,
   'col_3': 3,
   'col_4': 3,
-  'col_5': 3,
+  'col_5': 5,
   'col_6': 10,
   'col_7': 7,
   'col_8': 8,
@@ -891,6 +969,7 @@ watch([composeObjs, compose_name, fixedHoldObjs, buyoutRecords, showLostOnly, sh
   totAdjustNum.value = 0
 
   if (composeViewObjs.value.length > 0) {
+
     composeViewObjs.value.forEach(elem => {
       let fixedHoldObj = elem['fixedHoldObj']
       if (fixedHoldObj && fixedHoldObj['hold_objs'] && fixedHoldObj['hold_objs'].length > 0) {
@@ -926,6 +1005,91 @@ watch([composeObjs, compose_name, fixedHoldObjs, buyoutRecords, showLostOnly, sh
       if (dtFundId.value && dtFundId.value === elem['fund_id']) {
         elem['currSelected'] = true
         dtFundId.value = null
+      }
+
+      if (elem['compose_name'] === 'gdngoat') {
+        elem['plan_buyin_money'] = 40
+        if (!elem['kbObj']['p50_convg_dur_rank'] || !elem['kbObj']['p65_convg_dur_rank'] || !elem['kbObj']['p80_convg_dur_rank']) {
+          elem['plan_buyin_money'] = elem['plan_buyin_money'] - 10
+        }
+        if (elem['kbObj']['avg_convg_days'] && elem['kbObj']['avg_convg_days'] >= 150) {
+          elem['plan_buyin_money'] = elem['plan_buyin_money'] - 5
+        }
+        if (elem['kbObj']['avg_convg_days'] && elem['kbObj']['avg_convg_days'] >= 180) {
+          elem['plan_buyin_money'] = elem['plan_buyin_money'] - 5
+        }
+        if (elem['kbObj']['size'] && elem['kbObj']['size'] < 1100) {
+          elem['plan_buyin_money'] = elem['plan_buyin_money'] - 5
+        }
+        if (elem['kbObj']['size'] && elem['kbObj']['size'] < 880) {
+          elem['plan_buyin_money'] = elem['plan_buyin_money'] - 5
+        }
+        if (elem['wav_obj'] && elem['wav_obj']['wav_sort_level']) {
+          if (elem['wav_obj']['wav_sort_level'] > 2.5) {
+            elem['plan_buyin_money'] = elem['plan_buyin_money'] - 5
+          }
+          if (elem['wav_obj']['wav_sort_level'] > 5) {
+            elem['plan_buyin_money'] = elem['plan_buyin_money'] - 5
+          }
+          if (elem['wav_obj']['wav_sort_level'] > 7.5) {
+            elem['plan_buyin_money'] = elem['plan_buyin_money'] - 5
+          }
+        }
+
+        if (elem['plan_buyin_money'] < 10) {
+          elem['plan_buyin_money'] = 10
+        }
+
+      } else if (elem['compose_name'] === 'ovtree') {
+        elem['plan_buyin_money'] = 40
+        if (elem['kbObj']['statistics']['fund_perc_len'] && elem['kbObj']['statistics']['fund_perc_len'] < 1100) {
+          elem['plan_buyin_money'] = elem['plan_buyin_money'] - 5
+        }
+        if (elem['kbObj']['statistics']['fund_perc_len'] && elem['kbObj']['statistics']['fund_perc_len'] < 880) {
+          elem['plan_buyin_money'] = elem['plan_buyin_money'] - 5
+        }
+        if (elem['wav_obj'] && elem['wav_obj']['wav_sort_level']) {
+          if (elem['wav_obj']['wav_sort_level'] > 2.5) {
+            elem['plan_buyin_money'] = elem['plan_buyin_money'] - 5
+          }
+          if (elem['wav_obj']['wav_sort_level'] > 5) {
+            elem['plan_buyin_money'] = elem['plan_buyin_money'] - 5
+          }
+          if (elem['wav_obj']['wav_sort_level'] > 7.5) {
+            elem['plan_buyin_money'] = elem['plan_buyin_money'] - 5
+          }
+        }
+
+        if (elem['plan_buyin_money'] < 10) {
+          elem['plan_buyin_money'] = 10
+        }
+
+      } else if (elem['compose_name'] === 'dolphin') {
+        elem['plan_buyin_money'] = 30
+        if (elem['kbObj']['statistics']['fund_perc_len'] && elem['kbObj']['statistics']['fund_perc_len'] < 1100) {
+          elem['plan_buyin_money'] = elem['plan_buyin_money'] - 5
+        }
+        if (elem['kbObj']['statistics']['fund_perc_len'] && elem['kbObj']['statistics']['fund_perc_len'] < 880) {
+          elem['plan_buyin_money'] = elem['plan_buyin_money'] - 5
+        }
+        if (elem['wav_obj'] && elem['wav_obj']['wav_sort_level']) {
+          if (elem['wav_obj']['wav_sort_level'] > 2.5) {
+            elem['plan_buyin_money'] = elem['plan_buyin_money'] - 5
+          }
+          if (elem['wav_obj']['wav_sort_level'] > 5) {
+            elem['plan_buyin_money'] = elem['plan_buyin_money'] - 5
+          }
+          if (elem['wav_obj']['wav_sort_level'] > 7.5) {
+            elem['plan_buyin_money'] = elem['plan_buyin_money'] - 5
+          }
+        }
+
+        if (elem['plan_buyin_money'] < 10) {
+          elem['plan_buyin_money'] = 10
+        }
+
+      } else {
+        console.error("Not implement compose name: ", elem['compose_name']);
       }
     })
 
@@ -1334,4 +1498,10 @@ function clearSelected() {
     opacity: 0;
   }
 }
-</style>
+
+.sep_line {
+  height: 1px;
+  border: solid 1px white;
+  margin: 2px -8px;
+  box-sizing: border-box;
+}</style>

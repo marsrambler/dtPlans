@@ -25,12 +25,13 @@ export const useComposeStore = defineStore('compose-store', () => {
         }
     }
 
-    async function addOrRemoveCompose(_fund_id, _fund_name, _compose_name) {
+    async function addOrRemoveCompose(_fund_id, _fund_name, _compose_name, _plan_money = 30) {
         try {
             const response = await axiosInst.post("dt-plans/api/compose/update-compose", {
                 'fund_id': _fund_id,
                 'fund_name': _fund_name,
-                'compose_name': _compose_name
+                'compose_name': _compose_name,
+                'plan_money': _plan_money
             })
             if (response.status == 200) {
                 // await response.data

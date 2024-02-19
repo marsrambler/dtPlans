@@ -214,6 +214,7 @@ export const useReportStore = defineStore('report-store', () => {
         console.log("*** reportStore *** indexRtRateObjs: ", indexRtRateObjs.value)
 
         dynRecordObjs.value.forEach(elem => {
+            elem['show_summ_tip'] = false;
             let _tranStateObj = new Object
             elem['tranStateObj'] = _tranStateObj
             let fund_id = elem['fund_id']
