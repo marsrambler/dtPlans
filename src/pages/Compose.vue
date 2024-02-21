@@ -601,12 +601,17 @@
                 </div>
               </td>
               <td style="text-align: center;" v-bind:class="{ sel_row: oneRow['currSelected'] }">
-                <template v-if="oneRow['fixedHoldObj']">
+                <template v-if="oneRow['fixedHoldObj'] && oneRow['fixedHoldObj']['hold_objs'] && oneRow['fixedHoldObj']['hold_objs'].length > 0">
                   <button type="button" class="btn"
                     :class="{ 'btn-primary': !oneRow['fixedHoldObj']['disp_flag'], 'btn-secondary': oneRow['fixedHoldObj']['disp_flag'] }"
                     @click.stop="oneRow['fixedHoldObj']['disp_flag'] = !oneRow['fixedHoldObj']['disp_flag'];">
                     <template v-if="!oneRow['fixedHoldObj']['disp_flag']">展开</template>
                     <template v-else>折叠</template>
+                  </button>
+                </template>
+                <template v-else>
+                  <button type="button" class="btn btn-warning" @click.stop="removeCompose4Ui($event, oneRow)">
+                    移除
                   </button>
                 </template>
               </td>
@@ -778,6 +783,27 @@
       </div>
     </div>
   </div>
+  <div class="modal fade" id="removeComposeDialog" tabindex="-1">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title">移出确认</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+          <h6>以下将被移出: </h6>
+          <template v-if="toBeRemoveFundFromCompose">
+            <h6>{{ toBeRemoveFundFromCompose['fund_name'] }}&nbsp;{{ toBeRemoveFundFromCompose['compose_name'] }}</h6>
+          </template>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">取消</button>
+          <button type="button" class="btn btn-warning" @click.prevent="removeCompose()">移出
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
 </template>
 
 <script setup>
@@ -806,7 +832,7 @@ import { useRoute } from 'vue-router'
 const route = useRoute()
 const composeStore = useComposeStore()
 const { composeObjs, fixedHoldObjs } = storeToRefs(composeStore)
-const { getAllCompose, setComposeProperty, setComposeSoldDate, getComposeFixedHold } = composeStore
+const { getAllCompose, setComposeProperty, setComposeSoldDate, getComposeFixedHold, addOrRemoveCompose } = composeStore
 const buyInOutStore = useBuyInOutStore()
 const { buyoutRecords, wav_reports } = storeToRefs(buyInOutStore)
 const { getAllBuyoutRecords, soldComposeFixedHold, buyOutFixedFund } = buyInOutStore
@@ -1111,10 +1137,11 @@ getAllBuyoutRecords()
 /*
 * sold by bulk
 * */
-const dlgController = ref({ soldDlg: null, removeDlg: null })
+const dlgController = ref({ soldDlg: null, removeDlg: null, removeFromComposeDlg: null })
 onMounted(() => {
   dlgController.value.soldDlg = new Modal('#soldDialog', {})
   dlgController.value.removeDlg = new Modal('#removeDialog', {})
+  dlgController.value.removeFromComposeDlg = new Modal('#removeComposeDialog', {})
 
   if (route.query.hasOwnProperty('dt_compose') && route.query['dt_compose']) {
     if (['ovtree', 'dolphin', 'trident', 'gdngoat'].indexOf(route.query['dt_compose'].trim()) !== -1) {
@@ -1162,6 +1189,18 @@ async function removeFixedFundUi(_fund_id, _fund_name, _one_hold_obj) {
 async function removeFixedFund() {
   buyOutFixedFund(fund_id_remove.value, fund_name_remove.value, one_hold_obj_remove.value)
   dlgController.value.removeDlg.hide()
+}
+
+const toBeRemoveFundFromCompose = ref(null)
+function removeCompose4Ui(event, oneRowObj) {
+  event.stopPropagation()
+  toBeRemoveFundFromCompose.value = oneRowObj;
+  dlgController.value.removeFromComposeDlg.show();
+}
+
+async function removeCompose() {
+  await addOrRemoveCompose(toBeRemoveFundFromCompose.value['fund_id'], toBeRemoveFundFromCompose.value['fund_name'], toBeRemoveFundFromCompose.value['compose_plan'])
+  dlgController.value.removeFromComposeDlg.hide()
 }
 
 const sortFieldName = ref('')

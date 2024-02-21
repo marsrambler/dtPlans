@@ -381,11 +381,13 @@
                       </span>
                   </template>
                 </div>
+                <!--
                 <div class="right_pad">
                   <button type="button" class="btn btn-warning mw4_ctl" @click="removeCompose($event, oneRow)">
                     移除
                   </button>
                 </div>
+                -->
               </template>
             </div>
           </td>
@@ -574,10 +576,12 @@ function changeCompose(event, oneRowObj) {
   addOrRemoveCompose(oneRowObj['fund_id'], oneRowObj['fund_name'], oneRowObj['target_plan'], oneRow['plan_buyin_money'])
 }
 
+/*
 function removeCompose(event, oneRowObj) {
   event.stopPropagation()
   addOrRemoveCompose(oneRowObj['fund_id'], oneRowObj['fund_name'], oneRowObj['compose_plan'])
 }
+ */
 
 function selOrDesRow(oneRowObj) {
   if (oneRowObj.hasOwnProperty('currSelected')) {

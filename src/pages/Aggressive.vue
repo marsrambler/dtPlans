@@ -216,12 +216,14 @@
                       </span>
                       </template>
                     </div>
+                    <!--
                     <div class="right_pad">
                       <button type="button" class="btn btn-warning mw4_ctl"
                               @click="removeCompose4Ui($event, oneRow)">
                         移除
                       </button>
                     </div>
+                    -->
                   </template>
                 </div>
               </td>
@@ -420,12 +422,14 @@
                           </span>
                       </template>
                     </div>
+                    <!--
                     <div class="right_pad">
                       <button type="button" class="btn btn-warning mw4_ctl"
                               @click.stop="removeCompose4Ui($event, oneRow)">
                         移除
                       </button>
                     </div>
+                    -->
                   </template>
                 </div>
               </td>
@@ -449,6 +453,7 @@
       </tfoot>
     </table>
   </div>
+  <!--
   <div class="modal fade" id="removeDialog" tabindex="-1">
     <div class="modal-dialog">
       <div class="modal-content">
@@ -470,6 +475,7 @@
       </div>
     </div>
   </div>
+  -->
 </template>
 
 <script setup>
@@ -766,6 +772,7 @@ function changeCompose(event, oneRowObj) {
   addOrRemoveCompose(oneRowObj['fund_id'], oneRowObj['fund_name'], oneRowObj['target_plan'], oneRowObj['plan_buyin_money'])
 }
 
+/*
 const dlgController = ref({removeDlg: null})
 onMounted(() => {
   dlgController.value.removeDlg = new Modal('#removeDialog', {})
@@ -782,6 +789,7 @@ async function removeCompose() {
   await addOrRemoveCompose(toBeRemoveFund.value['fund_id'], toBeRemoveFund.value['fund_name'], toBeRemoveFund.value['compose_plan'])
   dlgController.value.removeDlg.hide()
 }
+ */
 
 function selOrDesRow(oneRowObj) {
   if (oneRowObj.hasOwnProperty('currSelected')) {
