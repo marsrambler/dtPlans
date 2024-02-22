@@ -1,7 +1,7 @@
 <template>
   <div :style="topSecClass">
-    <div id="op_pane" :style="{ 'height': opPaneHeight + 'rem' }" class="grid_pane_c11">
-      <div style="grid-column: 1 / span 2;">组合名称:&nbsp;
+    <div id="op_pane" :style="{ 'height': opPaneHeight + 'rem' }" class="grid_pane_c10">
+      <div style="margin-right:0.5rem;">
         <select class="form-select" style="width: 6.5rem;" v-model="compose_name">
           <option v-for="option in buy_in_from_plan" v-bind:value="option.source_val">
             {{ option.source_name }}
@@ -9,41 +9,55 @@
         </select>
       </div>
       <div class="form-check form_check_cust">
-        <input class="form-check-input" type="checkbox" v-model="showLostOnly">
-        <label class="form-check-label" for="flexCheckDefault">缺失&nbsp;</label>
-        <span class="badge bg-warning">{{ totLostNum }}</span>
+          <input class="form-check-input" type="checkbox" v-model="showLostOnly">
+          <label class="form-check-label" for="flexCheckDefault">缺失&nbsp;</label>
+          <span class="badge bg-warning">{{ totLostNum }}</span>
       </div>
       <div class="form-check form_check_cust">
-        <input class="form-check-input" type="checkbox" v-model="showPauseOnly">
-        <label class="form-check-label" for="flexCheckDefault">暂停&nbsp;</label>
-        <span class="badge bg-warning">{{ totPauseNum }}</span>
-      </div>
+          <input class="form-check-input" type="checkbox" v-model="showPauseOnly">
+          <label class="form-check-label" for="flexCheckDefault">暂停&nbsp;</label>
+          <span class="badge bg-warning">{{ totPauseNum }}</span>
+        </div>
       <div class="form-check form_check_cust">
-        <input class="form-check-input" type="checkbox" v-model="showAdjustOnly">
-        <label class="form-check-label" for="flexCheckDefault">调整&nbsp;</label>
-        <span class="badge bg-warning">{{ totAdjustNum }}</span>
-      </div>
-      <div>买入:&nbsp;{{ totMoney }}</div>
+          <input class="form-check-input" type="checkbox" v-model="showAdjustOnly">
+          <label class="form-check-label" for="flexCheckDefault">调整&nbsp;</label>
+          <span class="badge bg-warning">{{ totAdjustNum }}</span>
+        </div>
       <div style="display: flex; align-items: center;">
-        <div style="display: inline-block; width: 1.5rem">盈:</div>
-        <template v-if="totEarnMoney > 0 && totMoney > 0">
-          <div style="display: inline-block;" class="badge bg-danger">
-            <div style="font-size: 0.8rem;">{{ totEarnMoney }}</div>
-            <div class="sep_line"></div>
-            <div style="font-size: 0.8rem;">{{ totEarnRate }}</div>
+        <div style="display: inline-block; width: 2.5rem">
+          买入:
+        </div>
+        <div style="display: inline-block; text-align: center;">
+          <div style="font-size: 0.8rem;margin-bottom: -3px;font-weight: bold;">{{ totMoney }}</div>
+          <div class="sep_line" style="margin:0;"></div>
+          <div style="margin-top: -2px;">
+            <span class="blink_me badge bg-danger" style="font-size: 0.8rem;">
+              高点:&nbsp;{{ totPositiveNum }}
+            </span>
           </div>
-        </template>
-        <template v-else-if="totMoney > 0">
-          <div style="display: inline-block;;" class="badge bg-success">
-            <div style="font-size: 0.8rem;">{{ totEarnMoney }}</div>
-            <div class="sep_line"></div>
-            <div style="font-size: 0.8rem;">{{ totEarnRate }}</div>
-          </div>
-        </template>
+        </div>
       </div>
-      <div style="display: flex; align-items: center;">
-        <div style="display: inline-block; width: 1.5rem">设:</div>
-        <div style="display: inline-block; margin-left: 0.5rem;">
+      <div style="grid-column: 6 / span 2;display: flex; align-items: center; column-gap: 1rem;">
+        <div style="display: flex; align-items: center;">
+          <div style="display: inline-block; width: 1.5rem">盈:</div>
+          <template v-if="totEarnMoney > 0 && totMoney > 0">
+            <div style="display: inline-block;" class="badge bg-danger">
+              <div style="font-size: 0.8rem;">{{ totEarnMoney }}</div>
+              <div class="sep_line"></div>
+              <div style="font-size: 0.8rem;">{{ totEarnRate }}</div>
+            </div>
+          </template>
+          <template v-else-if="totMoney > 0">
+            <div style="display: inline-block;;" class="badge bg-success">
+              <div style="font-size: 0.8rem;">{{ totEarnMoney }}</div>
+              <div class="sep_line"></div>
+              <div style="font-size: 0.8rem;">{{ totEarnRate }}</div>
+            </div>
+          </template>
+        </div>
+        <div style="display: flex; align-items: center;">
+          <div style="display: inline-block; width: 1.5rem">设:</div>
+          <div style="display: inline-block; margin-left: 0.5rem;">
           <div style="font-size: 0.8rem; font-weight: bold; margin-bottom: -3px; text-align: center;">{{ totSetBuy }}</div>
           <div class="sep_line"></div>
           <template v-if="diffBuySet >= 0.1">
@@ -58,15 +72,14 @@
             <div style="font-size: 0.8rem; font-weight: bold; margin-top: -3px;">{{ totPlanBuy }}</div>
           </template>
         </div>
-      </div>
-      <template v-if="totPositiveNum > 0">
-        <span class="blink_me badge bg-danger" style="line-height: 1.5rem; font-size: 1rem;">
-          有高点:&nbsp;{{ totPositiveNum }}
-        </span>
-      </template>
-      <div style="cursor: pointer;" @click="clearSelected()">
+        </div>
+        <div style="cursor: pointer;" @click="clearSelected()">
         &nbsp;选择&nbsp;<span class="badge bg-warning text-dark">{{ currSelectedNum }}</span>
+        </div>
       </div>
+      <input type="text" class="form-control-plaintext search_box" style="" v-model="searchCond"
+             @keyup.enter="searchByCond()">
+      <input class="btn btn-primary btn-sm" type="button" value="查找" @click="searchByCond()">
       <template v-if="currSelectedNum > 0">
         <input class="btn btn-primary btn-sm" type="button" value="前移选择" @click="sortByField('selected')">
       </template>
@@ -381,7 +394,7 @@
                     </span>
                   </template>
                   <template v-if="oneRow['last_sold_date']">
-                    <span>售:&nbsp;{{ oneRow['last_sold_date'] }}&nbsp;|&nbsp;{{ oneRow['last_sold_days'] }}</span>
+                    <span>&nbsp;&nbsp;售:&nbsp;{{ oneRow['last_sold_date'] }}&nbsp;|&nbsp;{{ oneRow['last_sold_days'] }}</span>
                   </template>
                 </div>
                 <div>
@@ -821,7 +834,7 @@ import {
   getHitStyle,
   get_suggestion_by_wav
 } from "../lib/commonUtils.js"
-import { onMounted, computed, ref, watch, nextTick } from "vue";
+import {onMounted, computed, ref, watch, nextTick, onUnmounted} from "vue";
 import { storeToRefs } from 'pinia'
 import { useComposeStore } from "../store/composeStore.js";
 import { useZskbStore } from "../store/zskbStore.js"
@@ -890,7 +903,6 @@ const showLostOnly = ref(false)
 const showPauseOnly = ref(false)
 const showAdjustOnly = ref(false)
 const totPositiveNum = ref(0)
-const dtFundId = ref(null)
 const totLostNum = ref(0)
 const totPauseNum = ref(0)
 const totAdjustNum = ref(0)
@@ -1028,11 +1040,6 @@ watch([composeObjs, compose_name, fixedHoldObjs, buyoutRecords, showLostOnly, sh
         totAdjustNum.value = totAdjustNum.value + 1
       }
 
-      if (dtFundId.value && dtFundId.value === elem['fund_id']) {
-        elem['currSelected'] = true
-        dtFundId.value = null
-      }
-
       if (elem['compose_name'] === 'gdngoat') {
         elem['plan_buyin_money'] = 40
         if (!elem['kbObj']['p50_convg_dur_rank'] || !elem['kbObj']['p65_convg_dur_rank'] || !elem['kbObj']['p80_convg_dur_rank']) {
@@ -1138,6 +1145,11 @@ getAllBuyoutRecords()
 * sold by bulk
 * */
 const dlgController = ref({ soldDlg: null, removeDlg: null, removeFromComposeDlg: null })
+const searchCond = ref()
+const searchTimer = ref(null)
+const searchByFundIdFoundFlag = ref(false)
+const searchByFundIdTimes = ref(0)
+
 onMounted(() => {
   dlgController.value.soldDlg = new Modal('#soldDialog', {})
   dlgController.value.removeDlg = new Modal('#removeDialog', {})
@@ -1151,9 +1163,29 @@ onMounted(() => {
     }
   }
   if (route.query.hasOwnProperty('dt_fund_id') && route.query['dt_fund_id']) {
-    dtFundId.value = route.query['dt_fund_id'].trim();
+    searchCond.value = route.query['dt_fund_id'].trim();
+    searchByFundIdTimes.value = 0
+    if (searchCond.value.length === 6) {
+      searchTimer.value = setInterval(() => {
+        searchByCond()
+        if (searchByFundIdFoundFlag.value || searchByFundIdTimes.value >= 10) {
+          if (searchTimer.value) {
+            console.warn("clear search timer in compose page")
+            clearInterval(searchTimer.value)
+          }
+        }
+      }, 1000)
+    }
   }
 })
+
+onUnmounted(() => {
+  if (searchTimer.value) {
+    console.warn("clear search timer in compose page")
+    clearInterval(searchTimer.value)
+  }
+})
+
 const fund_id_sold = ref('')
 const fund_name_sold = ref('')
 const one_hold_obj_end = ref(null)
@@ -1496,6 +1528,73 @@ function selOrDesRow(oneRowObj) {
 function clearSelected() {
   composeViewObjs.value.forEach((elem) => elem['currSelected'] = false)
 }
+
+function searchByCond() {
+  clearSelected()
+  if (searchCond.value.trim() === '') {
+    return
+  }
+  let _foundCnt = 0
+  let _checkStrBackup = searchCond.value
+  let _testStr = _checkStrBackup.replace(/[0-9]/g, "")
+  let _pureStr = _testStr.trim()
+  if (_pureStr.length === 0 && searchCond.value.length === 6) {
+    searchByFundIdTimes.value += 1
+    // fund id
+    let _fundId = searchCond.value.trim()
+    composeViewObjs.value.forEach((elem) => {
+      if (elem['fund_id'] === _fundId) {
+        elem['currSelected'] = true
+        _foundCnt += 1
+        searchByFundIdFoundFlag.value = true
+      }
+    })
+  } else {
+    // fund name
+    let arr = searchCond.value.trim().split(" ")
+    composeViewObjs.value.forEach((elem) => {
+      if (arr.length === 1) {
+        let _cond_1 = arr[0].trim()
+        if (elem['fund_name'].indexOf(_cond_1) !== -1) {
+          elem['currSelected'] = true
+          _foundCnt += 1
+        }
+      } else if (arr.length === 2) {
+        let _cond_1 = arr[0].trim()
+        let _cond_2 = arr[1].trim()
+        if (elem['fund_name'].indexOf(_cond_1) !== -1 && elem['fund_name'].indexOf(_cond_2) !== -1) {
+          elem['currSelected'] = true
+          _foundCnt += 1
+        }
+      }
+    })
+  }
+  if (_foundCnt > 0) {
+    sortByField('selected')
+    if (_foundCnt === 1) {
+    }
+    if (searchByFundIdFoundFlag.value) {
+      let _elems = document.getElementsByTagName("body");
+      let _body = _elems[0];
+      let _warning = document.getElementById("warning_wnd");
+      if (_warning) {
+        console.warn("clear warn wnd");
+        _body.removeChild(_warning);
+      }
+      let _quant_wnd = document.getElementById("quant_wnd");
+      if (_quant_wnd) {
+        console.warn("clear quant wnd");
+        _body.removeChild(_quant_wnd);
+      }
+    }
+  } else {
+    if (_pureStr.length === 0 && searchCond.value.length === 6) {
+    } else {
+      searchCond.value = ""
+    }
+  }
+}
+
 </script>
 
 <style scoped>

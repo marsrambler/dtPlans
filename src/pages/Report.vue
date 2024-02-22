@@ -491,7 +491,7 @@ onMounted(() => {
         excuteSearchFund()
         if (searchByFundIdFoundFlag.value || searchByFundIdTimes.value >= 10) {
           if (searchTimer.value) {
-            console.warn("clear search timer")
+            console.warn("clear search timer in report page")
             clearInterval(searchTimer.value)
           }
         }
@@ -502,7 +502,7 @@ onMounted(() => {
 
 onUnmounted(() => {
   if (searchTimer.value) {
-    console.warn("clear search timer")
+    console.warn("clear search timer in report page")
     clearInterval(searchTimer.value)
   }
 })
