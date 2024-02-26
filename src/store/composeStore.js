@@ -8,6 +8,14 @@ export const useComposeStore = defineStore('compose-store', () => {
     // state
     const composeObjs = ref([])
     const fixedHoldObjs = ref([])
+    const totMoney = ref(0)
+    const totPositiveNum = ref(0)
+    const totPoleNum = ref(0)
+    const totEarnMoney = ref(0)
+    const totEarnRate = ref(null)
+    const totSetBuy = ref(0)
+    const totPlanBuy = ref(0)
+    const diffBuySet = ref(0)
 
     // action
     async function getAllCompose() {
@@ -107,6 +115,14 @@ export const useComposeStore = defineStore('compose-store', () => {
     return {
         composeObjs,
         fixedHoldObjs,
+        totMoney,
+        totPositiveNum,
+        totPoleNum,
+        totEarnMoney,
+        totEarnRate,
+        totSetBuy,
+        totPlanBuy,
+        diffBuySet,
         getAllCompose,
         addOrRemoveCompose,
         setComposeProperty,

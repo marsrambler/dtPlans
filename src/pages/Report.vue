@@ -481,7 +481,7 @@ onMounted(() => {
   let _prot = window.location.protocol;
   let _host = window.location.hostname;
   baseUrl4ProbeNav.value = _prot + "//" + _host + "/probe-funds.html?dt_fund_id="
-  baseUrl4ComposeNav.value = _prot + "//" + _host + "/dt_plans_web/#/composite?dt_fund_id="
+  baseUrl4ComposeNav.value = _prot + "//" + _host + "/dt_plans_web/#/?dt_fund_id="
 
   if (route.query.hasOwnProperty('fund_id') && route.query['fund_id']) {
     searchFundNameOrFundId.value = route.query['fund_id'].trim();

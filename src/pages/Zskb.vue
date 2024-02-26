@@ -254,14 +254,14 @@
           <td style="text-align: left;" v-bind:class="{ sel_row: oneRow['currSelected'] }">
             <div style="height: 1.8em; position: relative;"
                  v-bind:class="getPosColor(oneRow.positive.positive_reach_len)">
-                <span v-if="oneRow.positive.positive_reach_len >= 4" class="icon_pos">
+                <span v-if="oneRow.positive.positive_reach_len >= 4" class="icon_pos_right">
                   <i class="bi bi-arrow-up-circle-fill"></i>
                   <span class="lv_font">{{ oneRow.positive.positive_reach_len }}</span>
                 </span>
             </div>
             <div style="height: 1.8em; position: relative;"
                  v-bind:class="getNegColor(oneRow.negative.negative_reach_len)">
-                <span v-if="oneRow.negative.negative_reach_len >= 3" class="icon_pos">
+                <span v-if="oneRow.negative.negative_reach_len >= 3" class="icon_pos_right">
                   <i class="bi bi-arrow-down-circle-fill"></i>
                   <span class="lv_font">{{ oneRow.negative.negative_reach_len }}</span>
                 </span>
@@ -381,13 +381,6 @@
                       </span>
                   </template>
                 </div>
-                <!--
-                <div class="right_pad">
-                  <button type="button" class="btn btn-warning mw4_ctl" @click="removeCompose($event, oneRow)">
-                    移除
-                  </button>
-                </div>
-                -->
               </template>
             </div>
           </td>
@@ -441,6 +434,7 @@ const {composeObjs} = storeToRefs(composeStore)
 const {addOrRemoveCompose} = composeStore
 const buyInOutStore = useBuyInOutStore()
 const {wav_reports} = storeToRefs(buyInOutStore)
+const {calculatePlanMoney} = buyInOutStore
 
 const buy_in_esti_sugg_full = [
   {'source_name': '未知', 'source_val': -2},
@@ -537,28 +531,7 @@ watch([zskbObjs, wideIdxOnly, topicIdxOnly, indusIdxOnly, qdiiIdxOnly, composeOb
         elem['compose_plan'] = 'noplan'
         elem['compose_obj'] = null
       }
-
-      elem['plan_buyin_money'] = 40
-      if (elem['size'] && elem['size'] < 1100) {
-        elem['plan_buyin_money'] = elem['plan_buyin_money'] - 5
-      }
-      if (elem['size'] && elem['size'] < 880) {
-        elem['plan_buyin_money'] = elem['plan_buyin_money'] - 5
-      }
-      if (elem['wav_obj'] && elem['wav_obj']['wav_sort_level']) {
-        if (elem['wav_obj']['wav_sort_level'] > 2.5) {
-          elem['plan_buyin_money'] = elem['plan_buyin_money'] - 5
-        }
-        if (elem['wav_obj']['wav_sort_level'] > 5) {
-          elem['plan_buyin_money'] = elem['plan_buyin_money'] - 5
-        }
-        if (elem['wav_obj']['wav_sort_level'] > 7.5) {
-          elem['plan_buyin_money'] = elem['plan_buyin_money'] - 5
-        }
-      }
-      if (elem['plan_buyin_money'] < 10) {
-        elem['plan_buyin_money'] = 10
-      }
+      calculatePlanMoney('zskb', elem)
     })
   }
 }, {immediate: true})
@@ -575,13 +548,6 @@ function changeCompose(event, oneRowObj) {
   event.stopPropagation()
   addOrRemoveCompose(oneRowObj['fund_id'], oneRowObj['fund_name'], oneRowObj['target_plan'], oneRow['plan_buyin_money'])
 }
-
-/*
-function removeCompose(event, oneRowObj) {
-  event.stopPropagation()
-  addOrRemoveCompose(oneRowObj['fund_id'], oneRowObj['fund_name'], oneRowObj['compose_plan'])
-}
- */
 
 function selOrDesRow(oneRowObj) {
   if (oneRowObj.hasOwnProperty('currSelected')) {

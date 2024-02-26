@@ -10,12 +10,12 @@
       </button>
       <div class="collapse navbar-collapse" id="navbarNav">
         <ul class="navbar-nav" style="gap: 0.5rem;">
-          <router-link to="/" class="nav-item nav-link">仓库</router-link>
+          <router-link to="/" class="nav-item nav-link">组合</router-link>
+          <router-link to="/repo" class="nav-item nav-link">仓库</router-link>
           <router-link to="/kanban" class="nav-item nav-link">看板</router-link>
           <router-link to="/recycle" class="nav-item nav-link">回收</router-link>
           <router-link to="/aggressive" class="nav-item nav-link">主动</router-link>
           <router-link to="/convg" class="nav-item nav-link">优选</router-link>
-          <router-link to="/composite" class="nav-item nav-link">组合</router-link>
           <router-link to="/report" class="nav-item nav-link">报告</router-link>
           <li class="nav-item dropdown">
             <a class="nav-link dropdown-toggle" href="#" id="navbarDropdownMenuLink" role="button"
@@ -42,6 +42,72 @@
             去综合门户
           </a>
         </span>
+
+        <div style="display: flex; margin-left: 1rem; column-gap: 0.5rem;">
+
+          <div style="display: flex; align-items: center; color: white;">
+            <div style="display: inline-block; width: 1.5rem;">
+              持:
+            </div>
+            <div style="display: inline-block; text-align: center;">
+              <div style="font-size: 0.8rem;margin-bottom: -3px;font-weight: bold;">{{ totMoney }}</div>
+              <div class="sep_line" style="margin:0;"></div>
+              <div style="margin-top: -2px;">
+                <span class="blink_me badge bg-danger" style="font-size: 0.8rem;">
+                  高点:&nbsp;{{ totPositiveNum }}
+                </span>
+              </div>
+            </div>
+          </div>
+
+          <div style="display: flex; align-items: center; color: white;">
+            <div style="display: inline-block; width: 1.5rem">盈:</div>
+              <template v-if="totEarnMoney > 0 && totMoney > 0">
+                <div style="display: inline-block;" class="badge bg-danger">
+                  <div style="font-size: 0.8rem;">{{ totEarnMoney }}</div>
+                  <div class="sep_line"></div>
+                  <div style="font-size: 0.8rem;">{{ totEarnRate }}</div>
+                </div>
+              </template>
+              <template v-else-if="totMoney > 0">
+                <div style="display: inline-block;" class="badge bg-success">
+                  <div style="font-size: 0.8rem;">{{ totEarnMoney }}</div>
+                  <div class="sep_line"></div>
+                  <div style="font-size: 0.8rem;">{{ totEarnRate }}</div>
+                </div>
+              </template>
+              <template v-else>
+                <div style="display: inline-block; margin-left: 0.5rem; margin-right: 0.5rem;">
+                  <div style="font-size: 0.8rem;">0</div>
+                  <div class="sep_line"></div>
+                  <div style="font-size: 0.8rem;">0</div>                  
+                </div>
+              </template>
+          </div>
+          
+          <div style="display: flex; align-items: center; color: white;">
+            <div style="display: inline-block; width: 1.5rem">设:</div>
+            <div style="display: inline-block; margin-left: 0.5rem;">
+              <div style="font-size: 0.8rem; font-weight: bold; margin-bottom: -3px; text-align: center;">{{ totSetBuy }}</div>
+              <div class="sep_line"></div>
+                <template v-if="diffBuySet >= 0.1">
+                  <div class="badge bg-warning"
+                    style="font-size: 0.8rem; font-weight: bold; line-height: 0.8 !important;; display: block !important;">{{ totPlanBuy }}
+                  </div>
+                </template>
+                <template v-else-if="diffBuySet <= -0.1">
+                  <div class="badge bg-danger"
+                    style="font-size: 0.8rem; line-height: 0.8 !important;; display: block !important;">{{ totPlanBuy }}
+                  </div>
+                </template>
+                <template v-else>
+                  <div style="font-size: 0.8rem; font-weight: bold; margin-top: -3px;">{{ totPlanBuy }}</div>
+                </template>
+            </div>
+          </div>
+          
+        </div>
+
       </div>
     </div>
   </nav>
@@ -70,9 +136,13 @@ import { getSyncStatus, runKanban, syncKanban } from "../lib/opApi.js";
 import {Modal} from "bootstrap";
 import { useZskbStore } from "../store/zskbStore";
 import {storeToRefs} from 'pinia'
+import { useComposeStore } from '../store/composeStore';
 
 const zskbStore = useZskbStore()
 const {rtRates} = storeToRefs(zskbStore)
+
+const composeStore = useComposeStore()
+const { totMoney, totPositiveNum, totPoleNum, totEarnMoney, totEarnRate, totSetBuy, totPlanBuy, diffBuySet } = storeToRefs(composeStore)
 
 const cfmDlgTitle = ref("")
 const cfmDlgCont = ref("")
@@ -141,4 +211,22 @@ a.router-link-exact-active {
   border: solid 1px cyan;
   /*border-radius: 1px;*/
   font-weight: 900;
-}</style>
+}
+
+.blink_me {
+  animation: blinker 10s linear infinite;
+}
+
+@keyframes blinker {
+  50% {
+    opacity: 0;
+  }
+}
+
+.sep_line {
+  height: 1px;
+  border: solid 1px white;
+  margin: 2px -8px;
+  box-sizing: border-box;
+}
+</style>

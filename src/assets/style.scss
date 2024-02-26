@@ -81,6 +81,16 @@ $darkgolden: #ffc107;
   top:-8px;
 }
 
+.icon_pos_left {
+  @extend .icon_pos;
+  left: 0
+}
+
+.icon_pos_right {
+  @extend .icon_pos;
+  right: 0
+}
+
 .red_8 {
   color: $purple
 }

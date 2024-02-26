@@ -192,6 +192,256 @@ export const useBuyInOutStore = defineStore('buyInOut-store', () => {
         }
     }
 
+    function calculatePlanMoney(_page_type, elem) {
+        if (_page_type === 'zskb') {
+            elem['plan_buyin_money'] = 60
+            if (elem.hasOwnProperty('compose_obj') && elem['compose_obj'] && elem['compose_obj']['quant_obj'] && elem['compose_obj']['quant_obj']['histo']) {
+                let _max_hitted_times = elem['compose_obj']['quant_obj']['histo']['max_hitted_times']
+                let _min_hitted_times = elem['compose_obj']['quant_obj']['histo']['min_hitted_times']
+                if (_max_hitted_times > _min_hitted_times) {
+                    for (let idx = 0; idx < _max_hitted_times - _min_hitted_times; idx++) {
+                        elem['plan_buyin_money'] = elem['plan_buyin_money'] * 0.8
+                    }
+                } else if (_min_hitted_times > _max_hitted_times) {
+                    for (let idx = 0; idx < _min_hitted_times - _max_hitted_times; idx++) {
+                        elem['plan_buyin_money'] = elem['plan_buyin_money']
+                    }
+                }
+            }
+
+            if (elem.hasOwnProperty('size') && elem['size'] < 1100) {
+                elem['plan_buyin_money'] = elem['plan_buyin_money'] - 5
+            }
+            if (elem.hasOwnProperty('size') && elem['size'] < 880) {
+                elem['plan_buyin_money'] = elem['plan_buyin_money'] - 5
+            }
+            if (elem['wav_obj'] && elem['wav_obj']['wav_sort_level']) {
+                if (elem['wav_obj']['wav_sort_level'] > 2.5) {
+                    elem['plan_buyin_money'] = elem['plan_buyin_money'] - 5
+                }
+                if (elem['wav_obj']['wav_sort_level'] > 5) {
+                    elem['plan_buyin_money'] = elem['plan_buyin_money'] - 5
+                }
+                if (elem['wav_obj']['wav_sort_level'] > 7.5) {
+                    elem['plan_buyin_money'] = elem['plan_buyin_money'] - 5
+                }
+            }
+            if (elem['plan_buyin_money'] < 10) {
+                elem['plan_buyin_money'] = 10
+            }
+        } else if (_page_type === 'aggressive') {
+            elem['plan_buyin_money'] = 40
+            if (elem.hasOwnProperty('compose_obj') && elem['compose_obj'] && elem['compose_obj']['quant_obj'] && elem['compose_obj']['quant_obj']['histo']) {
+                let _max_hitted_times = elem['compose_obj']['quant_obj']['histo']['max_hitted_times']
+                let _min_hitted_times = elem['compose_obj']['quant_obj']['histo']['min_hitted_times']
+                if (_max_hitted_times > _min_hitted_times) {
+                    for (let idx = 0; idx < _max_hitted_times - _min_hitted_times; idx++) {
+                        elem['plan_buyin_money'] = elem['plan_buyin_money'] * 0.8
+                    }
+                } else if (_min_hitted_times > _max_hitted_times) {
+                    for (let idx = 0; idx < _min_hitted_times - _max_hitted_times; idx++) {
+                        elem['plan_buyin_money'] = elem['plan_buyin_money']
+                    }
+                }
+            }
+
+            if (!elem['p50_convg_dur_rank'] || !elem['p65_convg_dur_rank'] || !elem['p80_convg_dur_rank']) {
+                elem['plan_buyin_money'] = elem['plan_buyin_money'] - 10
+            }
+            if (elem['avg_convg_days'] && elem['avg_convg_days'] >= 150) {
+                elem['plan_buyin_money'] = elem['plan_buyin_money'] - 5
+            }
+            if (elem['avg_convg_days'] && elem['avg_convg_days'] >= 180) {
+                elem['plan_buyin_money'] = elem['plan_buyin_money'] - 5
+            }
+            if (elem['size'] && elem['size'] < 1100) {
+                elem['plan_buyin_money'] = elem['plan_buyin_money'] - 5
+            }
+            if (elem['size'] && elem['size'] < 880) {
+                elem['plan_buyin_money'] = elem['plan_buyin_money'] - 5
+            }
+            if (elem['wav_obj'] && elem['wav_obj']['wav_sort_level']) {
+                if (elem['wav_obj']['wav_sort_level'] > 2.5) {
+                    elem['plan_buyin_money'] = elem['plan_buyin_money'] - 5
+                }
+                if (elem['wav_obj']['wav_sort_level'] > 5) {
+                    elem['plan_buyin_money'] = elem['plan_buyin_money'] - 5
+                }
+                if (elem['wav_obj']['wav_sort_level'] > 7.5) {
+                    elem['plan_buyin_money'] = elem['plan_buyin_money'] - 5
+                }
+            }
+
+            if (elem['plan_buyin_money'] < 10) {
+                elem['plan_buyin_money'] = 10
+            }
+        } else if (_page_type === 'dtconvg') {
+            elem['plan_buyin_money'] = 40
+            if (elem.hasOwnProperty('compose_obj') && elem['compose_obj'] && elem['compose_obj']['quant_obj'] && elem['compose_obj']['quant_obj']['histo']) {
+                let _max_hitted_times = elem['compose_obj']['quant_obj']['histo']['max_hitted_times']
+                let _min_hitted_times = elem['compose_obj']['quant_obj']['histo']['min_hitted_times']
+                if (_max_hitted_times > _min_hitted_times) {
+                    for (let idx = 0; idx < _max_hitted_times - _min_hitted_times; idx++) {
+                        elem['plan_buyin_money'] = elem['plan_buyin_money'] * 0.8
+                    }
+                } else if (_min_hitted_times > _max_hitted_times) {
+                    for (let idx = 0; idx < _min_hitted_times - _max_hitted_times; idx++) {
+                        elem['plan_buyin_money'] = elem['plan_buyin_money']
+                    }
+                }
+            }
+
+            if (elem['size'] && elem['size'] < 1100) {
+                elem['plan_buyin_money'] = elem['plan_buyin_money'] - 5
+            }
+            if (elem['size'] && elem['size'] < 880) {
+                elem['plan_buyin_money'] = elem['plan_buyin_money'] - 5
+            }
+            if (elem['wav_obj'] && elem['wav_obj']['wav_sort_level']) {
+                if (elem['wav_obj']['wav_sort_level'] > 2.5) {
+                    elem['plan_buyin_money'] = elem['plan_buyin_money'] - 5
+                }
+                if (elem['wav_obj']['wav_sort_level'] > 5) {
+                    elem['plan_buyin_money'] = elem['plan_buyin_money'] - 5
+                }
+                if (elem['wav_obj']['wav_sort_level'] > 7.5) {
+                    elem['plan_buyin_money'] = elem['plan_buyin_money'] - 5
+                }
+            }
+
+            if (elem['plan_buyin_money'] < 10) {
+                elem['plan_buyin_money'] = 10
+            }
+        } else if (_page_type === 'compose') {
+            if (elem['compose_name'] === 'gdngoat') {
+                elem['plan_buyin_money'] = 40
+                if (elem['quant_obj'] && elem['quant_obj']['histo']) {
+                    let _max_hitted_times = elem['quant_obj']['histo']['max_hitted_times']
+                    let _min_hitted_times = elem['quant_obj']['histo']['min_hitted_times']
+                    if (_max_hitted_times > _min_hitted_times) {
+                        for (let idx = 0; idx < _max_hitted_times - _min_hitted_times; idx++) {
+                            elem['plan_buyin_money'] = elem['plan_buyin_money'] * 0.8
+                        }
+                    } else if (_min_hitted_times > _max_hitted_times) {
+                        for (let idx = 0; idx < _min_hitted_times - _max_hitted_times; idx++) {
+                            elem['plan_buyin_money'] = elem['plan_buyin_money']
+                        }
+                    }
+                }
+
+                if (!elem['kbObj']['p50_convg_dur_rank'] || !elem['kbObj']['p65_convg_dur_rank'] || !elem['kbObj']['p80_convg_dur_rank']) {
+                    elem['plan_buyin_money'] = elem['plan_buyin_money'] - 10
+                }
+                if (elem['kbObj']['avg_convg_days'] && elem['kbObj']['avg_convg_days'] >= 150) {
+                    elem['plan_buyin_money'] = elem['plan_buyin_money'] - 5
+                }
+                if (elem['kbObj']['avg_convg_days'] && elem['kbObj']['avg_convg_days'] >= 180) {
+                    elem['plan_buyin_money'] = elem['plan_buyin_money'] - 5
+                }
+                if (elem['kbObj']['size'] && elem['kbObj']['size'] < 1100) {
+                    elem['plan_buyin_money'] = elem['plan_buyin_money'] - 5
+                }
+                if (elem['kbObj']['size'] && elem['kbObj']['size'] < 880) {
+                    elem['plan_buyin_money'] = elem['plan_buyin_money'] - 5
+                }
+                if (elem['wav_obj'] && elem['wav_obj']['wav_sort_level']) {
+                    if (elem['wav_obj']['wav_sort_level'] > 2.5) {
+                        elem['plan_buyin_money'] = elem['plan_buyin_money'] - 5
+                    }
+                    if (elem['wav_obj']['wav_sort_level'] > 5) {
+                        elem['plan_buyin_money'] = elem['plan_buyin_money'] - 5
+                    }
+                    if (elem['wav_obj']['wav_sort_level'] > 7.5) {
+                        elem['plan_buyin_money'] = elem['plan_buyin_money'] - 5
+                    }
+                }
+
+                if (elem['plan_buyin_money'] < 10) {
+                    elem['plan_buyin_money'] = 10
+                }
+
+            } else if (elem['compose_name'] === 'ovtree') {
+                elem['plan_buyin_money'] = 60
+                if (elem['quant_obj'] && elem['quant_obj']['histo']) {
+                    let _max_hitted_times = elem['quant_obj']['histo']['max_hitted_times']
+                    let _min_hitted_times = elem['quant_obj']['histo']['min_hitted_times']
+                    if (_max_hitted_times > _min_hitted_times) {
+                        for (let idx = 0; idx < _max_hitted_times - _min_hitted_times; idx++) {
+                            elem['plan_buyin_money'] = elem['plan_buyin_money'] * 0.8
+                        }
+                    } else if (_min_hitted_times > _max_hitted_times) {
+                        for (let idx = 0; idx < _min_hitted_times - _max_hitted_times; idx++) {
+                            elem['plan_buyin_money'] = elem['plan_buyin_money']
+                        }
+                    }
+                }
+
+                if (elem['kbObj']['statistics']['fund_perc_len'] && elem['kbObj']['statistics']['fund_perc_len'] < 1100) {
+                    elem['plan_buyin_money'] = elem['plan_buyin_money'] - 5
+                }
+                if (elem['kbObj']['statistics']['fund_perc_len'] && elem['kbObj']['statistics']['fund_perc_len'] < 880) {
+                    elem['plan_buyin_money'] = elem['plan_buyin_money'] - 5
+                }
+                if (elem['wav_obj'] && elem['wav_obj']['wav_sort_level']) {
+                    if (elem['wav_obj']['wav_sort_level'] > 2.5) {
+                        elem['plan_buyin_money'] = elem['plan_buyin_money'] - 5
+                    }
+                    if (elem['wav_obj']['wav_sort_level'] > 5) {
+                        elem['plan_buyin_money'] = elem['plan_buyin_money'] - 5
+                    }
+                    if (elem['wav_obj']['wav_sort_level'] > 7.5) {
+                        elem['plan_buyin_money'] = elem['plan_buyin_money'] - 5
+                    }
+                }
+
+                if (elem['plan_buyin_money'] < 10) {
+                    elem['plan_buyin_money'] = 10
+                }
+
+            } else if (elem['compose_name'] === 'dolphin') {
+                elem['plan_buyin_money'] = 40
+                if (elem['quant_obj'] && elem['quant_obj']['histo']) {
+                    let _max_hitted_times = elem['quant_obj']['histo']['max_hitted_times']
+                    let _min_hitted_times = elem['quant_obj']['histo']['min_hitted_times']
+                    if (_max_hitted_times > _min_hitted_times) {
+                        for (let idx = 0; idx < _max_hitted_times - _min_hitted_times; idx++) {
+                            elem['plan_buyin_money'] = elem['plan_buyin_money'] * 0.8
+                        }
+                    } else if (_min_hitted_times > _max_hitted_times) {
+                        for (let idx = 0; idx < _min_hitted_times - _max_hitted_times; idx++) {
+                            elem['plan_buyin_money'] = elem['plan_buyin_money']
+                        }
+                    }
+                }
+
+                if (elem['kbObj']['statistics']['fund_perc_len'] && elem['kbObj']['statistics']['fund_perc_len'] < 1100) {
+                    elem['plan_buyin_money'] = elem['plan_buyin_money'] - 5
+                }
+                if (elem['kbObj']['statistics']['fund_perc_len'] && elem['kbObj']['statistics']['fund_perc_len'] < 880) {
+                    elem['plan_buyin_money'] = elem['plan_buyin_money'] - 5
+                }
+                if (elem['wav_obj'] && elem['wav_obj']['wav_sort_level']) {
+                    if (elem['wav_obj']['wav_sort_level'] > 2.5) {
+                        elem['plan_buyin_money'] = elem['plan_buyin_money'] - 5
+                    }
+                    if (elem['wav_obj']['wav_sort_level'] > 5) {
+                        elem['plan_buyin_money'] = elem['plan_buyin_money'] - 5
+                    }
+                    if (elem['wav_obj']['wav_sort_level'] > 7.5) {
+                        elem['plan_buyin_money'] = elem['plan_buyin_money'] - 5
+                    }
+                }
+
+                if (elem['plan_buyin_money'] < 10) {
+                    elem['plan_buyin_money'] = 10
+                }
+
+            } else {
+                console.error("Not implement compose name: ", elem['compose_name']);
+            }
+        }
+    }
+
     return {
         buyoutRecords,
         buyin_records,
@@ -203,7 +453,8 @@ export const useBuyInOutStore = defineStore('buyInOut-store', () => {
         buyOutFixedFund,
         getAllBuyinRecords,
         custBuyIn,
-        getFundWavReport
+        getFundWavReport,
+        calculatePlanMoney
     }
 
 });

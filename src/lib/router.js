@@ -7,19 +7,19 @@ import Report from "../pages/Report.vue";
 import RepoRecycle from "../pages/RepoRecycle.vue";
 import Aggressive from "../pages/Aggressive.vue";
 import DtConvg from "../pages/DtConvg.vue";
-
+/* composite*/
 const routes = [
     {
         path: '/',
+        component: Compose
+    },
+    {
+        path: '/repo/',
         component: Zsrepo
     },
     {
         path: '/kanban/',
         component: Zskb
-    },
-    {
-        path: '/composite/',
-        component: Compose
     },
     {
         path: '/report/',

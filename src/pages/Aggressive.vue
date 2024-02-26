@@ -216,14 +216,6 @@
                       </span>
                       </template>
                     </div>
-                    <!--
-                    <div class="right_pad">
-                      <button type="button" class="btn btn-warning mw4_ctl"
-                              @click="removeCompose4Ui($event, oneRow)">
-                        移除
-                      </button>
-                    </div>
-                    -->
                   </template>
                 </div>
               </td>
@@ -300,14 +292,14 @@
               <td style="text-align: left;" v-bind:class="{ sel_row: oneRow['currSelected'] }">
                 <div style="height: 1.8em; position: relative;"
                     v-bind:class="getPosColor(oneRow.positive.positive_reach_len)">
-                  <span v-if="oneRow.positive.positive_reach_len >= 4" class="icon_pos">
+                  <span v-if="oneRow.positive.positive_reach_len >= 4" class="icon_pos_right">
                     <i class="bi bi-arrow-up-circle-fill"></i>
                     <span class="lv_font">{{ oneRow.positive.positive_reach_len }}</span>
                   </span>
                 </div>
                 <div style="height: 1.8em; position: relative;"
                     v-bind:class="getNegColor(oneRow.negative.negative_reach_len)">
-                  <span v-if="oneRow.negative.negative_reach_len >= 3" class="icon_pos">
+                  <span v-if="oneRow.negative.negative_reach_len >= 3" class="icon_pos_right">
                     <i class="bi bi-arrow-down-circle-fill"></i>
                     <span class="lv_font">{{ oneRow.negative.negative_reach_len }}</span>
                   </span>
@@ -422,14 +414,6 @@
                           </span>
                       </template>
                     </div>
-                    <!--
-                    <div class="right_pad">
-                      <button type="button" class="btn btn-warning mw4_ctl"
-                              @click.stop="removeCompose4Ui($event, oneRow)">
-                        移除
-                      </button>
-                    </div>
-                    -->
                   </template>
                 </div>
               </td>
@@ -453,29 +437,6 @@
       </tfoot>
     </table>
   </div>
-  <!--
-  <div class="modal fade" id="removeDialog" tabindex="-1">
-    <div class="modal-dialog">
-      <div class="modal-content">
-        <div class="modal-header">
-          <h5 class="modal-title">卖出确认</h5>
-          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-        </div>
-        <div class="modal-body">
-          <h6>以下将被移出: </h6>
-          <template v-if="toBeRemoveFund">
-            <h6>{{ toBeRemoveFund['fund_name'] }}&nbsp;{{ toBeRemoveFund['compose_name'] }}</h6>
-          </template>
-        </div>
-        <div class="modal-footer">
-          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">取消</button>
-          <button type="button" class="btn btn-primary" @click.prevent="removeCompose()">移出
-          </button>
-        </div>
-      </div>
-    </div>
-  </div>
-  -->
 </template>
 
 <script setup>
@@ -509,7 +470,7 @@ const {composeObjs} = storeToRefs(composeStore)
 const {addOrRemoveCompose, } = composeStore
 const buyInOutStore = useBuyInOutStore()
 const {buyin_records, wav_reports} = storeToRefs(buyInOutStore)
-const {getAllBuyinRecords, custBuyIn} = buyInOutStore
+const {getAllBuyinRecords, custBuyIn, calculatePlanMoney} = buyInOutStore
 
 const buy_in_from_plan = [
   {'source_name': '无计划', 'source_val': 'noplan'},
@@ -540,25 +501,6 @@ const aggressiveViewObjs = ref([])
 
 watch([aggressiveObjs, aggressiveExcludes, buyin_records], () => {
   aggressiveViewObjs.value = aggressiveObjs.value
-  // if (composeObjs && composeObjs.value && composeObjs.value.length > 0) {
-  //   let _ovtree_fund_ids = composeObjs.value.find(item => item['compose_name'] === 'ovtree')['compose_objs'].map(item => item['fund_id'])
-  //   let _dolphin_fund_ids = composeObjs.value.find(item => item['compose_name'] === 'dolphin')['compose_objs'].map(item => item['fund_id'])
-  //   let _trident_fund_ids = composeObjs.value.find(item => item['compose_name'] === 'trident')['compose_objs'].map(item => item['fund_id'])
-  //   let _gdngoat_fund_ids = composeObjs.value.find(item => item['compose_name'] === 'gdngoat')['compose_objs'].map(item => item['fund_id'])
-  //   aggressiveViewObjs.value.forEach(elem => {
-  //     if (_ovtree_fund_ids.indexOf(elem['fund_id']) != -1) {
-  //       elem['compose_plan'] = 'ovtree'
-  //     } else if (_dolphin_fund_ids.indexOf(elem['fund_id']) != -1) {
-  //       elem['compose_plan'] = 'dolphin'
-  //     } else if (_trident_fund_ids.indexOf(elem['fund_id']) != -1) {
-  //       elem['compose_plan'] = 'trident'
-  //     } else if (_gdngoat_fund_ids.indexOf(elem['fund_id']) != -1) {
-  //       elem['compose_plan'] = 'gdngoat'
-  //     } else {
-  //       elem['compose_plan'] = 'noplan'
-  //     }
-  //   })
-  // }
   if (aggressiveExcludes && aggressiveExcludes.value && aggressiveExcludes.value.length > 0) {
     aggressiveViewObjs.value.forEach(elem => {
       if (aggressiveExcludes.value.indexOf(elem['fund_id']) != -1) {
@@ -722,41 +664,11 @@ watch([aggressiveObjs, aggressiveExcludes, buyin_records], () => {
   let _gdngoat_fund_objs = composeObjs.value.find(item => item['compose_name'] === 'gdngoat')['compose_objs']
 
   aggressiveViewObjs.value.forEach(elem => {
-    elem['plan_buyin_money'] = 40
-    if (!elem['p50_convg_dur_rank'] || !elem['p65_convg_dur_rank'] || !elem['p80_convg_dur_rank']) {
-      elem['plan_buyin_money'] = elem['plan_buyin_money'] - 10
-    }
-    if (elem['avg_convg_days'] && elem['avg_convg_days'] >= 150) {
-      elem['plan_buyin_money'] = elem['plan_buyin_money'] - 5
-    }
-    if (elem['avg_convg_days'] && elem['avg_convg_days'] >= 180) {
-      elem['plan_buyin_money'] = elem['plan_buyin_money'] - 5
-    }
-    if (elem['size'] && elem['size'] < 1100) {
-      elem['plan_buyin_money'] = elem['plan_buyin_money'] - 5
-    }
-    if (elem['size'] && elem['size'] < 880) {
-      elem['plan_buyin_money'] = elem['plan_buyin_money'] - 5
-    }
-    if (elem['wav_obj'] && elem['wav_obj']['wav_sort_level']) {
-      if (elem['wav_obj']['wav_sort_level'] > 2.5) {
-        elem['plan_buyin_money'] = elem['plan_buyin_money'] - 5
-      }
-      if (elem['wav_obj']['wav_sort_level'] > 5) {
-        elem['plan_buyin_money'] = elem['plan_buyin_money'] - 5
-      }
-      if (elem['wav_obj']['wav_sort_level'] > 7.5) {
-        elem['plan_buyin_money'] = elem['plan_buyin_money'] - 5
-      }
-    }
-
-    if (elem['plan_buyin_money'] < 10) {
-      elem['plan_buyin_money'] = 10
-    }
 
     if (elem.hasOwnProperty('compose_plan') && elem['compose_plan'] && elem['compose_plan'] === 'gdngoat') {
       elem['compose_obj'] = _gdngoat_fund_objs.find(_obj => _obj['fund_id'] === elem['fund_id'])
     }
+    calculatePlanMoney('aggressive', elem)
   })
 
 }, {immediate: true})
@@ -771,25 +683,6 @@ function changeCompose(event, oneRowObj) {
   event.stopPropagation()
   addOrRemoveCompose(oneRowObj['fund_id'], oneRowObj['fund_name'], oneRowObj['target_plan'], oneRowObj['plan_buyin_money'])
 }
-
-/*
-const dlgController = ref({removeDlg: null})
-onMounted(() => {
-  dlgController.value.removeDlg = new Modal('#removeDialog', {})
-})
-
-const toBeRemoveFund = ref(null)
-function removeCompose4Ui(event, oneRowObj) {
-  event.stopPropagation()
-  toBeRemoveFund.value = oneRowObj;
-  dlgController.value.removeDlg.show();
-}
-
-async function removeCompose() {
-  await addOrRemoveCompose(toBeRemoveFund.value['fund_id'], toBeRemoveFund.value['fund_name'], toBeRemoveFund.value['compose_plan'])
-  dlgController.value.removeDlg.hide()
-}
- */
 
 function selOrDesRow(oneRowObj) {
   if (oneRowObj.hasOwnProperty('currSelected')) {
@@ -1028,7 +921,7 @@ function scrollViewBySelection() {
 
 const rowElements = ref({})
 
-const searchCond = ref("&l<880;&r<0;&c>180")
+const searchCond = ref("&l<880;&r<-5;&c>230")
 
 function searchByCond() {
   if (searchCond.value.trim() === '') {

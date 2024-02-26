@@ -8,6 +8,7 @@
           </option>
         </select>
       </div>
+
       <div class="form-check form_check_cust">
           <input class="form-check-input" type="checkbox" v-model="showLostOnly">
           <label class="form-check-label" for="flexCheckDefault">缺失&nbsp;</label>
@@ -17,73 +18,31 @@
           <input class="form-check-input" type="checkbox" v-model="showPauseOnly">
           <label class="form-check-label" for="flexCheckDefault">暂停&nbsp;</label>
           <span class="badge bg-warning">{{ totPauseNum }}</span>
-        </div>
+      </div>
       <div class="form-check form_check_cust">
           <input class="form-check-input" type="checkbox" v-model="showAdjustOnly">
           <label class="form-check-label" for="flexCheckDefault">调整&nbsp;</label>
           <span class="badge bg-warning">{{ totAdjustNum }}</span>
-        </div>
-      <div style="display: flex; align-items: center;">
-        <div style="display: inline-block; width: 2.5rem">
-          买入:
-        </div>
-        <div style="display: inline-block; text-align: center;">
-          <div style="font-size: 0.8rem;margin-bottom: -3px;font-weight: bold;">{{ totMoney }}</div>
-          <div class="sep_line" style="margin:0;"></div>
-          <div style="margin-top: -2px;">
-            <span class="blink_me badge bg-danger" style="font-size: 0.8rem;">
-              高点:&nbsp;{{ totPositiveNum }}
-            </span>
-          </div>
-        </div>
       </div>
-      <div style="grid-column: 6 / span 2;display: flex; align-items: center; column-gap: 1rem;">
-        <div style="display: flex; align-items: center;">
-          <div style="display: inline-block; width: 1.5rem">盈:</div>
-          <template v-if="totEarnMoney > 0 && totMoney > 0">
-            <div style="display: inline-block;" class="badge bg-danger">
-              <div style="font-size: 0.8rem;">{{ totEarnMoney }}</div>
-              <div class="sep_line"></div>
-              <div style="font-size: 0.8rem;">{{ totEarnRate }}</div>
-            </div>
-          </template>
-          <template v-else-if="totMoney > 0">
-            <div style="display: inline-block;;" class="badge bg-success">
-              <div style="font-size: 0.8rem;">{{ totEarnMoney }}</div>
-              <div class="sep_line"></div>
-              <div style="font-size: 0.8rem;">{{ totEarnRate }}</div>
-            </div>
-          </template>
-        </div>
-        <div style="display: flex; align-items: center;">
-          <div style="display: inline-block; width: 1.5rem">设:</div>
-          <div style="display: inline-block; margin-left: 0.5rem;">
-          <div style="font-size: 0.8rem; font-weight: bold; margin-bottom: -3px; text-align: center;">{{ totSetBuy }}</div>
-          <div class="sep_line"></div>
-          <template v-if="diffBuySet >= 0.1">
-            <div class="badge bg-warning"
-              style="font-size: 0.8rem; font-weight: bold; line-height: 0.8 !important;; display: block !important;">{{ totPlanBuy }}</div>
-          </template>
-          <template v-else-if="diffBuySet <= -0.1">
-            <div class="badge bg-danger"
-              style="font-size: 0.8rem; line-height: 0.8 !important;; display: block !important;">{{ totPlanBuy }}</div>
-          </template>
-          <template v-else>
-            <div style="font-size: 0.8rem; font-weight: bold; margin-top: -3px;">{{ totPlanBuy }}</div>
-          </template>
-        </div>
-        </div>
-        <div style="cursor: pointer;" @click="clearSelected()">
+      <div class="form-check form_check_cust">
+          <input class="form-check-input" type="checkbox" v-model="showPoleOnly">
+          <label class="form-check-label" for="flexCheckDefault">突破&nbsp;</label>
+          <span class="badge bg-warning">{{ totPoleNum }}</span>
+      </div>
+
+      <div style="cursor: pointer;" @click="clearSelected()">
         &nbsp;选择&nbsp;<span class="badge bg-warning text-dark">{{ currSelectedNum }}</span>
-        </div>
       </div>
+      
       <input type="text" class="form-control-plaintext search_box" style="" v-model="searchCond"
              @keyup.enter="searchByCond()">
       <input class="btn btn-primary btn-sm" type="button" value="查找" @click="searchByCond()">
       <template v-if="currSelectedNum > 0">
         <input class="btn btn-primary btn-sm" type="button" value="前移选择" @click="sortByField('selected')">
       </template>
+
     </div>
+
     <table id="table_header" class="table table-bordered" style="margin-bottom: 0;">
       <thead style="">
         <tr :style="{ 'height': tabHeaderHeight + 'rem' }">
@@ -444,14 +403,32 @@
                 <template v-if="oneRow['kbObj']">
                   <div style="height: 1.8em; position: relative; text-align: center;"
                     v-bind:class="getPosColor(oneRow.kbObj.positive.positive_reach_len)">
-                    <span v-if="oneRow.kbObj.positive.positive_reach_len >= 4" class="icon_pos">
+                    <template v-if="oneRow.hasOwnProperty('quant_obj') && oneRow['quant_obj']['max_hitted']">
+                      <span class="icon_pos_left" style="color: red;">
+                        <i class="bi bi-arrow-up-circle-fill"></i>
+                        <div style="" class="icon_tri">
+                          <div>{{ oneRow['quant_obj']['rate_str'] }}</div>
+                          <div style="border-top: solid 2px darkgrey;">{{ oneRow['quant_obj']['max_str'] }}</div>
+                        </div>
+                      </span>
+                    </template>
+                    <span v-if="oneRow.kbObj.positive.positive_reach_len >= 4" class="icon_pos_right">
                       <i class="bi bi-arrow-up-circle-fill"></i>
                       <span class="lv_font">{{ oneRow.kbObj.positive.positive_reach_len }}</span>
                     </span>
                   </div>
                   <div style="height: 1.8em; position: relative; text-align: center;"
                     v-bind:class="getNegColor(oneRow.kbObj.negative.negative_reach_len)">
-                    <span v-if="oneRow.kbObj.negative.negative_reach_len >= 3" class="icon_pos">
+                    <template v-if="oneRow.hasOwnProperty('quant_obj') && oneRow['quant_obj']['min_hitted']">
+                      <span class="icon_pos_left" style="color: darkgreen;">
+                        <i class="bi bi-arrow-down-circle-fill"></i>
+                        <div style="" class="icon_tri">
+                          <div>{{ oneRow['quant_obj']['rate_str'] }}</div>
+                          <div style="border-top: solid 2px darkgrey;">{{ oneRow['quant_obj']['min_str'] }}</div>
+                        </div>
+                      </span>
+                    </template>
+                    <span v-if="oneRow.kbObj.negative.negative_reach_len >= 3" class="icon_pos_right">
                       <i class="bi bi-arrow-down-circle-fill"></i>
                       <span class="lv_font">{{ oneRow.kbObj.negative.negative_reach_len }}</span>
                     </span>
@@ -806,7 +783,7 @@
         <div class="modal-body">
           <h6>以下将被移出: </h6>
           <template v-if="toBeRemoveFundFromCompose">
-            <h6>{{ toBeRemoveFundFromCompose['fund_name'] }}&nbsp;{{ toBeRemoveFundFromCompose['compose_name'] }}</h6>
+            <h6>{{ toBeRemoveFundFromCompose['fund_name'] }}&nbsp;移出:&nbsp;{{ toBeRemoveFundFromCompose['compose_name'] }}</h6>
           </template>
         </div>
         <div class="modal-footer">
@@ -844,11 +821,11 @@ import { useRoute } from 'vue-router'
 
 const route = useRoute()
 const composeStore = useComposeStore()
-const { composeObjs, fixedHoldObjs } = storeToRefs(composeStore)
+const { composeObjs, fixedHoldObjs, totMoney, totPositiveNum, totPoleNum, totEarnMoney, totEarnRate, totSetBuy, totPlanBuy, diffBuySet } = storeToRefs(composeStore)
 const { getAllCompose, setComposeProperty, setComposeSoldDate, getComposeFixedHold, addOrRemoveCompose } = composeStore
 const buyInOutStore = useBuyInOutStore()
 const { buyoutRecords, wav_reports } = storeToRefs(buyInOutStore)
-const { getAllBuyoutRecords, soldComposeFixedHold, buyOutFixedFund } = buyInOutStore
+const { getAllBuyoutRecords, soldComposeFixedHold, buyOutFixedFund, calculatePlanMoney } = buyInOutStore
 const zskbStore = useZskbStore()
 const { zskbObjs } = storeToRefs(zskbStore)
 
@@ -893,25 +870,19 @@ watch(compose_name, () => {
 }, { immediate: true })
 
 const composeViewObjs = ref([])
-const totMoney = ref(0)
-const totEarnMoney = ref(0)
-const totEarnRate = ref(null)
-const totSetBuy = ref(0)
-const totPlanBuy = ref(0)
-const diffBuySet = ref(0)
 const showLostOnly = ref(false)
 const showPauseOnly = ref(false)
 const showAdjustOnly = ref(false)
-const totPositiveNum = ref(0)
+const showPoleOnly = ref(false)
 const totLostNum = ref(0)
 const totPauseNum = ref(0)
 const totAdjustNum = ref(0)
-watch([composeObjs, compose_name, fixedHoldObjs, buyoutRecords, showLostOnly, showPauseOnly, showAdjustOnly], () => {
+watch([composeObjs, compose_name, fixedHoldObjs, buyoutRecords, showLostOnly, showPauseOnly, showAdjustOnly, showPoleOnly], () => {
   composeViewObjs.value = []
   if (composeObjs && composeObjs.value && composeObjs.value.length > 0) {
     if (compose_name.value === 'all') {
       composeObjs.value.forEach(item => {
-        if (!showLostOnly.value && !showPauseOnly.value && !showAdjustOnly.value) {
+        if (!showLostOnly.value && !showPauseOnly.value && !showAdjustOnly.value && !showPoleOnly.value) {
           composeViewObjs.value.push(...item['compose_objs'])
         } else {
           item['compose_objs'].forEach(_obj => {
@@ -934,15 +905,21 @@ watch([composeObjs, compose_name, fixedHoldObjs, buyoutRecords, showLostOnly, sh
                 if (_obj['money'] != null && _obj['adjust_money'] != null) {
                   if (Math.abs(_obj['money'] - _obj['adjust_money']) >= 3) {
                     composeViewObjs.value.push(_obj)
+                    _added_in = true
                   }
                 }
+              }
+            }
+            if (showPoleOnly.value && !_added_in) {
+              if (_obj.hasOwnProperty("quant_obj") && _obj['quant_obj']['hitted']) {
+                composeViewObjs.value.push(_obj)
               }
             }
           })
         }
       })
     } else {
-      if (!showLostOnly.value && !showPauseOnly.value && !showAdjustOnly.value) {
+      if (!showLostOnly.value && !showPauseOnly.value && !showAdjustOnly.value && !showPoleOnly.value) {
         composeViewObjs.value = composeObjs.value.find(item => item['compose_name'] === compose_name.value)['compose_objs']
       } else {
         let _match_composes = composeObjs.value.find(item => item['compose_name'] === compose_name.value)
@@ -966,9 +943,15 @@ watch([composeObjs, compose_name, fixedHoldObjs, buyoutRecords, showLostOnly, sh
               if (_obj['money'] != null && _obj['adjust_money'] != null) {
                 if (Math.abs(_obj['money'] - _obj['adjust_money']) >= 3) {
                   composeViewObjs.value.push(_obj)
+                  _added_in = true
                 }
               }
             }
+          }
+          if (showPoleOnly.value && !_added_in) {
+              if (_obj.hasOwnProperty("quant_obj") && _obj['quant_obj']['hitted']) {
+                composeViewObjs.value.push(_obj)
+              }
           }
         })
       }
@@ -1005,6 +988,7 @@ watch([composeObjs, compose_name, fixedHoldObjs, buyoutRecords, showLostOnly, sh
   totLostNum.value = 0
   totPauseNum.value = 0
   totAdjustNum.value = 0
+  totPoleNum.value = 0
 
   if (composeViewObjs.value.length > 0) {
 
@@ -1034,96 +1018,17 @@ watch([composeObjs, compose_name, fixedHoldObjs, buyoutRecords, showLostOnly, sh
       } else if (!elem.hasOwnProperty('money') || elem['money'] <= 0) {
         totPauseNum.value = totPauseNum.value + 1
       }
+
       if (elem.hasOwnProperty('money') && elem.hasOwnProperty('adjust_money') &&
         elem['money'] != null && elem['adjust_money'] != null &&
         Math.abs(elem['money'] - elem['adjust_money']) >= 3) {
         totAdjustNum.value = totAdjustNum.value + 1
       }
 
-      if (elem['compose_name'] === 'gdngoat') {
-        elem['plan_buyin_money'] = 40
-        if (!elem['kbObj']['p50_convg_dur_rank'] || !elem['kbObj']['p65_convg_dur_rank'] || !elem['kbObj']['p80_convg_dur_rank']) {
-          elem['plan_buyin_money'] = elem['plan_buyin_money'] - 10
-        }
-        if (elem['kbObj']['avg_convg_days'] && elem['kbObj']['avg_convg_days'] >= 150) {
-          elem['plan_buyin_money'] = elem['plan_buyin_money'] - 5
-        }
-        if (elem['kbObj']['avg_convg_days'] && elem['kbObj']['avg_convg_days'] >= 180) {
-          elem['plan_buyin_money'] = elem['plan_buyin_money'] - 5
-        }
-        if (elem['kbObj']['size'] && elem['kbObj']['size'] < 1100) {
-          elem['plan_buyin_money'] = elem['plan_buyin_money'] - 5
-        }
-        if (elem['kbObj']['size'] && elem['kbObj']['size'] < 880) {
-          elem['plan_buyin_money'] = elem['plan_buyin_money'] - 5
-        }
-        if (elem['wav_obj'] && elem['wav_obj']['wav_sort_level']) {
-          if (elem['wav_obj']['wav_sort_level'] > 2.5) {
-            elem['plan_buyin_money'] = elem['plan_buyin_money'] - 5
-          }
-          if (elem['wav_obj']['wav_sort_level'] > 5) {
-            elem['plan_buyin_money'] = elem['plan_buyin_money'] - 5
-          }
-          if (elem['wav_obj']['wav_sort_level'] > 7.5) {
-            elem['plan_buyin_money'] = elem['plan_buyin_money'] - 5
-          }
-        }
-
-        if (elem['plan_buyin_money'] < 10) {
-          elem['plan_buyin_money'] = 10
-        }
-
-      } else if (elem['compose_name'] === 'ovtree') {
-        elem['plan_buyin_money'] = 40
-        if (elem['kbObj']['statistics']['fund_perc_len'] && elem['kbObj']['statistics']['fund_perc_len'] < 1100) {
-          elem['plan_buyin_money'] = elem['plan_buyin_money'] - 5
-        }
-        if (elem['kbObj']['statistics']['fund_perc_len'] && elem['kbObj']['statistics']['fund_perc_len'] < 880) {
-          elem['plan_buyin_money'] = elem['plan_buyin_money'] - 5
-        }
-        if (elem['wav_obj'] && elem['wav_obj']['wav_sort_level']) {
-          if (elem['wav_obj']['wav_sort_level'] > 2.5) {
-            elem['plan_buyin_money'] = elem['plan_buyin_money'] - 5
-          }
-          if (elem['wav_obj']['wav_sort_level'] > 5) {
-            elem['plan_buyin_money'] = elem['plan_buyin_money'] - 5
-          }
-          if (elem['wav_obj']['wav_sort_level'] > 7.5) {
-            elem['plan_buyin_money'] = elem['plan_buyin_money'] - 5
-          }
-        }
-
-        if (elem['plan_buyin_money'] < 10) {
-          elem['plan_buyin_money'] = 10
-        }
-
-      } else if (elem['compose_name'] === 'dolphin') {
-        elem['plan_buyin_money'] = 30
-        if (elem['kbObj']['statistics']['fund_perc_len'] && elem['kbObj']['statistics']['fund_perc_len'] < 1100) {
-          elem['plan_buyin_money'] = elem['plan_buyin_money'] - 5
-        }
-        if (elem['kbObj']['statistics']['fund_perc_len'] && elem['kbObj']['statistics']['fund_perc_len'] < 880) {
-          elem['plan_buyin_money'] = elem['plan_buyin_money'] - 5
-        }
-        if (elem['wav_obj'] && elem['wav_obj']['wav_sort_level']) {
-          if (elem['wav_obj']['wav_sort_level'] > 2.5) {
-            elem['plan_buyin_money'] = elem['plan_buyin_money'] - 5
-          }
-          if (elem['wav_obj']['wav_sort_level'] > 5) {
-            elem['plan_buyin_money'] = elem['plan_buyin_money'] - 5
-          }
-          if (elem['wav_obj']['wav_sort_level'] > 7.5) {
-            elem['plan_buyin_money'] = elem['plan_buyin_money'] - 5
-          }
-        }
-
-        if (elem['plan_buyin_money'] < 10) {
-          elem['plan_buyin_money'] = 10
-        }
-
-      } else {
-        console.error("Not implement compose name: ", elem['compose_name']);
+      if (elem.hasOwnProperty('quant_obj') && elem['quant_obj']['hitted']) {
+        totPoleNum.value = totPoleNum.value + 1
       }
+      calculatePlanMoney('compose', elem)
     })
 
     if (totMoney.value > 0) {
@@ -1231,7 +1136,8 @@ function removeCompose4Ui(event, oneRowObj) {
 }
 
 async function removeCompose() {
-  await addOrRemoveCompose(toBeRemoveFundFromCompose.value['fund_id'], toBeRemoveFundFromCompose.value['fund_name'], toBeRemoveFundFromCompose.value['compose_plan'])
+  await addOrRemoveCompose(toBeRemoveFundFromCompose.value['fund_id'], toBeRemoveFundFromCompose.value['fund_name'], 
+  toBeRemoveFundFromCompose.value['compose_name'])
   dlgController.value.removeFromComposeDlg.hide()
 }
 
@@ -1627,19 +1533,13 @@ function searchByCond() {
   line-height: 1.2rem;
 }
 
-.blink_me {
-  animation: blinker 10s linear infinite;
+.icon_tri {
+  display: inline-block;
+  font-size: 0.8rem;
+  line-height: 0.9;
+  position: absolute;
+  top: 6px;
+  font-weight: normal; 
+  padding-left: 3px;
 }
-
-@keyframes blinker {
-  50% {
-    opacity: 0;
-  }
-}
-
-.sep_line {
-  height: 1px;
-  border: solid 1px white;
-  margin: 2px -8px;
-  box-sizing: border-box;
-}</style>
+</style>
