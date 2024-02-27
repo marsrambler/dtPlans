@@ -208,6 +208,24 @@ export const useBuyInOutStore = defineStore('buyInOut-store', () => {
                     }
                 }
             }
+            if (elem.hasOwnProperty('statistics') && elem['statistics'] && elem['statistics'].hasOwnProperty('min_sort_tot_earn')) {
+                let _min_tot_earn = elem['statistics']['min_sort_tot_earn']
+                if (_min_tot_earn != null) {
+                    if (_min_tot_earn < -45) {
+                        elem['plan_buyin_money'] = elem['plan_buyin_money'] * 0.5
+                    } else if (_min_tot_earn < -30) {
+                        elem['plan_buyin_money'] = elem['plan_buyin_money'] * 0.6
+                    } else if (_min_tot_earn < -15) {
+                        elem['plan_buyin_money'] = elem['plan_buyin_money'] * 0.7
+                    } else if (_min_tot_earn < 0) {
+                        elem['plan_buyin_money'] = elem['plan_buyin_money'] * 0.8
+                    }
+                } else {
+                    console.error("zskb page has no statistics/min_sort_tot_earn for elem: ", elem);
+                }
+            } else {
+                console.error("zskb page has no statistics/min_sort_tot_earn for elem: ", elem);
+            }
 
             if (elem.hasOwnProperty('size') && elem['size'] < 1100) {
                 elem['plan_buyin_money'] = elem['plan_buyin_money'] - 5
@@ -229,6 +247,8 @@ export const useBuyInOutStore = defineStore('buyInOut-store', () => {
             if (elem['plan_buyin_money'] < 10) {
                 elem['plan_buyin_money'] = 10
             }
+            elem['plan_buyin_money'] = parseInt(elem['plan_buyin_money']);
+
         } else if (_page_type === 'aggressive') {
             elem['plan_buyin_money'] = 40
             if (elem.hasOwnProperty('compose_obj') && elem['compose_obj'] && elem['compose_obj']['quant_obj'] && elem['compose_obj']['quant_obj']['histo']) {
@@ -243,6 +263,25 @@ export const useBuyInOutStore = defineStore('buyInOut-store', () => {
                         elem['plan_buyin_money'] = elem['plan_buyin_money']
                     }
                 }
+            }
+
+            if (elem.hasOwnProperty('statistics') && elem['statistics'] && elem['statistics'].hasOwnProperty('min_sort_tot_earn')) {
+                let _min_tot_earn = elem['statistics']['min_sort_tot_earn']
+                if (_min_tot_earn != null) {
+                    if (_min_tot_earn < -45) {
+                        elem['plan_buyin_money'] = elem['plan_buyin_money'] * 0.5
+                    } else if (_min_tot_earn < -30) {
+                        elem['plan_buyin_money'] = elem['plan_buyin_money'] * 0.6
+                    } else if (_min_tot_earn < -15) {
+                        elem['plan_buyin_money'] = elem['plan_buyin_money'] * 0.7
+                    } else if (_min_tot_earn < 0) {
+                        elem['plan_buyin_money'] = elem['plan_buyin_money'] * 0.8
+                    }
+                } else {
+                    console.error("aggressive page has no statistics/min_sort_tot_earn for elem: ", elem);
+                }
+            } else {
+                console.error("aggressive page has no statistics/min_sort_tot_earn for elem: ", elem);
             }
 
             if (!elem['p50_convg_dur_rank'] || !elem['p65_convg_dur_rank'] || !elem['p80_convg_dur_rank']) {
@@ -275,6 +314,8 @@ export const useBuyInOutStore = defineStore('buyInOut-store', () => {
             if (elem['plan_buyin_money'] < 10) {
                 elem['plan_buyin_money'] = 10
             }
+            elem['plan_buyin_money'] = parseInt(elem['plan_buyin_money']);
+
         } else if (_page_type === 'dtconvg') {
             elem['plan_buyin_money'] = 40
             if (elem.hasOwnProperty('compose_obj') && elem['compose_obj'] && elem['compose_obj']['quant_obj'] && elem['compose_obj']['quant_obj']['histo']) {
@@ -289,6 +330,25 @@ export const useBuyInOutStore = defineStore('buyInOut-store', () => {
                         elem['plan_buyin_money'] = elem['plan_buyin_money']
                     }
                 }
+            }
+
+            if (elem.hasOwnProperty('statistics') && elem['statistics'] && elem['statistics'].hasOwnProperty('min_sort_tot_earn')) {
+                let _min_tot_earn = elem['statistics']['min_sort_tot_earn']
+                if (_min_tot_earn != null) {
+                    if (_min_tot_earn < -45) {
+                        elem['plan_buyin_money'] = elem['plan_buyin_money'] * 0.5
+                    } else if (_min_tot_earn < -30) {
+                        elem['plan_buyin_money'] = elem['plan_buyin_money'] * 0.6
+                    } else if (_min_tot_earn < -15) {
+                        elem['plan_buyin_money'] = elem['plan_buyin_money'] * 0.7
+                    } else if (_min_tot_earn < 0) {
+                        elem['plan_buyin_money'] = elem['plan_buyin_money'] * 0.8
+                    }
+                } else {
+                    console.error("dtconvg page has no statistics/min_sort_tot_earn for elem: ", elem);
+                }
+            } else {
+                console.error("dtconvg page has no statistics/min_sort_tot_earn for elem: ", elem);
             }
 
             if (elem['size'] && elem['size'] < 1100) {
@@ -312,6 +372,8 @@ export const useBuyInOutStore = defineStore('buyInOut-store', () => {
             if (elem['plan_buyin_money'] < 10) {
                 elem['plan_buyin_money'] = 10
             }
+            elem['plan_buyin_money'] = parseInt(elem['plan_buyin_money']);
+            
         } else if (_page_type === 'compose') {
             if (elem['compose_name'] === 'gdngoat') {
                 elem['plan_buyin_money'] = 40
@@ -327,6 +389,25 @@ export const useBuyInOutStore = defineStore('buyInOut-store', () => {
                             elem['plan_buyin_money'] = elem['plan_buyin_money']
                         }
                     }
+                }
+
+                if (elem.hasOwnProperty('kbObj') && elem['kbObj'] && elem['kbObj'].hasOwnProperty('statistics') && elem['kbObj']['statistics'] && elem['kbObj']['statistics'].hasOwnProperty('min_sort_tot_earn')) {
+                    let _min_tot_earn = elem['kbObj']['statistics']['min_sort_tot_earn']
+                    if (_min_tot_earn != null) {
+                        if (_min_tot_earn < -45) {
+                            elem['plan_buyin_money'] = elem['plan_buyin_money'] * 0.5
+                        } else if (_min_tot_earn < -30) {
+                            elem['plan_buyin_money'] = elem['plan_buyin_money'] * 0.6
+                        } else if (_min_tot_earn < -15) {
+                            elem['plan_buyin_money'] = elem['plan_buyin_money'] * 0.7
+                        } else if (_min_tot_earn < 0) {
+                            elem['plan_buyin_money'] = elem['plan_buyin_money'] * 0.8
+                        }
+                    } else {
+                        console.error("compose page/gdngoat has no statistics/min_sort_tot_earn for elem: ", elem);
+                    }
+                } else {
+                    console.error("compose page/gdngoat has no statistics/min_sort_tot_earn for elem: ", elem);
                 }
 
                 if (!elem['kbObj']['p50_convg_dur_rank'] || !elem['kbObj']['p65_convg_dur_rank'] || !elem['kbObj']['p80_convg_dur_rank']) {
@@ -359,6 +440,7 @@ export const useBuyInOutStore = defineStore('buyInOut-store', () => {
                 if (elem['plan_buyin_money'] < 10) {
                     elem['plan_buyin_money'] = 10
                 }
+                elem['plan_buyin_money'] = parseInt(elem['plan_buyin_money']);
 
             } else if (elem['compose_name'] === 'ovtree') {
                 elem['plan_buyin_money'] = 60
@@ -376,6 +458,25 @@ export const useBuyInOutStore = defineStore('buyInOut-store', () => {
                     }
                 }
 
+                if (elem.hasOwnProperty('kbObj') && elem['kbObj'] && elem['kbObj'].hasOwnProperty('statistics') && elem['kbObj']['statistics'] && elem['kbObj']['statistics'].hasOwnProperty('min_sort_tot_earn')) {
+                    let _min_tot_earn = elem['kbObj']['statistics']['min_sort_tot_earn']
+                    if (_min_tot_earn != null) {
+                        if (_min_tot_earn < -45) {
+                            elem['plan_buyin_money'] = elem['plan_buyin_money'] * 0.5
+                        } else if (_min_tot_earn < -30) {
+                            elem['plan_buyin_money'] = elem['plan_buyin_money'] * 0.6
+                        } else if (_min_tot_earn < -15) {
+                            elem['plan_buyin_money'] = elem['plan_buyin_money'] * 0.7
+                        } else if (_min_tot_earn < 0) {
+                            elem['plan_buyin_money'] = elem['plan_buyin_money'] * 0.8
+                        }
+                    } else {
+                        console.error("compose page/ovtree has no statistics/min_sort_tot_earn for elem: ", elem);
+                    }
+                } else {
+                    console.error("compose page/ovtree has no statistics/min_sort_tot_earn for elem: ", elem);
+                }
+
                 if (elem['kbObj']['statistics']['fund_perc_len'] && elem['kbObj']['statistics']['fund_perc_len'] < 1100) {
                     elem['plan_buyin_money'] = elem['plan_buyin_money'] - 5
                 }
@@ -397,6 +498,7 @@ export const useBuyInOutStore = defineStore('buyInOut-store', () => {
                 if (elem['plan_buyin_money'] < 10) {
                     elem['plan_buyin_money'] = 10
                 }
+                elem['plan_buyin_money'] = parseInt(elem['plan_buyin_money']);
 
             } else if (elem['compose_name'] === 'dolphin') {
                 elem['plan_buyin_money'] = 40
@@ -414,6 +516,25 @@ export const useBuyInOutStore = defineStore('buyInOut-store', () => {
                     }
                 }
 
+                if (elem.hasOwnProperty('kbObj') && elem['kbObj'] && elem['kbObj'].hasOwnProperty('statistics') && elem['kbObj']['statistics'] && elem['kbObj']['statistics'].hasOwnProperty('min_sort_tot_earn')) {
+                    let _min_tot_earn = elem['kbObj']['statistics']['min_sort_tot_earn']
+                    if (_min_tot_earn != null) {
+                        if (_min_tot_earn < -45) {
+                            elem['plan_buyin_money'] = elem['plan_buyin_money'] * 0.5
+                        } else if (_min_tot_earn < -30) {
+                            elem['plan_buyin_money'] = elem['plan_buyin_money'] * 0.6
+                        } else if (_min_tot_earn < -15) {
+                            elem['plan_buyin_money'] = elem['plan_buyin_money'] * 0.7
+                        } else if (_min_tot_earn < 0) {
+                            elem['plan_buyin_money'] = elem['plan_buyin_money'] * 0.8
+                        }
+                    } else {
+                        console.error("compose page/dolphin has no statistics/min_sort_tot_earn for elem: ", elem);
+                    }
+                } else {
+                    console.error("compose page/dolphin has no statistics/min_sort_tot_earn for elem: ", elem);
+                }
+
                 if (elem['kbObj']['statistics']['fund_perc_len'] && elem['kbObj']['statistics']['fund_perc_len'] < 1100) {
                     elem['plan_buyin_money'] = elem['plan_buyin_money'] - 5
                 }
@@ -435,6 +556,7 @@ export const useBuyInOutStore = defineStore('buyInOut-store', () => {
                 if (elem['plan_buyin_money'] < 10) {
                     elem['plan_buyin_money'] = 10
                 }
+                elem['plan_buyin_money'] = parseInt(elem['plan_buyin_money']);
 
             } else {
                 console.error("Not implement compose name: ", elem['compose_name']);
