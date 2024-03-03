@@ -213,7 +213,35 @@
                   </template>
                 </div>
               </td>
-              <td colspan="5" v-bind:class="{ sel_row: oneRow['currSelected'] }">
+              <td colspan="2" v-bind:class="{ sel_row: oneRow['currSelected'] }">
+                <template v-if="oneRow['kbObj']">
+                  <div style="height: 1.8em; position: relative; text-align: center;"
+                    v-bind:class="getPosColor(oneRow.kbObj.positive.positive_reach_len)">
+                    <template v-if="oneRow.hasOwnProperty('quant_obj') && oneRow['quant_obj']['max_hitted']">
+                      <span class="icon_pos_left" style="color: red;">
+                        <i class="bi bi-arrow-up-circle-fill"></i>
+                        <div style="" class="icon_tri">
+                          <div>{{ oneRow['quant_obj']['rate_str'] }}</div>
+                          <div style="border-top: solid 2px darkgrey;">{{ oneRow['quant_obj']['max_str'] }}</div>
+                        </div>
+                      </span>
+                    </template>
+                  </div>
+                  <div style="height: 1.8em; position: relative; text-align: center;"
+                    v-bind:class="getNegColor(oneRow.kbObj.negative.negative_reach_len)">
+                    <template v-if="oneRow.hasOwnProperty('quant_obj') && oneRow['quant_obj']['min_hitted']">
+                      <span class="icon_pos_left" style="color: darkgreen;">
+                        <i class="bi bi-arrow-down-circle-fill"></i>
+                        <div style="" class="icon_tri">
+                          <div>{{ oneRow['quant_obj']['rate_str'] }}</div>
+                          <div style="border-top: solid 2px darkgrey;">{{ oneRow['quant_obj']['min_str'] }}</div>
+                        </div>
+                      </span>
+                    </template>
+                  </div>
+                </template>
+              </td>              
+              <td colspan="3" v-bind:class="{ sel_row: oneRow['currSelected'] }">
                 <span style="color: red; font-weight: 900;">已缺失，可能是经理更换或业绩不再收敛。</span>
               </td>
               <td style="line-height: 2rem;" v-bind:class="{ sel_row: oneRow['currSelected'] }">
@@ -1018,13 +1046,12 @@ watch([composeObjs, compose_name, fixedHoldObjs, buyoutRecords, show4SoldOnly, s
       }
 
       if ((elem.hasOwnProperty('lost_in_aggressive') && elem['lost_in_aggressive'])
-        || (elem.hasOwnProperty('lost_in_dtconvg') && elem['lost_in_dtconvg'])) {
+        || (elem.hasOwnProperty('lost_in_dtconvg') && elem['lost_in_dtconvg'])
+        || (elem.hasOwnProperty('money') && elem['money'] === -2)) {
         tot4SoldNum.value = tot4SoldNum.value + 1
-      } else if (!elem.hasOwnProperty('money') || elem['money'] <= 0) {
+      } else if (elem.hasOwnProperty('money') && elem['money'] === -1) {
         totPauseNum.value = totPauseNum.value + 1
-      }
-
-      if (elem.hasOwnProperty('money') && elem.hasOwnProperty('adjust_money') &&
+      } else if (elem.hasOwnProperty('money') && elem.hasOwnProperty('adjust_money') &&
         elem['money'] != null && elem['adjust_money'] != null &&
         Math.abs(elem['money'] - elem['adjust_money']) >= 3) {
         totAdjustNum.value = totAdjustNum.value + 1
