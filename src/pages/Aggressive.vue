@@ -385,13 +385,15 @@
                     </div>
                   </template>
                   <template v-if="oneRow['compose_plan'] && oneRow['compose_plan'] !== 'noplan'">
-                    <div style="text-align: center;" 
-                    :style="{'color': oneRow['plan_buyin_money'] - oneRow['compose_obj']['money'] >= 10? '#f96' : 
-                    oneRow['compose_obj']['money'] - oneRow['plan_buyin_money'] >= 10? 'red' : '',
-                    'font-weight': Math.abs(oneRow['plan_buyin_money'] - oneRow['compose_obj']['money'])>=10? 'bold':'normal'}">
-                      <span style="font-size: 1rem;">初:{{oneRow['plan_buyin_money']}}&nbsp;</span>
-                      <span style="font-size: 1rem;">现:{{oneRow['compose_obj']['money']}}</span>
-                    </div>
+                    <template v-if="oneRow['compose_obj']">
+                      <div style="text-align: center;" 
+                      :style="{'color': oneRow['plan_buyin_money'] - oneRow['compose_obj']['money'] >= 10? '#f96' : 
+                      oneRow['compose_obj']['money'] - oneRow['plan_buyin_money'] >= 10? 'red' : '',
+                      'font-weight': Math.abs(oneRow['plan_buyin_money'] - oneRow['compose_obj']['money'])>=10? 'bold':'normal'}">
+                        <span style="font-size: 1rem;">初:{{oneRow['plan_buyin_money']}}&nbsp;</span>
+                        <span style="font-size: 1rem;">现:{{oneRow['compose_obj']['money']}}</span>
+                      </div>
+                    </template>
                     <div>
                       <template v-if="oneRow['compose_plan'] === 'ovtree'">
                           <span class="badge bg-primary text-bg-success big_badge">
@@ -664,9 +666,11 @@ watch([aggressiveObjs, aggressiveExcludes, buyin_records], () => {
   let _gdngoat_fund_objs = composeObjs.value.find(item => item['compose_name'] === 'gdngoat')['compose_objs']
 
   aggressiveViewObjs.value.forEach(elem => {
-
     if (elem.hasOwnProperty('compose_plan') && elem['compose_plan'] && elem['compose_plan'] === 'gdngoat') {
       elem['compose_obj'] = _gdngoat_fund_objs.find(_obj => _obj['fund_id'] === elem['fund_id'])
+      if (!elem['compose_obj'] && elem.hasOwnProperty('compose_plan') && elem['compose_plan'] != 'noplan') {
+        console.warn("aggressive page find compose_obj failed: ", elem['fund_id'], elem['fund_name']);
+      }
     }
     calculatePlanMoney('aggressive', elem)
   })

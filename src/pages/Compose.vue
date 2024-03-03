@@ -10,13 +10,13 @@
       </div>
 
       <div class="form-check form_check_cust">
-          <input class="form-check-input" type="checkbox" v-model="showLostOnly">
-          <label class="form-check-label" for="flexCheckDefault">缺失&nbsp;</label>
-          <span class="badge bg-warning">{{ totLostNum }}</span>
+          <input class="form-check-input" type="checkbox" v-model="show4SoldOnly">
+          <label class="form-check-label" for="flexCheckDefault">待卖&nbsp;</label>
+          <span class="badge bg-warning">{{ tot4SoldNum }}</span>
       </div>
       <div class="form-check form_check_cust">
           <input class="form-check-input" type="checkbox" v-model="showPauseOnly">
-          <label class="form-check-label" for="flexCheckDefault">暂停&nbsp;</label>
+          <label class="form-check-label" for="flexCheckDefault">待买&nbsp;</label>
           <span class="badge bg-warning">{{ totPauseNum }}</span>
       </div>
       <div class="form-check form_check_cust">
@@ -295,7 +295,7 @@
                 </div>
               </td>
               <td style="text-align: center;" v-bind:class="{ sel_row: oneRow['currSelected'] }">
-                <template v-if="oneRow['fixedHoldObj']">
+                <template v-if="oneRow['fixedHoldObj'] && oneRow['fixedHoldObj']['hold_objs'] && oneRow['fixedHoldObj']['hold_objs'].length > 0">
                   <button type="button" class="btn"
                     :class="{ 'btn-primary': !oneRow['fixedHoldObj']['disp_flag'], 'btn-secondary': oneRow['fixedHoldObj']['disp_flag'] }"
                     @click.stop="oneRow['fixedHoldObj']['disp_flag'] = !oneRow['fixedHoldObj']['disp_flag'];">
@@ -303,6 +303,11 @@
                     <template v-else>折叠</template>
                   </button>
                 </template>
+                <template v-else>
+                  <button type="button" class="btn btn-warning" @click.stop="removeCompose4Ui($event, oneRow)">
+                    移除
+                  </button>
+                </template>                
               </td>
             </tr>
           </template>
@@ -870,31 +875,31 @@ watch(compose_name, () => {
 }, { immediate: true })
 
 const composeViewObjs = ref([])
-const showLostOnly = ref(false)
+const show4SoldOnly = ref(false)
 const showPauseOnly = ref(false)
 const showAdjustOnly = ref(false)
 const showPoleOnly = ref(false)
-const totLostNum = ref(0)
+const tot4SoldNum = ref(0)
 const totPauseNum = ref(0)
 const totAdjustNum = ref(0)
-watch([composeObjs, compose_name, fixedHoldObjs, buyoutRecords, showLostOnly, showPauseOnly, showAdjustOnly, showPoleOnly], () => {
+watch([composeObjs, compose_name, fixedHoldObjs, buyoutRecords, show4SoldOnly, showPauseOnly, showAdjustOnly, showPoleOnly], () => {
   composeViewObjs.value = []
   if (composeObjs && composeObjs.value && composeObjs.value.length > 0) {
     if (compose_name.value === 'all') {
       composeObjs.value.forEach(item => {
-        if (!showLostOnly.value && !showPauseOnly.value && !showAdjustOnly.value && !showPoleOnly.value) {
+        if (!show4SoldOnly.value && !showPauseOnly.value && !showAdjustOnly.value && !showPoleOnly.value) {
           composeViewObjs.value.push(...item['compose_objs'])
         } else {
           item['compose_objs'].forEach(_obj => {
             let _added_in = false
-            if (showLostOnly.value) {
-              if (_obj['lost_in_aggressive'] || _obj['lost_in_dtconvg']) {
+            if (show4SoldOnly.value) {
+              if (_obj['lost_in_aggressive'] || _obj['lost_in_dtconvg'] || (_obj.hasOwnProperty('money') && _obj['money'] === -2)) {
                 composeViewObjs.value.push(_obj)
                 _added_in = true
               }
             }
             if (showPauseOnly.value && !_added_in) {
-              if ((!_obj.hasOwnProperty('money') || _obj['money'] <= 0) &&
+              if ((_obj.hasOwnProperty('money') && _obj['money'] === -1) &&
                 (!_obj['lost_in_aggressive'] && !_obj['lost_in_dtconvg'])) {
                 composeViewObjs.value.push(_obj)
                 _added_in = true
@@ -919,20 +924,20 @@ watch([composeObjs, compose_name, fixedHoldObjs, buyoutRecords, showLostOnly, sh
         }
       })
     } else {
-      if (!showLostOnly.value && !showPauseOnly.value && !showAdjustOnly.value && !showPoleOnly.value) {
+      if (!show4SoldOnly.value && !showPauseOnly.value && !showAdjustOnly.value && !showPoleOnly.value) {
         composeViewObjs.value = composeObjs.value.find(item => item['compose_name'] === compose_name.value)['compose_objs']
       } else {
         let _match_composes = composeObjs.value.find(item => item['compose_name'] === compose_name.value)
         _match_composes['compose_objs'].forEach(_obj => {
           let _added_in = false
-          if (showLostOnly.value) {
-            if (_obj['lost_in_aggressive'] || _obj['lost_in_dtconvg']) {
+          if (show4SoldOnly.value) {
+            if (_obj['lost_in_aggressive'] || _obj['lost_in_dtconvg'] || (_obj.hasOwnProperty('money') && _obj['money'] === -2)) {
               composeViewObjs.value.push(_obj)
               _added_in = true
             }
           }
           if (showPauseOnly.value && !_added_in) {
-            if ((!_obj.hasOwnProperty('money') || _obj['money'] <= 0) &&
+            if ((_obj.hasOwnProperty('money') && _obj['money'] === -1) &&
               (!_obj['lost_in_aggressive'] && !_obj['lost_in_dtconvg'])) {
               composeViewObjs.value.push(_obj)
               _added_in = true
@@ -985,7 +990,7 @@ watch([composeObjs, compose_name, fixedHoldObjs, buyoutRecords, showLostOnly, sh
   totSetBuy.value = 0
   totPlanBuy.value = 0
   totPositiveNum.value = 0
-  totLostNum.value = 0
+  tot4SoldNum.value = 0
   totPauseNum.value = 0
   totAdjustNum.value = 0
   totPoleNum.value = 0
@@ -1014,7 +1019,7 @@ watch([composeObjs, compose_name, fixedHoldObjs, buyoutRecords, showLostOnly, sh
 
       if ((elem.hasOwnProperty('lost_in_aggressive') && elem['lost_in_aggressive'])
         || (elem.hasOwnProperty('lost_in_dtconvg') && elem['lost_in_dtconvg'])) {
-        totLostNum.value = totLostNum.value + 1
+        tot4SoldNum.value = tot4SoldNum.value + 1
       } else if (!elem.hasOwnProperty('money') || elem['money'] <= 0) {
         totPauseNum.value = totPauseNum.value + 1
       }

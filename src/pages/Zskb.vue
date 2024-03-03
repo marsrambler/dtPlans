@@ -333,7 +333,8 @@
           </td>
           <td class="nr_td" v-bind:class="{ sel_row: oneRow['currSelected'] }">
             <div class="grid_1">
-              <template v-if="oneRow['compose_plan'] && oneRow['compose_plan'] === 'noplan'">
+              <template v-if="(oneRow['compose_plan'] && oneRow['compose_plan'] === 'noplan')
+              ||(!oneRow.hasOwnProperty('compose_obj') || !oneRow['compose_obj'])">
                 <div style="text-wrap: nowrap; display: flex; align-items: center;">额:&nbsp;
                   <input type="number" style="width: 3.5rem; border-radius: 5px; flex-grow: 1;" 
                   v-model="oneRow['plan_buyin_money']" @click.stop>                  
@@ -352,13 +353,15 @@
                 </div>
               </template>
               <template v-if="oneRow['compose_plan'] && oneRow['compose_plan'] !== 'noplan'">
-                <div style="text-align: center;" 
-                :style="{'color': oneRow['plan_buyin_money'] - oneRow['compose_obj']['money'] >=10? '#f96' : 
-                oneRow['compose_obj']['money'] - oneRow['plan_buyin_money'] >=10? 'red' : '',
-                'font-weight': Math.abs(oneRow['plan_buyin_money'] - oneRow['compose_obj']['money'])>=10? 'bold':'normal'}">
-                  <span style="font-size: 1rem;">初:{{oneRow['plan_buyin_money']}}&nbsp;</span>
-                  <span style="font-size: 1rem;">现:{{oneRow['compose_obj']['money']}}</span>
-                </div>
+                <template v-if="oneRow['compose_obj']">
+                  <div style="text-align: center;" 
+                  :style="{'color': oneRow['plan_buyin_money'] - oneRow['compose_obj']['money'] >=10? '#f96' : 
+                  oneRow['compose_obj']['money'] - oneRow['plan_buyin_money'] >=10? 'red' : '',
+                  'font-weight': Math.abs(oneRow['plan_buyin_money'] - oneRow['compose_obj']['money'])>=10? 'bold':'normal'}">
+                    <span style="font-size: 1rem;">初:{{oneRow['plan_buyin_money']}}&nbsp;</span>
+                    <span style="font-size: 1rem;">现:{{oneRow['compose_obj']['money']}}</span>
+                  </div>
+                </template>
                 <div>
                   <template v-if="oneRow['compose_plan'] === 'ovtree'">
                       <span class="badge bg-primary text-bg-success big_badge">
@@ -448,6 +451,7 @@ const buy_in_from_plan = [
   {'source_name': '橄榄树', 'source_val': 'ovtree'},
   // {'source_name': '海豚', 'source_val': 'dolphin'},
   // { 'source_name': '三叉戟', 'source_val': 'trident' }
+  {'source_name': '金毛羊', 'source_val': 'gdngoat'}
 ]
 
 const colWidMap = {
@@ -528,8 +532,11 @@ watch([zskbObjs, wideIdxOnly, topicIdxOnly, indusIdxOnly, qdiiIdxOnly, composeOb
         elem['compose_plan'] = 'gdngoat'
         elem['compose_obj'] = _gdngoat_fund_objs.find(_obj => _obj['fund_id'] === elem['fund_id'])
       } else {
-        elem['compose_plan'] = 'noplan'
+        //elem['compose_plan'] = 'noplan'
         elem['compose_obj'] = null
+        if (elem.hasOwnProperty('compose_plan') && elem['compose_plan'] != 'noplan') {
+          console.warn("zskb page get compose_obj failed: ", elem['fund_id'], elem['fund_name']);
+        }
       }
       calculatePlanMoney('zskb', elem)
     })
