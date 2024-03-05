@@ -410,19 +410,19 @@ export const useBuyInOutStore = defineStore('buyInOut-store', () => {
                     console.error("compose page/gdngoat has no statistics/min_sort_tot_earn for elem: ", elem);
                 }
 
-                if (!elem['kbObj']['p50_convg_dur_rank'] || !elem['kbObj']['p65_convg_dur_rank'] || !elem['kbObj']['p80_convg_dur_rank']) {
+                if (elem['kbObj'] && (!elem['kbObj']['p50_convg_dur_rank'] || !elem['kbObj']['p65_convg_dur_rank'] || !elem['kbObj']['p80_convg_dur_rank'])) {
                     elem['plan_buyin_money'] = elem['plan_buyin_money'] - 10
                 }
-                if (elem['kbObj']['avg_convg_days'] && elem['kbObj']['avg_convg_days'] >= 150) {
+                if (elem['kbObj'] && elem['kbObj']['avg_convg_days'] && elem['kbObj']['avg_convg_days'] >= 150) {
                     elem['plan_buyin_money'] = elem['plan_buyin_money'] - 5
                 }
-                if (elem['kbObj']['avg_convg_days'] && elem['kbObj']['avg_convg_days'] >= 180) {
+                if (elem['kbObj'] && elem['kbObj']['avg_convg_days'] && elem['kbObj']['avg_convg_days'] >= 180) {
                     elem['plan_buyin_money'] = elem['plan_buyin_money'] - 5
                 }
-                if (elem['kbObj']['size'] && elem['kbObj']['size'] < 1100) {
+                if (elem['kbObj'] && elem['kbObj']['size'] && elem['kbObj']['size'] < 1100) {
                     elem['plan_buyin_money'] = elem['plan_buyin_money'] - 5
                 }
-                if (elem['kbObj']['size'] && elem['kbObj']['size'] < 880) {
+                if (elem['kbObj'] && elem['kbObj']['size'] && elem['kbObj']['size'] < 880) {
                     elem['plan_buyin_money'] = elem['plan_buyin_money'] - 5
                 }
                 if (elem['wav_obj'] && elem['wav_obj']['wav_sort_level']) {
@@ -477,10 +477,10 @@ export const useBuyInOutStore = defineStore('buyInOut-store', () => {
                     console.error("compose page/ovtree has no statistics/min_sort_tot_earn for elem: ", elem);
                 }
 
-                if (elem['kbObj']['statistics']['fund_perc_len'] && elem['kbObj']['statistics']['fund_perc_len'] < 1100) {
+                if (elem['kbObj'] && elem['kbObj']['statistics']['fund_perc_len'] && elem['kbObj']['statistics']['fund_perc_len'] < 1100) {
                     elem['plan_buyin_money'] = elem['plan_buyin_money'] - 5
                 }
-                if (elem['kbObj']['statistics']['fund_perc_len'] && elem['kbObj']['statistics']['fund_perc_len'] < 880) {
+                if (elem['kbObj'] && elem['kbObj']['statistics']['fund_perc_len'] && elem['kbObj']['statistics']['fund_perc_len'] < 880) {
                     elem['plan_buyin_money'] = elem['plan_buyin_money'] - 5
                 }
                 if (elem['wav_obj'] && elem['wav_obj']['wav_sort_level']) {
@@ -535,10 +535,10 @@ export const useBuyInOutStore = defineStore('buyInOut-store', () => {
                     console.error("compose page/dolphin has no statistics/min_sort_tot_earn for elem: ", elem);
                 }
 
-                if (elem['kbObj']['statistics']['fund_perc_len'] && elem['kbObj']['statistics']['fund_perc_len'] < 1100) {
+                if (elem['kbObj'] && elem['kbObj']['statistics']['fund_perc_len'] && elem['kbObj']['statistics']['fund_perc_len'] < 1100) {
                     elem['plan_buyin_money'] = elem['plan_buyin_money'] - 5
                 }
-                if (elem['kbObj']['statistics']['fund_perc_len'] && elem['kbObj']['statistics']['fund_perc_len'] < 880) {
+                if (elem['kbObj'] && elem['kbObj']['statistics']['fund_perc_len'] && elem['kbObj']['statistics']['fund_perc_len'] < 880) {
                     elem['plan_buyin_money'] = elem['plan_buyin_money'] - 5
                 }
                 if (elem['wav_obj'] && elem['wav_obj']['wav_sort_level']) {

@@ -480,7 +480,7 @@ onMounted(() => {
   dlgController.value.reportDlg = new Modal('#reportDialog', {})
   let _prot = window.location.protocol;
   let _host = window.location.hostname;
-  baseUrl4ProbeNav.value = _prot + "//" + _host + "/probe-funds.html?dt_fund_id="
+  baseUrl4ProbeNav.value = _prot + "//" + _host + "/index.html?dt_fund_id="
   baseUrl4ComposeNav.value = _prot + "//" + _host + "/dt_plans_web/#/?dt_fund_id="
 
   if (route.query.hasOwnProperty('fund_id') && route.query['fund_id']) {
@@ -1454,7 +1454,7 @@ const summ_level_tips_map = {
 				'4': {'cmt': '估值较差', 'bgcolor': 'red', 'color': 'white', 'bd': ''},
 				'4.1': {'cmt': '持有额较大|次差', 'bgcolor': 'cornsilk', 'color': 'red', 'bd': 'dashed 2px red'},
 				'4.2': {'cmt': '持有额大|特差', 'bgcolor': 'cornsilk', 'color': 'red', 'bd': 'dashed 2px red'},
-				'4.3': {'cmt': '售出不久', 'bgcolor': 'cornsilk', 'color': 'red', 'bd': 'dashed 2px red'},
+				'4.3': {'cmt': '售出近|量化停', 'bgcolor': 'cornsilk', 'color': 'red', 'bd': 'dashed 2px red'},
 				'-1': {'cmt': '已经终止', 'bgcolor': 'black', 'color': 'white', 'bd': ''}
 			};
 </script>

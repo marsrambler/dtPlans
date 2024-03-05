@@ -348,7 +348,7 @@
                   <button type="button" class="btn btn-warning mw4_ctl" @click.stop="changeCompose($event, oneRow)"
                           v-bind:disabled="!oneRow['target_plan'] || oneRow['target_plan'] === 'noplan' 
                           || !oneRow.hasOwnProperty('plan_buyin_money') || !oneRow['plan_buyin_money'] 
-                          || oneRow['plan_buyin_money'] <= 0">保存
+                          || oneRow['plan_buyin_money'] < -1">保存
                   </button>
                 </div>
               </template>

@@ -218,13 +218,16 @@
                   <div style="height: 1.8em; position: relative; text-align: center;"
                     v-bind:class="getPosColor(oneRow.kbObj.positive.positive_reach_len)">
                     <template v-if="oneRow.hasOwnProperty('quant_obj') && oneRow['quant_obj']['max_hitted']">
-                      <span class="icon_pos_left" style="color: red;">
-                        <i class="bi bi-arrow-up-circle-fill"></i>
-                        <div style="" class="icon_tri">
-                          <div>{{ oneRow['quant_obj']['rate_str'] }}</div>
-                          <div style="border-top: solid 2px darkgrey;">{{ oneRow['quant_obj']['max_str'] }}</div>
-                        </div>
-                      </span>
+                      <a v-bind:href="baseUrl4ProbeNav + oneRow['fund_id'] + '&cust_fund_name=' + oneRow['fund_name'] + '&cust_buyin_type=' + 'fixed_buyin_append'" 
+                      target="_blank" style="cursor: pointer; text-decoration: none;">
+                        <span class="icon_pos_left" style="color: red;">
+                          <i class="bi bi-arrow-up-circle-fill"></i>
+                          <div style="" class="icon_tri">
+                            <div>{{ oneRow['quant_obj']['rate_str'] }}</div>
+                            <div style="border-top: solid 2px darkgrey;">{{ oneRow['quant_obj']['max_str'] }}</div>
+                          </div>
+                        </span>
+                      </a>
                     </template>
                   </div>
                   <div style="height: 1.8em; position: relative; text-align: center;"
@@ -437,13 +440,16 @@
                   <div style="height: 1.8em; position: relative; text-align: center;"
                     v-bind:class="getPosColor(oneRow.kbObj.positive.positive_reach_len)">
                     <template v-if="oneRow.hasOwnProperty('quant_obj') && oneRow['quant_obj']['max_hitted']">
-                      <span class="icon_pos_left" style="color: red;">
-                        <i class="bi bi-arrow-up-circle-fill"></i>
-                        <div style="" class="icon_tri">
-                          <div>{{ oneRow['quant_obj']['rate_str'] }}</div>
-                          <div style="border-top: solid 2px darkgrey;">{{ oneRow['quant_obj']['max_str'] }}</div>
-                        </div>
-                      </span>
+                      <a v-bind:href="baseUrl4ProbeNav + oneRow['fund_id'] + '&cust_fund_name=' + oneRow['fund_name'] + '&cust_buyin_type=' + 'fixed_buyin_append'" 
+                      target="_blank" style="cursor: pointer; text-decoration: none;">
+                        <span class="icon_pos_left" style="color: red;">
+                          <i class="bi bi-arrow-up-circle-fill"></i>
+                          <div style="" class="icon_tri">
+                            <div>{{ oneRow['quant_obj']['rate_str'] }}</div>
+                            <div style="border-top: solid 2px darkgrey;">{{ oneRow['quant_obj']['max_str'] }}</div>
+                          </div>
+                        </span>
+                      </a>
                     </template>
                     <span v-if="oneRow.kbObj.positive.positive_reach_len >= 4" class="icon_pos_right">
                       <i class="bi bi-arrow-up-circle-fill"></i>
@@ -1086,6 +1092,7 @@ const searchCond = ref()
 const searchTimer = ref(null)
 const searchByFundIdFoundFlag = ref(false)
 const searchByFundIdTimes = ref(0)
+const baseUrl4ProbeNav = ref("")
 
 onMounted(() => {
   dlgController.value.soldDlg = new Modal('#soldDialog', {})
@@ -1114,6 +1121,10 @@ onMounted(() => {
       }, 1000)
     }
   }
+  
+  let _prot = window.location.protocol;
+  let _host = window.location.hostname;
+  baseUrl4ProbeNav.value = _prot + "//" + _host + "/index.html?cust_fund_id="
 })
 
 onUnmounted(() => {
