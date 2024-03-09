@@ -553,7 +553,7 @@ function saveEstiPe(event, oneRowObj) {
 
 function changeCompose(event, oneRowObj) {
   event.stopPropagation()
-  addOrRemoveCompose(oneRowObj['fund_id'], oneRowObj['fund_name'], oneRowObj['target_plan'], oneRow['plan_buyin_money'])
+  addOrRemoveCompose(oneRowObj['fund_id'], oneRowObj['fund_name'], oneRowObj['target_plan'], oneRowObj['plan_buyin_money'])
 }
 
 function selOrDesRow(oneRowObj) {

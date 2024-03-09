@@ -299,23 +299,26 @@
                     --><span class="red_card less_height"
                       v-if="oneRow['money'] - oneRow['adjust_money'] >= 20">&nbsp;</span><!--
                     --><span class="darkgolden_card less_height"
-                      v-if="oneRow['adjust_money'] - oneRow['money'] >= 20">&nbsp;</span><!--
-                    --><span class="red_card less_height"
-                      v-if="oneRow['money'] - oneRow['adjust_money'] >= 25">&nbsp;</span><!--
-                    --><span class="darkgolden_card less_height"
-                      v-if="oneRow['adjust_money'] - oneRow['money'] >= 25">&nbsp;</span><!--
-                    --><span class="red_card less_height"
-                      v-if="oneRow['money'] - oneRow['adjust_money'] >= 30">&nbsp;</span><!--
-                    --><span class="darkgolden_card less_height"
-                      v-if="oneRow['adjust_money'] - oneRow['money'] >= 30">&nbsp;</span><!--
-                    --><span class="red_card less_height"
-                      v-if="oneRow['money'] - oneRow['adjust_money'] >= 35">&nbsp;</span><!--
-                    --><span class="darkgolden_card less_height"
-                      v-if="oneRow['adjust_money'] - oneRow['money'] >= 35">&nbsp;</span><!--
-                    --><span class="red_card less_height"
-                      v-if="oneRow['money'] - oneRow['adjust_money'] >= 40">&nbsp;</span><!--
-                    --><span class="darkgolden_card less_height"
-                      v-if="oneRow['adjust_money'] - oneRow['money'] >= 40">&nbsp;</span>
+                      v-if="oneRow['adjust_money'] - oneRow['money'] >= 20">&nbsp;</span>
+                    <template v-if="false">
+                      <!--
+                      --><span class="red_card less_height"
+                        v-if="oneRow['money'] - oneRow['adjust_money'] >= 25">&nbsp;</span><!--
+                      --><span class="darkgolden_card less_height"
+                        v-if="oneRow['adjust_money'] - oneRow['money'] >= 25">&nbsp;</span><!--
+                      --><span class="red_card less_height"
+                        v-if="oneRow['money'] - oneRow['adjust_money'] >= 30">&nbsp;</span><!--
+                      --><span class="darkgolden_card less_height"
+                        v-if="oneRow['adjust_money'] - oneRow['money'] >= 30">&nbsp;</span><!--
+                      --><span class="red_card less_height"
+                        v-if="oneRow['money'] - oneRow['adjust_money'] >= 35">&nbsp;</span><!--
+                      --><span class="darkgolden_card less_height"
+                        v-if="oneRow['adjust_money'] - oneRow['money'] >= 35">&nbsp;</span><!--
+                      --><span class="red_card less_height"
+                        v-if="oneRow['money'] - oneRow['adjust_money'] >= 40">&nbsp;</span><!--
+                      --><span class="darkgolden_card less_height"
+                        v-if="oneRow['adjust_money'] - oneRow['money'] >= 40">&nbsp;</span>
+                    </template>
                   </template>
                 </div>
                 <div>
@@ -603,23 +606,26 @@
                     --><span class="red_card less_height"
                       v-if="oneRow['money'] - oneRow['adjust_money'] >= 20">&nbsp;</span><!--
                     --><span class="darkgolden_card less_height"
-                      v-if="oneRow['adjust_money'] - oneRow['money'] >= 20">&nbsp;</span><!--
-                    --><span class="red_card less_height"
-                      v-if="oneRow['money'] - oneRow['adjust_money'] >= 25">&nbsp;</span><!--
-                    --><span class="darkgolden_card less_height"
-                      v-if="oneRow['adjust_money'] - oneRow['money'] >= 25">&nbsp;</span><!--
-                    --><span class="red_card less_height"
-                      v-if="oneRow['money'] - oneRow['adjust_money'] >= 30">&nbsp;</span><!--
-                    --><span class="darkgolden_card less_height"
-                      v-if="oneRow['adjust_money'] - oneRow['money'] >= 30">&nbsp;</span><!--
-                    --><span class="red_card less_height"
-                      v-if="oneRow['money'] - oneRow['adjust_money'] >= 35">&nbsp;</span><!--
-                    --><span class="darkgolden_card less_height"
-                      v-if="oneRow['adjust_money'] - oneRow['money'] >= 35">&nbsp;</span><!--
-                    --><span class="red_card less_height"
-                      v-if="oneRow['money'] - oneRow['adjust_money'] >= 40">&nbsp;</span><!--
-                    --><span class="darkgolden_card less_height"
-                      v-if="oneRow['adjust_money'] - oneRow['money'] >= 40">&nbsp;</span>
+                      v-if="oneRow['adjust_money'] - oneRow['money'] >= 20">&nbsp;</span>
+                    <template v-if="false">
+                      <!--
+                      --><span class="red_card less_height"
+                        v-if="oneRow['money'] - oneRow['adjust_money'] >= 25">&nbsp;</span><!--
+                      --><span class="darkgolden_card less_height"
+                        v-if="oneRow['adjust_money'] - oneRow['money'] >= 25">&nbsp;</span><!--
+                      --><span class="red_card less_height"
+                        v-if="oneRow['money'] - oneRow['adjust_money'] >= 30">&nbsp;</span><!--
+                      --><span class="darkgolden_card less_height"
+                        v-if="oneRow['adjust_money'] - oneRow['money'] >= 30">&nbsp;</span><!--
+                      --><span class="red_card less_height"
+                        v-if="oneRow['money'] - oneRow['adjust_money'] >= 35">&nbsp;</span><!--
+                      --><span class="darkgolden_card less_height"
+                        v-if="oneRow['adjust_money'] - oneRow['money'] >= 35">&nbsp;</span><!--
+                      --><span class="red_card less_height"
+                        v-if="oneRow['money'] - oneRow['adjust_money'] >= 40">&nbsp;</span><!--
+                      --><span class="darkgolden_card less_height"
+                        v-if="oneRow['adjust_money'] - oneRow['money'] >= 40">&nbsp;</span>
+                    </template>
                   </template>
                 </div>
                 <div style="height: 1.8rem;">

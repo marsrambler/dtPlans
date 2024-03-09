@@ -128,7 +128,8 @@ export const useBuyInOutStore = defineStore('buyInOut-store', () => {
                 'fund_order': _fund_order,
                 'fund_name': _fund_name,
                 'distance_natural': _distance_natural,
-                'buyin_source': _buyin_source
+                'buyin_source': _buyin_source,
+                'action-type': 'remove'
             })
             if (response.status === 200) {
                 useApiStore().pop_alert_msg("删除记录成功: " + _fund_name)
