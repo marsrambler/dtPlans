@@ -49,8 +49,25 @@ async function syncKanban() {
     }
 }
 
+async function syncCluster() {
+    try {
+        const response = await axiosInst.get("api/sync-fe-cluster")
+        if (response.status == 200) {
+            useApiStore().pop_alert_msg("同步android集群成功")
+            return true
+        } else {
+            console.error("sync cluster failed: ", response)
+            return false
+        }
+    } catch (error) {
+        console.log("sync cluster failed: ", error)
+        return false
+    }
+}
+
 export {
     getSyncStatus,
     runKanban,
-    syncKanban
+    syncKanban,
+    syncCluster
 }

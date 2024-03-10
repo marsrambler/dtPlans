@@ -33,6 +33,10 @@
                 <button style="width: 100%; border-radius: 0;" type="button" class="btn btn-secondary"
                   @click="syncKanban4ui();">同步看板</button>
               </li>
+              <li>
+                <button style="width: 100%; border-radius: 0;" type="button" class="btn btn-secondary"
+                  @click="syncCluster4ui();">同步集群</button>
+              </li>              
             </ul>
           </li>
         </ul>
@@ -132,7 +136,7 @@
 
 <script setup>
 import {onMounted, ref, computed, watch} from 'vue'
-import { getSyncStatus, runKanban, syncKanban } from "../lib/opApi.js";
+import { getSyncStatus, runKanban, syncKanban, syncCluster } from "../lib/opApi.js";
 import {Modal} from "bootstrap";
 import { useZskbStore } from "../store/zskbStore";
 import {storeToRefs} from 'pinia'
@@ -193,11 +197,20 @@ function syncKanban4ui() {
   dlgController.value.cfmDlg.show()
 }
 
+function syncCluster4ui() {
+  cfmDlgTitle.value = "确认"
+  cfmDlgCont.value = "要同步android集群数据吗？"
+  cfmDlgType.value = "sync cluster"
+  dlgController.value.cfmDlg.show()
+}
+
 function runOrSyncKanban() {
   if (cfmDlgType.value === "run kanban") {
     runKanban()
   } else if (cfmDlgType.value === "sync kanban") {
     syncKanban()
+  } else if (cfmDlgType.value === "sync cluster") {
+    syncCluster()
   }
   dlgController.value.cfmDlg.hide()
 }
