@@ -209,7 +209,11 @@
                 </div>
                 <div>{{ oneRow.fund_name }}&nbsp;
                   <template v-if="oneRow['last_sold_date']">
-                    <span>售:&nbsp;{{ oneRow['last_sold_date'] }}&nbsp;|&nbsp;{{ oneRow['last_sold_days'] }}</span>
+                    <span style="color:red;font-weight: bold;font-size:1.1rem;">售:&nbsp;{{ oneRow['last_sold_date'] }}
+                      <template v-if="oneRow.hasOwnProperty('last_sold_days') && oneRow['last_sold_days'] != null">
+                      &nbsp;|&nbsp;{{ oneRow['last_sold_days'] }}日
+                      </template>
+                    </span>
                   </template>
                 </div>
               </td>
@@ -219,7 +223,9 @@
                     v-bind:class="getPosColor(oneRow.kbObj.positive.positive_reach_len)">
                     <template v-if="oneRow.hasOwnProperty('quant_obj') && oneRow['quant_obj']['max_hitted']">
                       <a v-bind:href="baseUrl4ProbeNav + oneRow['fund_id'] + '&cust_fund_name=' + oneRow['fund_name'] + '&cust_buyin_type=' + 'fixed_buyin_append'" 
-                      target="_blank" style="cursor: pointer; text-decoration: none;">
+                      target="_blank" style="cursor: pointer; text-decoration: none;"
+                      @mouseover="oneRow['show_temp_quant_tip']=true;"
+                      @mouseleave="oneRow['show_temp_quant_tip']=false;">
                         <span class="icon_pos_left" style="color: red;">
                           <i class="bi bi-arrow-up-circle-fill"></i>
                           <div style="" class="icon_tri">
@@ -228,6 +234,11 @@
                           </div>
                         </span>
                       </a>
+                      <template v-if="oneRow['show_temp_quant_tip']">
+                        <span class="hover_tip">
+                          若高点明显则不应追加
+                        </span>
+                      </template>
                     </template>
                   </div>
                   <div style="height: 1.8em; position: relative; text-align: center;"
@@ -329,6 +340,11 @@
                 </div>
               </td>
               <td style="text-align: center;" v-bind:class="{ sel_row: oneRow['currSelected'] }">
+                <template v-if="oneRow.hasOwnProperty('last_pause_days') && oneRow['last_pause_days'] >= 5">
+                  <a v-bind:href="baseUrl4Report + oneRow['fund_id']" _target="blank" style="line-height: 3rem; color: red;">
+                    <span>看走势</span>
+                  </a>
+                </template>
                 <template v-if="oneRow['fixedHoldObj'] && oneRow['fixedHoldObj']['hold_objs'] && oneRow['fixedHoldObj']['hold_objs'].length > 0">
                   <button type="button" class="btn"
                     :class="{ 'btn-primary': !oneRow['fixedHoldObj']['disp_flag'], 'btn-secondary': oneRow['fixedHoldObj']['disp_flag'] }"
@@ -392,7 +408,11 @@
                     </span>
                   </template>
                   <template v-if="oneRow['last_sold_date']">
-                    <span>&nbsp;&nbsp;售:&nbsp;{{ oneRow['last_sold_date'] }}&nbsp;|&nbsp;{{ oneRow['last_sold_days'] }}</span>
+                    <span style="color:red;font-weight: bold;font-size:1.1rem;">&nbsp;&nbsp;售:&nbsp;{{ oneRow['last_sold_date'] }}
+                      <template v-if="oneRow.hasOwnProperty('last_sold_days') && oneRow['last_sold_days'] != null">
+                      &nbsp;|&nbsp;{{ oneRow['last_sold_days'] }}日
+                      </template>
+                    </span>
                   </template>
                 </div>
                 <div>
@@ -444,7 +464,9 @@
                     v-bind:class="getPosColor(oneRow.kbObj.positive.positive_reach_len)">
                     <template v-if="oneRow.hasOwnProperty('quant_obj') && oneRow['quant_obj']['max_hitted']">
                       <a v-bind:href="baseUrl4ProbeNav + oneRow['fund_id'] + '&cust_fund_name=' + oneRow['fund_name'] + '&cust_buyin_type=' + 'fixed_buyin_append'" 
-                      target="_blank" style="cursor: pointer; text-decoration: none;">
+                      target="_blank" style="cursor: pointer; text-decoration: none;"
+                      @mouseover="oneRow['show_temp_quant_tip']=true;"
+                      @mouseleave="oneRow['show_temp_quant_tip']=false;">
                         <span class="icon_pos_left" style="color: red;">
                           <i class="bi bi-arrow-up-circle-fill"></i>
                           <div style="" class="icon_tri">
@@ -453,6 +475,11 @@
                           </div>
                         </span>
                       </a>
+                      <template v-if="oneRow['show_temp_quant_tip']">
+                        <span class="hover_tip">
+                          若高点明显则不应追加
+                        </span>
+                      </template>
                     </template>
                     <span v-if="oneRow.kbObj.positive.positive_reach_len >= 4" class="icon_pos_right">
                       <i class="bi bi-arrow-up-circle-fill"></i>
@@ -636,6 +663,11 @@
                 </div>
               </td>
               <td style="text-align: center;" v-bind:class="{ sel_row: oneRow['currSelected'] }">
+                <template v-if="oneRow.hasOwnProperty('last_pause_days') && oneRow['last_pause_days'] >= 5">
+                  <a v-bind:href="baseUrl4Report + oneRow['fund_id']" _target="blank" style="line-height: 3rem; color: red;">
+                    <span>看走势</span>
+                  </a>
+                </template>
                 <template v-if="oneRow['fixedHoldObj'] && oneRow['fixedHoldObj']['hold_objs'] && oneRow['fixedHoldObj']['hold_objs'].length > 0">
                   <button type="button" class="btn"
                     :class="{ 'btn-primary': !oneRow['fixedHoldObj']['disp_flag'], 'btn-secondary': oneRow['fixedHoldObj']['disp_flag'] }"
@@ -923,6 +955,15 @@ const tot4SoldNum = ref(0)
 const totPauseNum = ref(0)
 const totAdjustNum = ref(0)
 watch([composeObjs, compose_name, fixedHoldObjs, buyoutRecords, show4SoldOnly, showPauseOnly, showAdjustOnly, showPoleOnly], () => {
+  if (composeObjs && composeObjs.value && composeObjs.value.length > 0) {
+    composeObjs.value.forEach(elem => {
+      if (elem['compose_objs'] && elem['compose_objs'].length > 0) {
+        elem['compose_objs'].forEach(_obj => {
+          _obj['show_temp_quant_tip'] = false
+        })
+      }
+    })
+  }
   composeViewObjs.value = []
   if (composeObjs && composeObjs.value && composeObjs.value.length > 0) {
     if (compose_name.value === 'all') {
@@ -1099,6 +1140,7 @@ const searchTimer = ref(null)
 const searchByFundIdFoundFlag = ref(false)
 const searchByFundIdTimes = ref(0)
 const baseUrl4ProbeNav = ref("")
+const baseUrl4Report = ref("")
 
 onMounted(() => {
   dlgController.value.soldDlg = new Modal('#soldDialog', {})
@@ -1131,6 +1173,7 @@ onMounted(() => {
   let _prot = window.location.protocol;
   let _host = window.location.hostname;
   baseUrl4ProbeNav.value = _prot + "//" + _host + "/index.html?cust_fund_id="
+  baseUrl4Report.value = _prot + "//" + _host + "/dt_plans_web/#/report?fund_id="
 })
 
 onUnmounted(() => {
@@ -1157,7 +1200,7 @@ async function soldFixedFundByBulkUi(_fund_id, _fund_name, _one_hold_obj_end, _h
 
 async function soldFixedFundByBulk() {
   await soldComposeFixedHold(fund_id_sold.value, fund_name_sold.value, one_hold_obj_end.value, hold_objs.value)
-  await setComposeSoldDate(fund_one_row_obj.value['fund_id'], fund_one_row_obj.value['fund_name'], fund_one_row_obj.value['compose_name'], 0, fund_one_row_obj.value['buyin_source'])
+  await setComposeSoldDate(fund_one_row_obj.value['fund_id'], fund_one_row_obj.value['fund_name'], fund_one_row_obj.value['compose_name'], -1, fund_one_row_obj.value['buyin_source'])
   dlgController.value.soldDlg.hide()
 }
 
@@ -1591,4 +1634,19 @@ function searchByCond() {
   font-weight: normal; 
   padding-left: 3px;
 }
+
+.hover_tip {
+  background-color: red;
+  color: white;
+  font-weight: bold;
+  position: absolute;
+  font-size: 0.9rem;
+  left: -4rem;
+  top: 2rem;
+  border-radius: 5px;
+  /* width: 11.5rem; */
+  text-align: center;
+  padding: 2px 5px 2px 5px;
+}
+
 </style>
