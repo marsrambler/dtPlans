@@ -193,6 +193,24 @@ export const useBuyInOutStore = defineStore('buyInOut-store', () => {
         }
     }
 
+    async function buyOutFixedFundOfToday(_fund_id, _fund_name) {
+        try {
+            const response = await axiosInst.post("api/buy-out-future", {
+                'phone_num': "13426156189",
+                'fund_id': _fund_id,
+                'fund_name': _fund_name
+            })
+            if (response.status == 200) {
+                await response.data
+                useApiStore().pop_alert_msg("撤销今日定投成功: " + _fund_name)
+            } else {
+                console.error("axios buyOutFixedFundOfToday failed: ", response)
+            }
+        } catch (error) {
+            console.log("axios buyOutFixedFundOfToday error: ", error)
+        }
+    }
+
     function calculatePlanMoney(_page_type, elem) {
         if (_page_type === 'zskb') {
             elem['plan_buyin_money'] = 60
@@ -577,6 +595,7 @@ export const useBuyInOutStore = defineStore('buyInOut-store', () => {
         getAllBuyinRecords,
         custBuyIn,
         getFundWavReport,
+        buyOutFixedFundOfToday,
         calculatePlanMoney
     }
 

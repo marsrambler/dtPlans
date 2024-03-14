@@ -341,7 +341,7 @@
               </td>
               <td style="text-align: center;" v-bind:class="{ sel_row: oneRow['currSelected'] }">
                 <template v-if="oneRow.hasOwnProperty('last_pause_days') && oneRow['last_pause_days'] >= 5">
-                  <a v-bind:href="baseUrl4Report + oneRow['fund_id']" _target="blank" style="line-height: 3rem; color: red;">
+                  <a v-bind:href="baseUrl4Report + oneRow['fund_id']" _target="blank" style="line-height: 2rem; color: red;">
                     <span>看走势</span>
                   </a>
                 </template>
@@ -357,7 +357,13 @@
                   <button type="button" class="btn btn-warning" @click.stop="removeCompose4Ui($event, oneRow)">
                     移除
                   </button>
-                </template>                
+                </template>
+                <template v-if="oneRow.hasOwnProperty('money') && oneRow['money'] > 0">
+                  <button type="button" class="btn btn-secondary" style="font-size: 0.8rem; margin-top: 0.5rem;"
+                    @click.stop="removeFixedFund4TodayUi(oneRow['fund_id'], oneRow['fund_name'])">
+                    撤今日
+                  </button>
+                </template>                 
               </td>
             </tr>
           </template>
@@ -664,7 +670,7 @@
               </td>
               <td style="text-align: center;" v-bind:class="{ sel_row: oneRow['currSelected'] }">
                 <template v-if="oneRow.hasOwnProperty('last_pause_days') && oneRow['last_pause_days'] >= 5">
-                  <a v-bind:href="baseUrl4Report + oneRow['fund_id']" _target="blank" style="line-height: 3rem; color: red;">
+                  <a v-bind:href="baseUrl4Report + oneRow['fund_id']" _target="blank" style="line-height: 2rem; color: red;">
                     <span>看走势</span>
                   </a>
                 </template>
@@ -679,6 +685,12 @@
                 <template v-else>
                   <button type="button" class="btn btn-warning" @click.stop="removeCompose4Ui($event, oneRow)">
                     移除
+                  </button>
+                </template>
+                <template v-if="oneRow.hasOwnProperty('money') && oneRow['money'] > 0">
+                  <button type="button" class="btn btn-secondary" style="font-size: 0.8rem; margin-top: 0.5rem;"
+                    @click.stop="removeFixedFund4TodayUi(oneRow['fund_id'], oneRow['fund_name'])">
+                    撤今日
                   </button>
                 </template>
               </td>
@@ -835,12 +847,23 @@
     <div class="modal-dialog">
       <div class="modal-content">
         <div class="modal-header">
-          <h5 class="modal-title">删除确认</h5>
+          <template v-if="fixed_remove_type == 'remove old'">
+            <h5 class="modal-title">删除确认</h5>
+          </template>
+          <template v-else-if="fixed_remove_type == 'remove today'">
+            <h5 class="modal-title">撤销确认</h5>
+          </template>
           <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
         </div>
         <div class="modal-body">
-          <h6>以下将被删除: </h6>
-          <h6>{{ fund_id_remove }}&nbsp;{{ fund_name_remove }}&nbsp; {{ one_hold_obj_remove?.dateStr }}</h6>
+          <template v-if="fixed_remove_type == 'remove old'">
+            <h6>以下将被删除: </h6>
+            <h6>{{ fund_id_remove }}&nbsp;{{ fund_name_remove }}&nbsp; {{ one_hold_obj_remove?.dateStr }}</h6>
+          </template>
+          <template v-else-if="fixed_remove_type == 'remove today'">
+            <h6>以下将被撤销: </h6>
+            <h6>{{ fund_id_remove }}&nbsp;{{ fund_name_remove }}</h6>
+          </template>
         </div>
         <div class="modal-footer">
           <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">取消</button>
@@ -902,7 +925,7 @@ const { composeObjs, fixedHoldObjs, totMoney, totPositiveNum, totPoleNum, totEar
 const { getAllCompose, setComposeProperty, setComposeSoldDate, getComposeFixedHold, addOrRemoveCompose } = composeStore
 const buyInOutStore = useBuyInOutStore()
 const { buyoutRecords, wav_reports } = storeToRefs(buyInOutStore)
-const { getAllBuyoutRecords, soldComposeFixedHold, buyOutFixedFund, calculatePlanMoney } = buyInOutStore
+const { getAllBuyoutRecords, soldComposeFixedHold, buyOutFixedFund, calculatePlanMoney, buyOutFixedFundOfToday } = buyInOutStore
 const zskbStore = useZskbStore()
 const { zskbObjs } = storeToRefs(zskbStore)
 
@@ -1207,8 +1230,10 @@ async function soldFixedFundByBulk() {
 const fund_id_remove = ref('')
 const fund_name_remove = ref('')
 const one_hold_obj_remove = ref(null)
+const fixed_remove_type = ref('')
 
 async function removeFixedFundUi(_fund_id, _fund_name, _one_hold_obj) {
+  fixed_remove_type.value = 'remove old'
   fund_id_remove.value = _fund_id
   fund_name_remove.value = _fund_name
   one_hold_obj_remove.value = _one_hold_obj
@@ -1216,8 +1241,22 @@ async function removeFixedFundUi(_fund_id, _fund_name, _one_hold_obj) {
 }
 
 async function removeFixedFund() {
-  buyOutFixedFund(fund_id_remove.value, fund_name_remove.value, one_hold_obj_remove.value)
-  dlgController.value.removeDlg.hide()
+  if (fixed_remove_type.value == 'remove old') {
+    buyOutFixedFund(fund_id_remove.value, fund_name_remove.value, one_hold_obj_remove.value)
+    dlgController.value.removeDlg.hide()
+  } else if (fixed_remove_type.value == 'remove today') {
+    buyOutFixedFundOfToday(fund_id_remove.value, fund_name_remove.value)
+    dlgController.value.removeDlg.hide()
+  } else {
+    console.error("internal error as remove fund type does not match.")
+  }
+}
+
+async function removeFixedFund4TodayUi(_fund_id, _fund_name) {
+  fixed_remove_type.value = 'remove today'
+  fund_id_remove.value = _fund_id
+  fund_name_remove.value = _fund_name
+  dlgController.value.removeDlg.show();
 }
 
 const toBeRemoveFundFromCompose = ref(null)
