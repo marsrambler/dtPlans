@@ -209,11 +209,13 @@
                 </div>
                 <div>{{ oneRow.fund_name }}&nbsp;
                   <template v-if="oneRow['last_sold_date']">
-                    <span style="color:red;font-weight: bold;font-size:1.1rem;">售:&nbsp;{{ oneRow['last_sold_date'] }}
-                      <template v-if="oneRow.hasOwnProperty('last_sold_days') && oneRow['last_sold_days'] != null">
-                      &nbsp;|&nbsp;{{ oneRow['last_sold_days'] }}日
-                      </template>
-                    </span>
+                    <a v-bind:href="baseUrl4Report + oneRow['fund_id']" _target="blank" style="text-decoration: none" title="看走势">
+                      <span style="color:red;font-weight: bold;font-size:1.1rem;">售:&nbsp;{{ oneRow['last_sold_date'] }}
+                        <template v-if="oneRow.hasOwnProperty('last_sold_days') && oneRow['last_sold_days'] != null">
+                        &nbsp;|&nbsp;{{ oneRow['last_sold_days'] }}日
+                        </template>
+                      </span>
+                    </a>
                   </template>
                 </div>
               </td>
@@ -358,12 +360,17 @@
                     移除
                   </button>
                 </template>
-                <template v-if="oneRow.hasOwnProperty('money') && oneRow['money'] > 0">
+                <template v-if="oneRow.hasOwnProperty('money') && oneRow['money'] > 0 && (!buyout_future_objs.hasOwnProperty(oneRow['fund_id']) || !buyout_future_objs[oneRow['fund_id']])">
                   <button type="button" class="btn btn-secondary" style="font-size: 0.8rem; margin-top: 0.5rem;"
                     @click.stop="removeFixedFund4TodayUi(oneRow['fund_id'], oneRow['fund_name'])">
                     撤今日
                   </button>
-                </template>                 
+                </template>
+                <template v-else-if="oneRow.hasOwnProperty('money') && oneRow['money'] > 0 && (buyout_future_objs.hasOwnProperty(oneRow['fund_id']) && buyout_future_objs[oneRow['fund_id']] != null)">
+                  <span class="badge bg-success text-bg-success big_badge" style="margin-top: 0.5rem;">
+                    已撤销
+                  </span>
+                </template>
               </td>
             </tr>
           </template>
@@ -414,11 +421,13 @@
                     </span>
                   </template>
                   <template v-if="oneRow['last_sold_date']">
-                    <span style="color:red;font-weight: bold;font-size:1.1rem;">&nbsp;&nbsp;售:&nbsp;{{ oneRow['last_sold_date'] }}
-                      <template v-if="oneRow.hasOwnProperty('last_sold_days') && oneRow['last_sold_days'] != null">
-                      &nbsp;|&nbsp;{{ oneRow['last_sold_days'] }}日
-                      </template>
-                    </span>
+                    <a v-bind:href="baseUrl4Report + oneRow['fund_id']" _target="blank" style="text-decoration: none" title="看走势">
+                      <span style="color:red;font-weight: bold;font-size:1.1rem;">&nbsp;&nbsp;售:&nbsp;{{ oneRow['last_sold_date'] }}
+                        <template v-if="oneRow.hasOwnProperty('last_sold_days') && oneRow['last_sold_days'] != null">
+                        &nbsp;|&nbsp;{{ oneRow['last_sold_days'] }}日
+                        </template>
+                      </span>
+                    </a>
                   </template>
                 </div>
                 <div>
@@ -687,11 +696,16 @@
                     移除
                   </button>
                 </template>
-                <template v-if="oneRow.hasOwnProperty('money') && oneRow['money'] > 0">
+                <template v-if="oneRow.hasOwnProperty('money') && oneRow['money'] > 0 && (!buyout_future_objs.hasOwnProperty(oneRow['fund_id']) || !buyout_future_objs[oneRow['fund_id']])">
                   <button type="button" class="btn btn-secondary" style="font-size: 0.8rem; margin-top: 0.5rem;"
                     @click.stop="removeFixedFund4TodayUi(oneRow['fund_id'], oneRow['fund_name'])">
                     撤今日
                   </button>
+                </template>
+                <template v-else-if="oneRow.hasOwnProperty('money') && oneRow['money'] > 0 && (buyout_future_objs.hasOwnProperty(oneRow['fund_id']) && buyout_future_objs[oneRow['fund_id']] != null)">
+                  <span class="badge bg-success text-bg-success big_badge" style="margin-top: 0.5rem;">
+                    已撤销
+                  </span>
                 </template>
               </td>
             </tr>
@@ -924,8 +938,8 @@ const composeStore = useComposeStore()
 const { composeObjs, fixedHoldObjs, totMoney, totPositiveNum, totPoleNum, totEarnMoney, totEarnRate, totSetBuy, totPlanBuy, diffBuySet } = storeToRefs(composeStore)
 const { getAllCompose, setComposeProperty, setComposeSoldDate, getComposeFixedHold, addOrRemoveCompose } = composeStore
 const buyInOutStore = useBuyInOutStore()
-const { buyoutRecords, wav_reports } = storeToRefs(buyInOutStore)
-const { getAllBuyoutRecords, soldComposeFixedHold, buyOutFixedFund, calculatePlanMoney, buyOutFixedFundOfToday } = buyInOutStore
+const { buyoutRecords, wav_reports, buyout_future_objs } = storeToRefs(buyInOutStore)
+const { getAllBuyoutRecords, soldComposeFixedHold, buyOutFixedFund, calculatePlanMoney, buyOutFixedFundOfToday, getAllBuyoutFutureRecords } = buyInOutStore
 const zskbStore = useZskbStore()
 const { zskbObjs } = storeToRefs(zskbStore)
 
@@ -1153,6 +1167,7 @@ watch([composeObjs, compose_name, fixedHoldObjs, buyoutRecords, show4SoldOnly, s
 }, { immediate: true })
 
 getAllBuyoutRecords()
+getAllBuyoutFutureRecords()
 
 /*
 * sold by bulk

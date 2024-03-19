@@ -11,6 +11,7 @@ export const useBuyInOutStore = defineStore('buyInOut-store', () => {
     const buyout_records_map = ref({})
     const buyin_records = ref([])
     const wav_reports = ref([])
+    const buyout_future_objs = ref({})
 
     // action
     async function getAllBuyoutRecords() {
@@ -203,6 +204,7 @@ export const useBuyInOutStore = defineStore('buyInOut-store', () => {
             if (response.status == 200) {
                 await response.data
                 useApiStore().pop_alert_msg("撤销今日定投成功: " + _fund_name)
+                await getAllBuyoutFutureRecords()
             } else {
                 console.error("axios buyOutFixedFundOfToday failed: ", response)
             }
@@ -583,11 +585,32 @@ export const useBuyInOutStore = defineStore('buyInOut-store', () => {
         }
     }
 
+    async function getAllBuyoutFutureRecords() {
+        try {
+            const response = await axiosInst.get("api/buy-out-future")
+            if (response.status == 200) {
+                let _objs = await response.data;
+                let _trans_objs = {}
+                if (_objs && _objs.length > 0) {
+                    _objs.forEach(elem => {
+                        _trans_objs[elem['fund_id']] = elem
+                    })
+                }
+                buyout_future_objs.value = _trans_objs
+            } else {
+                console.error("axios get buyout future records failed: ", response)
+            }
+        } catch (error) {
+            console.log("axios get buyout future records error: ", error)
+        }
+    }
+
     return {
         buyoutRecords,
         buyin_records,
         buyout_records_map,
         wav_reports,
+        buyout_future_objs,
         getAllBuyoutRecords,
         fundCanBeBuyOut,
         soldComposeFixedHold,
@@ -596,7 +619,8 @@ export const useBuyInOutStore = defineStore('buyInOut-store', () => {
         custBuyIn,
         getFundWavReport,
         buyOutFixedFundOfToday,
-        calculatePlanMoney
+        calculatePlanMoney,
+        getAllBuyoutFutureRecords
     }
 
 });
