@@ -12,6 +12,7 @@ export const useBuyInOutStore = defineStore('buyInOut-store', () => {
     const buyin_records = ref([])
     const wav_reports = ref([])
     const buyout_future_objs = ref({})
+    const contStartStopObj = ref({})
 
     // action
     async function getAllBuyoutRecords() {
@@ -605,12 +606,26 @@ export const useBuyInOutStore = defineStore('buyInOut-store', () => {
         }
     }
 
+    async function getContStartStop() {
+        try {
+            const response = await axiosInst.get("api/get_cont_start_stop")
+            if (response.status == 200) {
+                contStartStopObj.value = await response.data;
+            } else {
+                console.error("axios get cont start stop failed: ", response)
+            }
+        } catch (error) {
+            console.log("axios get cont start stop error: ", error)
+        }
+    }
+
     return {
         buyoutRecords,
         buyin_records,
         buyout_records_map,
         wav_reports,
         buyout_future_objs,
+        contStartStopObj,
         getAllBuyoutRecords,
         fundCanBeBuyOut,
         soldComposeFixedHold,
@@ -620,7 +635,8 @@ export const useBuyInOutStore = defineStore('buyInOut-store', () => {
         getFundWavReport,
         buyOutFixedFundOfToday,
         calculatePlanMoney,
-        getAllBuyoutFutureRecords
+        getAllBuyoutFutureRecords,
+        getContStartStop
     }
 
 });

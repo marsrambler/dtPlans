@@ -146,6 +146,20 @@
             </div>
           </th>
           <th :style="{ 'width': colWidMap['col_9'] + 'rem' }">
+            <div class="w50_w_br" @click="sortByField('cont_start')">
+              <template v-if="sortFieldName === 'cont_start'">
+                <span v-if="sortFieldFlag"><i class="bi bi-arrow-up"></i></span>
+                <span v-else><i class="bi bi-arrow-down"></i></span>
+              </template>
+              <span>购</span>
+            </div>
+            <div class="w50_w_br" @click="sortByField('cont_stop')" style="border: none;">
+              <template v-if="sortFieldName === 'cont_stop'">
+                <span v-if="sortFieldFlag"><i class="bi bi-arrow-up"></i></span>
+                <span v-else><i class="bi bi-arrow-down"></i></span>
+              </template>
+              <span>停</span>
+            </div>
           </th>
         </tr>
       </thead>
@@ -678,10 +692,23 @@
                 </div>
               </td>
               <td style="text-align: center;" v-bind:class="{ sel_row: oneRow['currSelected'] }">
-                <template v-if="oneRow.hasOwnProperty('last_pause_days') && oneRow['last_pause_days'] >= 5">
+                <template v-if="contStartStopObj.hasOwnProperty(oneRow['fund_id']) && contStartStopObj[oneRow['fund_id']]['start_stop_obj'] && contStartStopObj[oneRow['fund_id']]['start_stop_obj']['cont_stop_flag']">
+                  <a v-bind:href="baseUrl4Report + oneRow['fund_id']" _target="blank" style="line-height: 2rem; color: darkgreen;">
+                    <span>连停{{contStartStopObj[oneRow['fund_id']]['start_stop_obj']['stop_days']}}日</span>
+                  </a>
+                  <br>
+                </template>
+                <template v-if="contStartStopObj.hasOwnProperty(oneRow['fund_id']) && contStartStopObj[oneRow['fund_id']]['start_stop_obj'] && contStartStopObj[oneRow['fund_id']]['start_stop_obj']['cont_start_flag']">
+                  <a v-bind:href="baseUrl4Report + oneRow['fund_id']" _target="blank" style="line-height: 2rem; color: red;">
+                    <span>连购{{contStartStopObj[oneRow['fund_id']]['start_stop_obj']['start_days']}}日</span>
+                  </a>
+                  <br>
+                </template>
+                <template v-if="true"> <!-- v-if="oneRow.hasOwnProperty('last_pause_days') && oneRow['last_pause_days'] >= 5" -->
                   <a v-bind:href="baseUrl4Report + oneRow['fund_id']" _target="blank" style="line-height: 2rem; color: red;">
                     <span>看走势</span>
                   </a>
+                  <br>
                 </template>
                 <template v-if="oneRow['fixedHoldObj'] && oneRow['fixedHoldObj']['hold_objs'] && oneRow['fixedHoldObj']['hold_objs'].length > 0">
                   <button type="button" class="btn"
@@ -938,7 +965,7 @@ const composeStore = useComposeStore()
 const { composeObjs, fixedHoldObjs, totMoney, totPositiveNum, totPoleNum, totEarnMoney, totEarnRate, totSetBuy, totPlanBuy, diffBuySet } = storeToRefs(composeStore)
 const { getAllCompose, setComposeProperty, setComposeSoldDate, getComposeFixedHold, addOrRemoveCompose } = composeStore
 const buyInOutStore = useBuyInOutStore()
-const { buyoutRecords, wav_reports, buyout_future_objs } = storeToRefs(buyInOutStore)
+const { buyoutRecords, wav_reports, buyout_future_objs, contStartStopObj} = storeToRefs(buyInOutStore)
 const { getAllBuyoutRecords, soldComposeFixedHold, buyOutFixedFund, calculatePlanMoney, buyOutFixedFundOfToday, getAllBuyoutFutureRecords } = buyInOutStore
 const zskbStore = useZskbStore()
 const { zskbObjs } = storeToRefs(zskbStore)
@@ -1514,6 +1541,58 @@ function sortByField(_field) {
         } else {
           return 0;
         }
+      });
+    }
+  } else if (_field === 'cont_start') {
+    if (sortFieldFlag.value) {
+      composeViewObjs.value.sort((a, b) => {
+        let _start_days_a = -9999
+        let _start_days_b = -9999
+        if (contStartStopObj.value.hasOwnProperty(a['fund_id']) && contStartStopObj.value[a['fund_id']]['start_stop_obj'] && contStartStopObj.value[a['fund_id']]['start_stop_obj']['start_days']) {
+          _start_days_a = contStartStopObj.value[a['fund_id']]['start_stop_obj']['start_days']
+        }
+        if (contStartStopObj.value.hasOwnProperty(b['fund_id']) && contStartStopObj.value[b['fund_id']]['start_stop_obj'] && contStartStopObj.value[b['fund_id']]['start_stop_obj']['start_days']) {
+          _start_days_b = contStartStopObj.value[b['fund_id']]['start_stop_obj']['start_days']
+        }
+        return _start_days_a - _start_days_b;
+      });
+    } else {
+      composeViewObjs.value.sort((a, b) => {
+        let _start_days_a = -9999
+        let _start_days_b = -9999
+        if (contStartStopObj.value.hasOwnProperty(a['fund_id']) && contStartStopObj.value[a['fund_id']]['start_stop_obj'] && contStartStopObj.value[a['fund_id']]['start_stop_obj']['start_days']) {
+          _start_days_a = contStartStopObj.value[a['fund_id']]['start_stop_obj']['start_days']
+        }
+        if (contStartStopObj.value.hasOwnProperty(b['fund_id']) && contStartStopObj.value[b['fund_id']]['start_stop_obj'] && contStartStopObj.value[b['fund_id']]['start_stop_obj']['start_days']) {
+          _start_days_b = contStartStopObj.value[b['fund_id']]['start_stop_obj']['start_days']
+        }
+        return  _start_days_b - _start_days_a;
+      });
+    }
+  } else if (_field === 'cont_stop') {
+    if (sortFieldFlag.value) {
+      composeViewObjs.value.sort((a, b) => {
+        let _stop_days_a = -9999
+        let _stop_days_b = -9999
+        if (contStartStopObj.value.hasOwnProperty(a['fund_id']) && contStartStopObj.value[a['fund_id']]['start_stop_obj'] && contStartStopObj.value[a['fund_id']]['start_stop_obj']['stop_days']) {
+          _stop_days_a = contStartStopObj.value[a['fund_id']]['start_stop_obj']['stop_days']
+        }
+        if (contStartStopObj.value.hasOwnProperty(b['fund_id']) && contStartStopObj.value[b['fund_id']]['start_stop_obj'] && contStartStopObj.value[b['fund_id']]['start_stop_obj']['stop_days']) {
+          _stop_days_b = contStartStopObj.value[b['fund_id']]['start_stop_obj']['stop_days']
+        }
+        return _stop_days_a - _stop_days_b;
+      });
+    } else {
+      composeViewObjs.value.sort((a, b) => {
+        let _stop_days_a = -9999
+        let _stop_days_b = -9999
+        if (contStartStopObj.value.hasOwnProperty(a['fund_id']) && contStartStopObj.value[a['fund_id']]['start_stop_obj'] && contStartStopObj.value[a['fund_id']]['start_stop_obj']['stop_days']) {
+          _stop_days_a = contStartStopObj.value[a['fund_id']]['start_stop_obj']['stop_days']
+        }
+        if (contStartStopObj.value.hasOwnProperty(b['fund_id']) && contStartStopObj.value[b['fund_id']]['start_stop_obj'] && contStartStopObj.value[b['fund_id']]['start_stop_obj']['stop_days']) {
+          _stop_days_b = contStartStopObj.value[b['fund_id']]['start_stop_obj']['stop_days']
+        }
+        return  _stop_days_b - _stop_days_a;
       });
     }
   } else if (_field === 'selected') {

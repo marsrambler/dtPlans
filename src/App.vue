@@ -25,7 +25,7 @@ const {getRecordsAndRates, getRetroFunds, getFixedFunds, getAllComposeFixedHold,
 const aggressiveStore = useAggressiveStore()
 const {getAllAggressive} = aggressiveStore
 const buyInOutStore = useBuyInOutStore()
-const {getFundWavReport, getAllBuyoutFutureRecords} = buyInOutStore
+const {getFundWavReport, getAllBuyoutFutureRecords, getContStartStop} = buyInOutStore
 
 onUpdated(() => {
   const hiddenToasts = errorMsgObjs.value.filter((obj) => {
@@ -64,6 +64,7 @@ getAllComposeFixedHold()
 // getBigPoolFixedHold()
 // getAllAggressive()
 // getFundWavReport()
+getContStartStop()
 </script>
 
 <template>
