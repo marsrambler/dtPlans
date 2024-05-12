@@ -151,14 +151,14 @@
                 <span v-if="sortFieldFlag"><i class="bi bi-arrow-up"></i></span>
                 <span v-else><i class="bi bi-arrow-down"></i></span>
               </template>
-              <span>购</span>
+              <span>连购</span>
             </div>
             <div class="w50_w_br" @click="sortByField('cont_stop')" style="border: none;">
               <template v-if="sortFieldName === 'cont_stop'">
                 <span v-if="sortFieldFlag"><i class="bi bi-arrow-up"></i></span>
                 <span v-else><i class="bi bi-arrow-down"></i></span>
               </template>
-              <span>停</span>
+              <span>连停</span>
             </div>
           </th>
         </tr>
@@ -274,7 +274,7 @@
               <td colspan="3" v-bind:class="{ sel_row: oneRow['currSelected'] }">
                 <span style="color: red; font-weight: 900;">已缺失，可能是经理更换或业绩不再收敛。</span>
               </td>
-              <td style="line-height: 2rem;" v-bind:class="{ sel_row: oneRow['currSelected'] }">
+              <td style="line-height: 1.6;" v-bind:class="{ sel_row: oneRow['currSelected'] }">
                 <template v-if="oneRow['kbObj']">
                   <div>
                     持有:&nbsp;
@@ -302,6 +302,17 @@
                       </span>
                     </template>
                   </div>
+                </template>
+                <template v-if="oneRow.hasOwnProperty('money') && oneRow['money'] > 0 && (!buyout_future_objs.hasOwnProperty(oneRow['fund_id']) || !buyout_future_objs[oneRow['fund_id']])">
+                  <button type="button" class="btn btn-secondary" style="font-size: 0.8rem;"
+                          @click.stop="removeFixedFund4TodayUi(oneRow['fund_id'], oneRow['fund_name'])">
+                    撤今日
+                  </button>
+                </template>
+                <template v-else-if="oneRow.hasOwnProperty('money') && oneRow['money'] > 0 && (buyout_future_objs.hasOwnProperty(oneRow['fund_id']) && buyout_future_objs[oneRow['fund_id']] != null)">
+                  <span class="badge bg-success text-bg-success big_badge" style="">
+                    已撤销
+                  </span>
                 </template>
               </td>
               <td style="line-height: 2rem;" v-bind:class="{ sel_row: oneRow['currSelected'] }">
@@ -356,10 +367,47 @@
                 </div>
               </td>
               <td style="text-align: center;" v-bind:class="{ sel_row: oneRow['currSelected'] }">
-                <template v-if="oneRow.hasOwnProperty('last_pause_days') && oneRow['last_pause_days'] >= 5">
-                  <a v-bind:href="baseUrl4Report + oneRow['fund_id']" _target="blank" style="line-height: 2rem; color: red;">
-                    <span>看走势</span>
+                <template v-if="contStartStopObj.hasOwnProperty(oneRow['fund_id']) && contStartStopObj[oneRow['fund_id']]['start_stop_obj'] && contStartStopObj[oneRow['fund_id']]['start_stop_obj']['cont_stop_flag']">
+                  <div style="color: darkgreen; text-decoration: none;">
+                    <span style="font-weight: bold; text-decoration: none;">
+                      连停&nbsp;<span :style="{
+                        'font-size':
+                        contStartStopObj[oneRow['fund_id']]['start_stop_obj']['stop_days'] >= 30? '1.3rem':
+                        contStartStopObj[oneRow['fund_id']]['start_stop_obj']['stop_days'] >= 20? '1.2rem':
+                        contStartStopObj[oneRow['fund_id']]['start_stop_obj']['stop_days'] >= 10? '1.1rem': '1rem',
+                        'font-weight':
+                        contStartStopObj[oneRow['fund_id']]['start_stop_obj']['stop_days'] >= 10? 'bold': 'normal',
+                        'text-decoration':
+                        contStartStopObj[oneRow['fund_id']]['start_stop_obj']['stop_days'] >= 10? 'none': 'line-through'
+                      }">
+                      {{contStartStopObj[oneRow['fund_id']]['start_stop_obj']['stop_days']}}日
+                      </span>
+                    </span>
+                  </div>
+                </template>
+                <template v-if="contStartStopObj.hasOwnProperty(oneRow['fund_id']) && contStartStopObj[oneRow['fund_id']]['start_stop_obj'] && contStartStopObj[oneRow['fund_id']]['start_stop_obj']['cont_start_flag']">
+                  <div style="color: red; text-decoration: none;">
+                    <span style="font-weight: bold; text-decoration: none;">
+                      连购&nbsp;<span :style="{
+                        'font-size':
+                        contStartStopObj[oneRow['fund_id']]['start_stop_obj']['start_days'] >= 60? '1.3rem':
+                        contStartStopObj[oneRow['fund_id']]['start_stop_obj']['start_days'] >= 40? '1.2rem':
+                        contStartStopObj[oneRow['fund_id']]['start_stop_obj']['start_days'] >= 20? '1.1rem': '1rem',
+                        'font-weight':
+                        contStartStopObj[oneRow['fund_id']]['start_stop_obj']['start_days'] >= 20? 'bold': 'normal',
+                        'text-decoration':
+                        contStartStopObj[oneRow['fund_id']]['start_stop_obj']['start_days'] >= 20? 'none': 'line-through'
+                      }">
+                      {{contStartStopObj[oneRow['fund_id']]['start_stop_obj']['start_days']}}日
+                      </span>
+                    </span>
+                  </div>
+                </template>
+                <template v-if="true"> <!-- v-if="oneRow.hasOwnProperty('last_pause_days') && oneRow['last_pause_days'] >= 5" -->
+                  <a v-bind:href="baseUrl4Report + oneRow['fund_id']" _target="blank" style="display:inline-block;height:3rem;line-height:3;color:red;">
+                    <span style="line-height: 3;">看走势</span>
                   </a>
+                  <br>
                 </template>
                 <template v-if="oneRow['fixedHoldObj'] && oneRow['fixedHoldObj']['hold_objs'] && oneRow['fixedHoldObj']['hold_objs'].length > 0">
                   <button type="button" class="btn"
@@ -368,22 +416,13 @@
                     <template v-if="!oneRow['fixedHoldObj']['disp_flag']">展开</template>
                     <template v-else>折叠</template>
                   </button>
+                  <br>
                 </template>
                 <template v-else>
                   <button type="button" class="btn btn-warning" @click.stop="removeCompose4Ui($event, oneRow)">
                     移除
                   </button>
-                </template>
-                <template v-if="oneRow.hasOwnProperty('money') && oneRow['money'] > 0 && (!buyout_future_objs.hasOwnProperty(oneRow['fund_id']) || !buyout_future_objs[oneRow['fund_id']])">
-                  <button type="button" class="btn btn-secondary" style="font-size: 0.8rem; margin-top: 0.5rem;"
-                    @click.stop="removeFixedFund4TodayUi(oneRow['fund_id'], oneRow['fund_name'])">
-                    撤今日
-                  </button>
-                </template>
-                <template v-else-if="oneRow.hasOwnProperty('money') && oneRow['money'] > 0 && (buyout_future_objs.hasOwnProperty(oneRow['fund_id']) && buyout_future_objs[oneRow['fund_id']] != null)">
-                  <span class="badge bg-success text-bg-success big_badge" style="margin-top: 0.5rem;">
-                    已撤销
-                  </span>
+                  <br>
                 </template>
               </td>
             </tr>
@@ -596,7 +635,7 @@
                   </div>
                 </template>
               </td>
-              <td style="line-height: 2rem;" v-bind:class="{ sel_row: oneRow['currSelected'] }">
+              <td style="line-height: 1.6;" v-bind:class="{ sel_row: oneRow['currSelected'] }">
                 <template v-if="oneRow['kbObj']">
                   <div>
                     持有:&nbsp;
@@ -630,6 +669,17 @@
                       </span>
                     </template>
                   </div>
+                </template>
+                <template v-if="oneRow.hasOwnProperty('money') && oneRow['money'] > 0 && (!buyout_future_objs.hasOwnProperty(oneRow['fund_id']) || !buyout_future_objs[oneRow['fund_id']])">
+                  <button type="button" class="btn btn-secondary" style="font-size: 0.8rem;"
+                          @click.stop="removeFixedFund4TodayUi(oneRow['fund_id'], oneRow['fund_name'])">
+                    撤今日
+                  </button>
+                </template>
+                <template v-else-if="oneRow.hasOwnProperty('money') && oneRow['money'] > 0 && (buyout_future_objs.hasOwnProperty(oneRow['fund_id']) && buyout_future_objs[oneRow['fund_id']] != null)">
+                  <span class="badge bg-success text-bg-success big_badge" style="">
+                    已撤销
+                  </span>
                 </template>
               </td>
               <td style="line-height: 2rem;" v-bind:class="{ sel_row: oneRow['currSelected'] }">
@@ -693,20 +743,44 @@
               </td>
               <td style="text-align: center;" v-bind:class="{ sel_row: oneRow['currSelected'] }">
                 <template v-if="contStartStopObj.hasOwnProperty(oneRow['fund_id']) && contStartStopObj[oneRow['fund_id']]['start_stop_obj'] && contStartStopObj[oneRow['fund_id']]['start_stop_obj']['cont_stop_flag']">
-                  <a v-bind:href="baseUrl4Report + oneRow['fund_id']" _target="blank" style="line-height: 2rem; color: darkgreen;">
-                    <span>连停{{contStartStopObj[oneRow['fund_id']]['start_stop_obj']['stop_days']}}日</span>
-                  </a>
-                  <br>
+                  <div style="color: darkgreen; text-decoration: none;">
+                    <span style="font-weight: bold; text-decoration: none;">
+                      连停&nbsp;<span :style="{
+                        'font-size':
+                        contStartStopObj[oneRow['fund_id']]['start_stop_obj']['stop_days'] >= 30? '1.3rem':
+                        contStartStopObj[oneRow['fund_id']]['start_stop_obj']['stop_days'] >= 20? '1.2rem':
+                        contStartStopObj[oneRow['fund_id']]['start_stop_obj']['stop_days'] >= 10? '1.1rem': '1rem',
+                        'font-weight':
+                        contStartStopObj[oneRow['fund_id']]['start_stop_obj']['stop_days'] >= 10? 'bold': 'normal',
+                        'text-decoration':
+                        contStartStopObj[oneRow['fund_id']]['start_stop_obj']['stop_days'] >= 10? 'none': 'line-through'
+                      }">
+                      {{contStartStopObj[oneRow['fund_id']]['start_stop_obj']['stop_days']}}日
+                      </span>
+                    </span>
+                  </div>
                 </template>
                 <template v-if="contStartStopObj.hasOwnProperty(oneRow['fund_id']) && contStartStopObj[oneRow['fund_id']]['start_stop_obj'] && contStartStopObj[oneRow['fund_id']]['start_stop_obj']['cont_start_flag']">
-                  <a v-bind:href="baseUrl4Report + oneRow['fund_id']" _target="blank" style="line-height: 2rem; color: red;">
-                    <span>连购{{contStartStopObj[oneRow['fund_id']]['start_stop_obj']['start_days']}}日</span>
-                  </a>
-                  <br>
+                  <div style="color: red; text-decoration: none;">
+                    <span style="font-weight: bold; text-decoration: none;">
+                      连购&nbsp;<span :style="{
+                        'font-size':
+                        contStartStopObj[oneRow['fund_id']]['start_stop_obj']['start_days'] >= 60? '1.3rem':
+                        contStartStopObj[oneRow['fund_id']]['start_stop_obj']['start_days'] >= 40? '1.2rem':
+                        contStartStopObj[oneRow['fund_id']]['start_stop_obj']['start_days'] >= 20? '1.1rem': '1rem',
+                        'font-weight':
+                        contStartStopObj[oneRow['fund_id']]['start_stop_obj']['start_days'] >= 20? 'bold': 'normal',
+                        'text-decoration':
+                        contStartStopObj[oneRow['fund_id']]['start_stop_obj']['start_days'] >= 20? 'none': 'line-through'
+                      }">
+                      {{contStartStopObj[oneRow['fund_id']]['start_stop_obj']['start_days']}}日
+                      </span>
+                    </span>
+                  </div>
                 </template>
                 <template v-if="true"> <!-- v-if="oneRow.hasOwnProperty('last_pause_days') && oneRow['last_pause_days'] >= 5" -->
-                  <a v-bind:href="baseUrl4Report + oneRow['fund_id']" _target="blank" style="line-height: 2rem; color: red;">
-                    <span>看走势</span>
+                  <a v-bind:href="baseUrl4Report + oneRow['fund_id']" _target="blank" style="display:inline-block;height:3rem;line-height:3;color:red;">
+                    <span style="line-height: 3;">看走势</span>
                   </a>
                   <br>
                 </template>
@@ -717,23 +791,15 @@
                     <template v-if="!oneRow['fixedHoldObj']['disp_flag']">展开</template>
                     <template v-else>折叠</template>
                   </button>
+                  <br>
                 </template>
                 <template v-else>
                   <button type="button" class="btn btn-warning" @click.stop="removeCompose4Ui($event, oneRow)">
                     移除
                   </button>
+                  <br>
                 </template>
-                <template v-if="oneRow.hasOwnProperty('money') && oneRow['money'] > 0 && (!buyout_future_objs.hasOwnProperty(oneRow['fund_id']) || !buyout_future_objs[oneRow['fund_id']])">
-                  <button type="button" class="btn btn-secondary" style="font-size: 0.8rem; margin-top: 0.5rem;"
-                    @click.stop="removeFixedFund4TodayUi(oneRow['fund_id'], oneRow['fund_name'])">
-                    撤今日
-                  </button>
-                </template>
-                <template v-else-if="oneRow.hasOwnProperty('money') && oneRow['money'] > 0 && (buyout_future_objs.hasOwnProperty(oneRow['fund_id']) && buyout_future_objs[oneRow['fund_id']] != null)">
-                  <span class="badge bg-success text-bg-success big_badge" style="margin-top: 0.5rem;">
-                    已撤销
-                  </span>
-                </template>
+
               </td>
             </tr>
             <tr v-if="oneRow['show_wav']">
@@ -987,7 +1053,7 @@ const colWidMap = {
   'col_6': 10,
   'col_7': 7,
   'col_8': 8,
-  'col_9': 4
+  'col_9': 6.5
 }
 
 const colWidMapSub = {

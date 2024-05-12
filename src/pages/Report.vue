@@ -224,7 +224,7 @@
                     刷新
                   </template>
                 </button>
-                <button type="button" class="btn btn-warning" @click="removeLocalDynvalue(oneRow['fund_id'], oneRow['fund_name'])">
+                <button type="button" class="btn btn-warning" @click="removeDynFileFromUi($event, oneRow)">
                   删除
                 </button>
               </div>
@@ -415,6 +415,29 @@
       </div>
     </div>
   </div>
+
+  <div class="modal fade" id="removeDialog" tabindex="-1">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title">删除确认</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+          <h6>以下将被删除: </h6>
+          <template v-if="toBeRemoveFund">
+            <h6>{{ toBeRemoveFund['fund_name'] }}&nbsp;&nbsp;将被删除</h6>
+          </template>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">取消</button>
+          <button type="button" class="btn btn-warning" @click.prevent="removeDynFileLogic()">删除
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
 </template>
 
 <script setup>
@@ -468,7 +491,7 @@ watch(zskbObjs, () => {
 const cfmDlgTitle = ref("")
 const cfmDlgCont = ref("")
 const cfmDlgType = ref("")
-const dlgController = ref({ reportDlg: null })
+const dlgController = ref({ reportDlg: null, removeDlg: null})
 const baseUrl4ProbeNav = ref("")
 const baseUrl4ComposeNav = ref("")
 const searchFundNameOrFundId = ref("")
@@ -478,6 +501,8 @@ const searchByFundIdTimes = ref(0)
 
 onMounted(() => {
   dlgController.value.reportDlg = new Modal('#reportDialog', {})
+  dlgController.value.removeDlg = new Modal('#removeDialog', {})
+
   let _prot = window.location.protocol;
   let _host = window.location.hostname;
   baseUrl4ProbeNav.value = _prot + "//" + _host + "/index.html?dt_fund_id="
@@ -506,6 +531,18 @@ onUnmounted(() => {
     clearInterval(searchTimer.value)
   }
 })
+
+const toBeRemoveFund = ref(null)
+function removeDynFileFromUi(event, oneRow) {
+  event.stopPropagation()
+  toBeRemoveFund.value = oneRow;
+  dlgController.value.removeDlg.show();
+}
+
+function removeDynFileLogic() {
+  removeLocalDynvalue(toBeRemoveFund.value['fund_id'], toBeRemoveFund.value['fund_name'])
+  dlgController.value.removeDlg.hide()
+}
 
 const requireFundIds = ref("")
 watch(requireFundIds, () => {
