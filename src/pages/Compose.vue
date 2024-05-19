@@ -877,18 +877,18 @@
                               --><span style="">{{ one_hold_obj['pure_percent_str'] }}</span>
                             </div>
                             <div v-if="one_hold_obj['has_thresh_flag']">
-                              <span v-if="one_hold_obj['max_earn_yr1_flag']" class="purple_card">&nbsp;</span><!--
-                          --><span v-if="one_hold_obj['avg_earn_yr1_flag']" class="red_card">&nbsp;</span><!--
+                              <span v-if="one_hold_obj['max_earn_yr1_flag']" class="purple_card standard_height">&nbsp;</span><!--
+                          --><span v-if="one_hold_obj['avg_earn_yr1_flag']" class="red_card standard_height">&nbsp;</span><!--
                           --><span v-if="!one_hold_obj['max_earn_yr1_flag'] && !one_hold_obj['avg_earn_yr1_flag']"
-                                class="white_card">&nbsp;</span><!--
-                          --><span v-if="one_hold_obj['max_earn_yr2_flag']" class="purple_card">&nbsp;</span><!--
-                          --><span v-if="one_hold_obj['avg_earn_yr2_flag']" class="red_card">&nbsp;</span><!--
+                                class="white_card standard_height">&nbsp;</span><!--
+                          --><span v-if="one_hold_obj['max_earn_yr2_flag']" class="purple_card standard_height">&nbsp;</span><!--
+                          --><span v-if="one_hold_obj['avg_earn_yr2_flag']" class="red_card standard_height">&nbsp;</span><!--
                           --><span v-if="!one_hold_obj['max_earn_yr2_flag'] && !one_hold_obj['avg_earn_yr2_flag']"
-                                class="white_card">&nbsp;</span><!--
-                          --><span v-if="one_hold_obj['max_earn_yr3_flag']" class="purple_card">&nbsp;</span><!--
-                          --><span v-if="one_hold_obj['avg_earn_yr3_flag']" class="red_card">&nbsp;</span><!--
+                                class="white_card standard_height">&nbsp;</span><!--
+                          --><span v-if="one_hold_obj['max_earn_yr3_flag']" class="purple_card standard_height">&nbsp;</span><!--
+                          --><span v-if="one_hold_obj['avg_earn_yr3_flag']" class="red_card standard_height">&nbsp;</span><!--
                           --><span v-if="!one_hold_obj['max_earn_yr3_flag'] && !one_hold_obj['avg_earn_yr3_flag']"
-                                class="white_card">&nbsp;</span>
+                                class="white_card standard_height">&nbsp;</span>
                             </div>
                           </td>
                           <td :style="{ color: cust_color }">
@@ -1822,6 +1822,10 @@ function searchByCond() {
 
 .less_height {
   line-height: 1.2rem;
+}
+
+.standard_height {
+  line-height: 1rem;
 }
 
 .icon_tri {

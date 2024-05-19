@@ -185,6 +185,7 @@
               <div>卖:&nbsp;{{ oneRow.statistics?.sold_times }}</div>
               <div>加:&nbsp;{{ oneRow.statistics?.asc_money_times }}</div>
               <div>减:&nbsp;{{ oneRow.statistics?.desc_money_times }}</div>
+              <div>追:&nbsp;{{ oneRow.statistics?.append_fixed_times }}</div>              
             </td>
             <td style="line-height: 1.2rem;" v-bind:class="{ sel_row: oneRow['currSelected'] }">
               <div class="text-bg-danger">卖:&nbsp;{{ oneRow.statistics?.last_sold_profit?.currStatistics?.tot_profit_perc_str }}</div>
@@ -856,6 +857,28 @@ const chartOptions = ref({
           fillInSoldDate(_date_str)
         }
       }
+    },
+    {
+      // append flag points
+      name: '追加标',
+      type: 'flags',
+      data: [],
+      onSeries: 'dataseries',
+      shape: 'circlepin',
+      width: 20,
+      height: 16,
+      lineWidth: 2,
+      color: 'purple',
+      style: {
+        color: 'purple'
+      },
+      events: {
+        click: function (e) {
+          // let _date_str = new Date(e.point.category).toISOString().split("T")[0]
+          // console.log("sold flag series click: ", e.point.category, " date_str: ", _date_str)
+          // fillInSoldDate(_date_str)
+        }
+      }
     }
   ]
 });
@@ -876,7 +899,7 @@ watch(currDynValue, () => {
   chartOptions.value['series'][4]['data'] = []
   chartOptions.value['series'][5]['data'] = []
   chartOptions.value['series'][6]['data'] = []
-
+  chartOptions.value['series'][7]['data'] = []
 
   let _price_arr = []
   // price list 
@@ -948,6 +971,18 @@ watch(currDynValue, () => {
       title: '-'
     })
   })
+
+  // append money list
+  if (currDynValue.value.hasOwnProperty('appendFixed4draw') && currDynValue.value['appendFixed4draw'].length > 0) {
+    let appendFixed4draw = currDynValue.value['appendFixed4draw']
+    appendFixed4draw.forEach(element => {
+      let _timestamp = Date.parse(element['date_str'])
+      chartOptions.value['series'][7]['data'].push({
+        x: _timestamp,
+        title: '追加'
+      })
+    })
+  }
 }, {
   deep: true
 })
@@ -1415,28 +1450,54 @@ function genTextReport() {
   report_txt += "历史数据表现较好。\r\n"
   report_txt += "    于当日开始实施分批买入，每交易日买入一份。分别于"
   if (fundObj['statistics']['asc_money_dates'] && fundObj['statistics']['asc_money_dates'].length > 0) {
-    fundObj['statistics']['asc_money_dates'].forEach(elem => {
-      report_txt += transDate(elem) + "、"
+    fundObj['statistics']['asc_money_dates'].forEach((elem, index) => {
+      report_txt += transDate(elem)
+      if (index < fundObj['statistics']['asc_money_dates'].length - 1) {
+        report_txt += "、"
+      }
     })
   } else {
     report_txt += "???"
   }
-  report_txt += "增加买入资金，共" + fundObj['statistics']['asc_money_times'] + "次；分别于"
+  report_txt += "增加(定投)买入资金，共" + fundObj['statistics']['asc_money_times'] + "次；分别于"
   if (fundObj['statistics']['desc_money_dates'] && fundObj['statistics']['desc_money_dates'].length > 0) {
-    fundObj['statistics']['desc_money_dates'].forEach(elem => {
-      report_txt += transDate(elem) + "、"
+    fundObj['statistics']['desc_money_dates'].forEach((elem, index) => {
+      report_txt += transDate(elem)
+      if (index < fundObj['statistics']['desc_money_dates'].length - 1) {
+        report_txt += "、"
+      }
     })
   } else {
     report_txt += "???"
   }
-  report_txt += "减少买入资金，共" + fundObj['statistics']['desc_money_times'] + "次；分别于"
+  report_txt += "减少(定投)买入资金，共" + fundObj['statistics']['desc_money_times'] + "次；分别于"
+
+  if (fundObj['statistics'].hasOwnProperty('append_fixed_times') && fundObj['statistics']['append_fixed_times']) {
+    if (fundObj['appendFixed4draw'] && fundObj['appendFixed4draw'].length > 0) {
+      fundObj['appendFixed4draw'].forEach((elem, index) => {
+        report_txt += transDate(elem['date_str'])
+        if (index < fundObj['appendFixed4draw'].length - 1) {
+          report_txt += "、"
+        }
+      })
+      report_txt += "追加买入资金，共" + fundObj['statistics']['append_fixed_times'] + "次；分别于"
+    } else {
+      report_txt += "???"
+    }
+  }  
+
   if (fundObj['soldList4draw'] && fundObj['soldList4draw'].length > 0) {
-    fundObj['soldList4draw'].forEach(elem => {
-      report_txt += transDate(elem['date_str']) + "、"
+    fundObj['soldList4draw'].forEach((elem, index) => {
+      report_txt += transDate(elem['date_str'])
+      if (index < fundObj['soldList4draw'].length - 1) {
+        report_txt += "、"
+      }
     })
   } else {
     report_txt += "???"
   }
+
+
   report_txt += "依次逢高卖出份额，共" + fundObj['soldList4draw'].length + "次。截止最后一次卖出时，总盈利率为"
   report_txt += fundObj['statistics']['last_sold_profit']['currStatistics']['tot_profit_perc_str'] + "。好于以下宽指涨幅："
   if (fundObj['statistics']['last_sold_wide_profit'] && fundObj['statistics']['last_sold_wide_profit'].length >= 5) {
