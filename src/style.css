@@ -45,6 +45,13 @@ table {
     vertical-align: middle !important;
 }
 
+.w25_w_br {
+    display: inline-block;
+    width: 24.9%;
+    border-right: solid 1px whitesmoke;
+    line-height: 2rem;
+}
+
 .w33_w_br {
     display: inline-block;
     width: 33.3%;

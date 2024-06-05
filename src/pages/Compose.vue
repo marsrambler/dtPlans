@@ -90,13 +90,22 @@
           </th>
           <th :style="{ 'width': colWidMap['col_5'] + colWidMap['col_6'] + 'rem' }" colspan="2">
             <div>
-              <div class="w33_w_br" @click="sortByField('positive')">
-                <template v-if="sortFieldName === 'positive'">
+              <div class="w33_w_br">
+                <div class="w50_w_br" @click="sortByField('short_wav')">
+                  <template v-if="sortFieldName === 'short_wav'">
+                    <span v-if="sortFieldFlag"><i class="bi bi-arrow-up"></i></span>
+                    <span v-else><i class="bi bi-arrow-down"></i></span>
+                  </template>
+                  <span style="font-size:0.9rem;">短时</span>
+                </div>
+                <div class="w50_w_br" @click="sortByField('positive')" style="border: none;">
+                  <template v-if="sortFieldName === 'positive'">
                   <span v-if="sortFieldFlag"><i class="bi bi-arrow-up"></i></span>
                   <span v-else><i class="bi bi-arrow-down"></i></span>
-                </template>
-                <span>高点</span>
-              </div>
+                  </template>
+                  <span style="font-size:0.9rem;">高点</span>
+                </div>
+              </div>             
               <div class="w33_w_br" @click="sortByField('negative')">
                 <template v-if="sortFieldName === 'negative'">
                   <span v-if="sortFieldFlag"><i class="bi bi-arrow-up"></i></span>
@@ -276,6 +285,10 @@
               </td>
               <td style="line-height: 1.6;" v-bind:class="{ sel_row: oneRow['currSelected'] }">
                 <template v-if="oneRow['kbObj']">
+                  <div @click.stop="suggestCompose4Ui($event, oneRow)"
+                      style="cursor: pointer; margin-bottom: 0.3rem; text-decoration: underline;color:darkgreen;font-weight: bold;">
+                    速决策(^q)
+                  </div>
                   <div>
                     持有:&nbsp;
                     <template v-if="oneRow['hold_accu_money']">
@@ -369,37 +382,51 @@
               <td style="text-align: center;" v-bind:class="{ sel_row: oneRow['currSelected'] }">
                 <template v-if="contStartStopObj.hasOwnProperty(oneRow['fund_id']) && contStartStopObj[oneRow['fund_id']]['start_stop_obj'] && contStartStopObj[oneRow['fund_id']]['start_stop_obj']['cont_stop_flag']">
                   <div style="color: darkgreen; text-decoration: none;">
-                    <span style="font-weight: bold; text-decoration: none;">
-                      连停&nbsp;<span :style="{
-                        'font-size':
-                        contStartStopObj[oneRow['fund_id']]['start_stop_obj']['stop_days'] >= 30? '1.3rem':
-                        contStartStopObj[oneRow['fund_id']]['start_stop_obj']['stop_days'] >= 20? '1.2rem':
-                        contStartStopObj[oneRow['fund_id']]['start_stop_obj']['stop_days'] >= 10? '1.1rem': '1rem',
-                        'font-weight':
-                        contStartStopObj[oneRow['fund_id']]['start_stop_obj']['stop_days'] >= 10? 'bold': 'normal',
-                        'text-decoration':
-                        contStartStopObj[oneRow['fund_id']]['start_stop_obj']['stop_days'] >= 10? 'none': 'line-through'
-                      }">
-                      {{contStartStopObj[oneRow['fund_id']]['start_stop_obj']['stop_days']}}日
-                      </span>
+                    <span style="font-weight: bold; text-decoration: none;position: relative;--tooltip-left:-8rem;--tooltip-top:-2rem;"
+                    data-title="若连停小于10交易日则不宜启动" data-float-no-pos="">
+                      连停&nbsp;
+                      <template v-if="oneRow.hasOwnProperty('money') && oneRow['money'] > 0">
+                        <span style="font-weight:bold;">刚启动</span>
+                      </template>
+                      <template v-else>
+                        <span :style="{
+                          'font-size':
+                          contStartStopObj[oneRow['fund_id']]['start_stop_obj']['stop_days'] >= 30? '1.3rem':
+                          contStartStopObj[oneRow['fund_id']]['start_stop_obj']['stop_days'] >= 20? '1.2rem':
+                          contStartStopObj[oneRow['fund_id']]['start_stop_obj']['stop_days'] >= 10? '1.1rem': '1rem',
+                          'font-weight':
+                          contStartStopObj[oneRow['fund_id']]['start_stop_obj']['stop_days'] >= 10? 'bold': 'normal',
+                          'text-decoration':
+                          contStartStopObj[oneRow['fund_id']]['start_stop_obj']['stop_days'] >= 10? 'none': 'line-through'
+                        }">
+                        {{contStartStopObj[oneRow['fund_id']]['start_stop_obj']['stop_days']}}日
+                        </span>
+                      </template>
                     </span>
                   </div>
                 </template>
                 <template v-if="contStartStopObj.hasOwnProperty(oneRow['fund_id']) && contStartStopObj[oneRow['fund_id']]['start_stop_obj'] && contStartStopObj[oneRow['fund_id']]['start_stop_obj']['cont_start_flag']">
                   <div style="color: red; text-decoration: none;">
-                    <span style="font-weight: bold; text-decoration: none;">
-                      连购&nbsp;<span :style="{
-                        'font-size':
-                        contStartStopObj[oneRow['fund_id']]['start_stop_obj']['start_days'] >= 60? '1.3rem':
-                        contStartStopObj[oneRow['fund_id']]['start_stop_obj']['start_days'] >= 40? '1.2rem':
-                        contStartStopObj[oneRow['fund_id']]['start_stop_obj']['start_days'] >= 20? '1.1rem': '1rem',
-                        'font-weight':
-                        contStartStopObj[oneRow['fund_id']]['start_stop_obj']['start_days'] >= 20? 'bold': 'normal',
-                        'text-decoration':
-                        contStartStopObj[oneRow['fund_id']]['start_stop_obj']['start_days'] >= 20? 'none': 'line-through'
-                      }">
-                      {{contStartStopObj[oneRow['fund_id']]['start_stop_obj']['start_days']}}日
-                      </span>
+                    <span style="font-weight: bold; text-decoration: none;position: relative;--tooltip-left:-10rem;--tooltip-top:-2rem;"
+                    data-title="若连购小于20交易日则不宜停止" data-float-no-pos="">
+                      连购&nbsp;
+                      <template v-if="oneRow.hasOwnProperty('money') && oneRow['money'] < 0">
+                        <span style="font-weight:bold;">刚停止</span>
+                      </template>
+                      <template v-else>
+                        <span :style="{
+                          'font-size':
+                          contStartStopObj[oneRow['fund_id']]['start_stop_obj']['start_days'] >= 60? '1.3rem':
+                          contStartStopObj[oneRow['fund_id']]['start_stop_obj']['start_days'] >= 40? '1.2rem':
+                          contStartStopObj[oneRow['fund_id']]['start_stop_obj']['start_days'] >= 20? '1.1rem': '1rem',
+                          'font-weight':
+                          contStartStopObj[oneRow['fund_id']]['start_stop_obj']['start_days'] >= 20? 'bold': 'normal',
+                          'text-decoration':
+                          contStartStopObj[oneRow['fund_id']]['start_stop_obj']['start_days'] >= 20? 'none': 'line-through'
+                        }">
+                        {{contStartStopObj[oneRow['fund_id']]['start_stop_obj']['start_days']}}日
+                        </span>
+                      </template>
                     </span>
                   </div>
                 </template>
@@ -503,6 +530,26 @@
                 <div>
                   {{ oneRow?.kbObj?.statistics?.min_earn_tri_str }}
                 </div>
+                <template v-if="oneRow.hasOwnProperty('quant_obj') && oneRow['quant_obj'] != null &&
+                 oneRow['quant_obj'].hasOwnProperty('histo') && oneRow['quant_obj']['histo'] != null">
+                  <div style="height: 1px; border-top:solid 1px darkgray; margin: 5px 0 5px 0;"></div>
+                  <div style="height: 4rem;position:relative;--tooltip-left:-3rem;--tooltip-top:-2rem;"
+                  data-title="短时行情波动情况" data-float-no-pos="">
+                    <div style="font-weight: bold; color: red;font-size: 0.9rem;">
+                      启{{ oneRow['quant_obj']['histo']['max_hitted_times'] }}
+                    </div>
+                    <div style="font-weight: bold; color: darkgreen;font-size: 0.9rem;">
+                      停{{ oneRow['quant_obj']['histo']['min_hitted_times'] }}
+                    </div>
+                  </div>                 
+                </template>
+                <template v-else>
+                  <div style="height: 1px; border-top:solid 1px darkgray; margin: 5px 0 5px 0;"></div>
+                  <div style="height: 4rem;">
+                    <div style="font-weight: bold; color: darkgreen;font-size: 0.9rem;">&nbsp;</div>
+                    <div style="font-weight: bold; color: darkgreen;font-size: 0.9rem;">&nbsp;</div>
+                  </div>
+                </template>
               </td>
               <td v-bind:class="{ sel_row: oneRow['currSelected'] }">
                 <div>
@@ -514,6 +561,90 @@
                 <div>
                   {{ oneRow?.kbObj?.statistics?.avg_earn_tri_str }}
                 </div>
+                <template v-if="oneRow.hasOwnProperty('quant_obj') && oneRow['quant_obj'] != null &&
+                 oneRow['quant_obj'].hasOwnProperty('histo') && oneRow['quant_obj']['histo'] != null &&
+                 oneRow['quant_obj']['histo'].hasOwnProperty('latest_hitted_obj') && 
+                 oneRow['quant_obj']['histo']['latest_hitted_obj'] != null &&
+                 oneRow['quant_obj']['histo']['latest_hitted_obj']['max_hitted'] && 
+                 !oneRow['quant_obj']['histo']['latest_hitted_obj']['same_as_today']">        
+                  <div style="height: 1px; border-top:solid 1px darkgray; margin: 5px 0 5px 0;"></div>
+                  <div style="height: 4rem;">
+                    <a v-bind:href="baseUrl4ProbeNav + oneRow['fund_id'] + '&cust_fund_name=' + oneRow['fund_name'] + '&cust_buyin_type=' + 'fixed_buyin_append'" 
+                      target="_blank" style="cursor: pointer; text-decoration: none;">
+                      <div style="position: relative; text-align: center; color: darkgreen; height: 1.2rem;--tooltip-left:-3rem;--tooltip-top:-2rem;"
+                      data-title="若高点明显则不应追加" data-float-no-pos="">
+                        <span class="icon_pos_left" style="color:red;top:-5px; left:1rem;">
+                          <div>
+                            <i class="bi bi-arrow-up-circle-fill"></i>
+                          </div>
+                        </span>
+                      </div>
+                      <div style="height: 1.8em; position: relative; text-align: center; color: red;--tooltip-left:-3rem;--tooltip-top:-2rem;"
+                      data-title="若高点明显则不应追加" data-float-no-pos="">
+                        <div style="line-height: 0.9; font-size: 0.8rem;">
+                          <div style="font-size:0.9rem;font-weight: bold;">
+                            {{ oneRow['quant_obj']['histo']['latest_hitted_obj']['rate_str'] }}
+                          </div>
+                          <div style="font-size:0.9rem;font-weight: bold;border-top: solid 2px darkgrey;">
+                            {{ oneRow['quant_obj']['histo']['latest_hitted_obj']['max_str'] }}
+                          </div>
+                        </div>
+                      </div>
+                      <div 
+                      style="text-align: center; color: red; font-size: 0.9rem;font-weight: bold;position: relative;--tooltip-left:-10rem;--tooltip-top:-2rem;"
+                      :style="{
+                        'text-decoration': oneRow['quant_obj']['histo']['latest_hitted_obj']['distance_days']>10? 'line-through': 'none'
+                      }"
+                      data-title="启动信号越小越不应该停止,大于10个交易日逐步失效" data-float-no-pos="">
+                        {{ oneRow['quant_obj']['histo']['latest_hitted_obj']['distance_days'] }}日
+                      </div>
+                    </a>
+                  </div>
+                </template>
+                <template v-else-if="oneRow.hasOwnProperty('quant_obj') && oneRow['quant_obj'] != null &&
+                 oneRow['quant_obj'].hasOwnProperty('histo') && oneRow['quant_obj']['histo'] != null &&
+                 oneRow['quant_obj']['histo'].hasOwnProperty('latest_hitted_obj') && 
+                 oneRow['quant_obj']['histo']['latest_hitted_obj'] != null &&
+                 oneRow['quant_obj']['histo']['latest_hitted_obj']['min_hitted'] &&
+                 !oneRow['quant_obj']['histo']['latest_hitted_obj']['same_as_today']">
+                  <div style="height: 1px; border-top:solid 1px darkgray; margin: 5px 0 5px 0;"></div>
+                  <div style="height: 4rem;">
+                    <div style="position: relative; text-align: center; color: darkgreen; height: 1.2rem;--tooltip-left:-3rem;--tooltip-top:-2rem;"
+                    data-title="若低点明显则不应减少" data-float-no-pos="">
+                      <span class="icon_pos_left" style="color: darkgreen; top:-5px; left:1rem;">
+                        <div>
+                          <i class="bi bi-arrow-down-circle-fill"></i>
+                        </div>
+                      </span>
+                    </div>
+                    <div style="height: 1.8em; text-align: center; color: darkgreen;">
+                      <div style="line-height: 0.9; font-size: 0.9rem;position:relative;--tooltip-left:-3rem;--tooltip-top:-2rem;" 
+                      data-title="若低点明显则不应减少" data-float-no-pos="">
+                        <div style="font-size: 0.9rem; font-weight: bold;">
+                          {{ oneRow['quant_obj']['histo']['latest_hitted_obj']['rate_str'] }}
+                        </div>
+                        <div style="border-top: solid 2px darkgrey; font-size: 0.9rem;font-weight: bold;">
+                          {{ oneRow['quant_obj']['histo']['latest_hitted_obj']['min_str'] }}
+                        </div>
+                      </div>
+                    </div>
+                    <div 
+                    style="text-align: center; color: darkgreen; font-size: 0.9rem;font-weight: bold;position: relative;--tooltip-left:-10rem;--tooltip-top:-2rem;"
+                    :style="{
+                        'text-decoration': oneRow['quant_obj']['histo']['latest_hitted_obj']['distance_days']>5? 'line-through':'none'
+                      }"
+                      data-title="停止信号越小越不应该启动,大于5个交易日逐步失效" data-float-no-pos="">
+                        {{ oneRow['quant_obj']['histo']['latest_hitted_obj']['distance_days'] }}日
+                      </div>                    
+                  </div>
+                </template>
+                <template v-else>
+                  <div style="height: 1px; border-top:solid 1px darkgray; margin: 5px 0 5px 0;"></div>
+                  <div style="height: 4rem;">
+                    <div style="font-weight: bold; color: darkgreen;font-size: 0.9rem;">&nbsp;</div>
+                    <div style="font-weight: bold; color: darkgreen;font-size: 0.9rem;">&nbsp;</div>
+                  </div>
+                </template>
               </td>
               <td v-bind:class="{ sel_row: oneRow['currSelected'] }">
                 <div>
@@ -525,16 +656,22 @@
                 <div>
                   {{ oneRow?.kbObj?.statistics?.max_earn_tri_str }}
                 </div>
+                <template v-if="true">
+                  <div style="height: 1px; border-top:solid 1px darkgray; margin: 5px 0 5px 0;"></div>
+                  <div style="height: 4rem;">
+                    <div style="font-weight: bold; color: darkgreen;font-size: 0.9rem;">&nbsp;</div>
+                    <div style="font-weight: bold; color: darkgreen;font-size: 0.9rem;">&nbsp;</div>
+                  </div>
+                </template>
               </td>
-              <td v-bind:class="{ sel_row: oneRow['currSelected'] }">
+              <td v-bind:class="{ sel_row: oneRow['currSelected'] }" style="padding-left: 2px !important; padding-right: 2px !important;">
                 <template v-if="oneRow['kbObj']">
                   <div style="height: 1.8em; position: relative; text-align: center;"
                     v-bind:class="getPosColor(oneRow.kbObj.positive.positive_reach_len)">
                     <template v-if="oneRow.hasOwnProperty('quant_obj') && oneRow['quant_obj']['max_hitted']">
                       <a v-bind:href="baseUrl4ProbeNav + oneRow['fund_id'] + '&cust_fund_name=' + oneRow['fund_name'] + '&cust_buyin_type=' + 'fixed_buyin_append'" 
-                      target="_blank" style="cursor: pointer; text-decoration: none;"
-                      @mouseover="oneRow['show_temp_quant_tip']=true;"
-                      @mouseleave="oneRow['show_temp_quant_tip']=false;">
+                      target="_blank" style="cursor: pointer; text-decoration: none;--tooltip-left:-3rem;--tooltip-top:-2rem;"
+                      data-title="若高点明显则不应追加" data-float-no-pos="">
                         <span class="icon_pos_left" style="color: red;">
                           <i class="bi bi-arrow-up-circle-fill"></i>
                           <div style="" class="icon_tri">
@@ -543,11 +680,6 @@
                           </div>
                         </span>
                       </a>
-                      <template v-if="oneRow['show_temp_quant_tip']">
-                        <span class="hover_tip">
-                          若高点明显则不应追加
-                        </span>
-                      </template>
                     </template>
                     <span v-if="oneRow.kbObj.positive.positive_reach_len >= 4" class="icon_pos_right">
                       <i class="bi bi-arrow-up-circle-fill"></i>
@@ -557,13 +689,17 @@
                   <div style="height: 1.8em; position: relative; text-align: center;"
                     v-bind:class="getNegColor(oneRow.kbObj.negative.negative_reach_len)">
                     <template v-if="oneRow.hasOwnProperty('quant_obj') && oneRow['quant_obj']['min_hitted']">
-                      <span class="icon_pos_left" style="color: darkgreen;">
-                        <i class="bi bi-arrow-down-circle-fill"></i>
-                        <div style="" class="icon_tri">
-                          <div>{{ oneRow['quant_obj']['rate_str'] }}</div>
-                          <div style="border-top: solid 2px darkgrey;">{{ oneRow['quant_obj']['min_str'] }}</div>
-                        </div>
-                      </span>
+                      <a v-bind:href="baseUrl4ProbeNav + oneRow['fund_id'] + '&cust_fund_name=' + oneRow['fund_name'] + '&cust_buyin_type=' + 'fixed_buyin_append'" 
+                      target="_blank" style="cursor: pointer; text-decoration: none;--tooltip-left:-3rem;--tooltip-top:-2rem;"
+                      data-title="若低点明显则不应减少" data-float-no-pos="">
+                        <span class="icon_pos_left" style="color: darkgreen;">
+                          <i class="bi bi-arrow-down-circle-fill"></i>
+                          <div style="" class="icon_tri">
+                            <div>{{ oneRow['quant_obj']['rate_str'] }}</div>
+                            <div style="border-top: solid 2px darkgrey;">{{ oneRow['quant_obj']['min_str'] }}</div>
+                          </div>
+                        </span>
+                      </a>
                     </template>
                     <span v-if="oneRow.kbObj.negative.negative_reach_len >= 3" class="icon_pos_right">
                       <i class="bi bi-arrow-down-circle-fill"></i>
@@ -637,6 +773,10 @@
               </td>
               <td style="line-height: 1.6;" v-bind:class="{ sel_row: oneRow['currSelected'] }">
                 <template v-if="oneRow['kbObj']">
+                  <div @click.stop="suggestCompose4Ui($event, oneRow)"
+                       style="cursor: pointer; margin-bottom: 0.3rem; text-decoration: underline;color:darkgreen;font-weight: bold;">
+                    速决策(^q)
+                  </div>
                   <div>
                     持有:&nbsp;
                     <template
@@ -744,37 +884,51 @@
               <td style="text-align: center;" v-bind:class="{ sel_row: oneRow['currSelected'] }">
                 <template v-if="contStartStopObj.hasOwnProperty(oneRow['fund_id']) && contStartStopObj[oneRow['fund_id']]['start_stop_obj'] && contStartStopObj[oneRow['fund_id']]['start_stop_obj']['cont_stop_flag']">
                   <div style="color: darkgreen; text-decoration: none;">
-                    <span style="font-weight: bold; text-decoration: none;">
-                      连停&nbsp;<span :style="{
-                        'font-size':
-                        contStartStopObj[oneRow['fund_id']]['start_stop_obj']['stop_days'] >= 30? '1.3rem':
-                        contStartStopObj[oneRow['fund_id']]['start_stop_obj']['stop_days'] >= 20? '1.2rem':
-                        contStartStopObj[oneRow['fund_id']]['start_stop_obj']['stop_days'] >= 10? '1.1rem': '1rem',
-                        'font-weight':
-                        contStartStopObj[oneRow['fund_id']]['start_stop_obj']['stop_days'] >= 10? 'bold': 'normal',
-                        'text-decoration':
-                        contStartStopObj[oneRow['fund_id']]['start_stop_obj']['stop_days'] >= 10? 'none': 'line-through'
-                      }">
-                      {{contStartStopObj[oneRow['fund_id']]['start_stop_obj']['stop_days']}}日
-                      </span>
+                    <span style="font-weight: bold; text-decoration: none;position: relative;--tooltip-left:-8rem;--tooltip-top:-2rem;"
+                    data-title="若连停小于10交易日则不宜启动" data-float-no-pos="">
+                      连停&nbsp;
+                      <template v-if="oneRow.hasOwnProperty('money') && oneRow['money'] > 0">
+                        <span style="font-weight:bold;">刚启动</span>
+                      </template>
+                      <template v-else>
+                        <span :style="{
+                          'font-size':
+                          contStartStopObj[oneRow['fund_id']]['start_stop_obj']['stop_days'] >= 30? '1.3rem':
+                          contStartStopObj[oneRow['fund_id']]['start_stop_obj']['stop_days'] >= 20? '1.2rem':
+                          contStartStopObj[oneRow['fund_id']]['start_stop_obj']['stop_days'] >= 10? '1.1rem': '1rem',
+                          'font-weight':
+                          contStartStopObj[oneRow['fund_id']]['start_stop_obj']['stop_days'] >= 10? 'bold': 'normal',
+                          'text-decoration':
+                          contStartStopObj[oneRow['fund_id']]['start_stop_obj']['stop_days'] >= 10? 'none': 'line-through'
+                        }">
+                        {{contStartStopObj[oneRow['fund_id']]['start_stop_obj']['stop_days']}}日
+                        </span>
+                      </template>
                     </span>
                   </div>
                 </template>
                 <template v-if="contStartStopObj.hasOwnProperty(oneRow['fund_id']) && contStartStopObj[oneRow['fund_id']]['start_stop_obj'] && contStartStopObj[oneRow['fund_id']]['start_stop_obj']['cont_start_flag']">
                   <div style="color: red; text-decoration: none;">
-                    <span style="font-weight: bold; text-decoration: none;">
-                      连购&nbsp;<span :style="{
-                        'font-size':
-                        contStartStopObj[oneRow['fund_id']]['start_stop_obj']['start_days'] >= 60? '1.3rem':
-                        contStartStopObj[oneRow['fund_id']]['start_stop_obj']['start_days'] >= 40? '1.2rem':
-                        contStartStopObj[oneRow['fund_id']]['start_stop_obj']['start_days'] >= 20? '1.1rem': '1rem',
-                        'font-weight':
-                        contStartStopObj[oneRow['fund_id']]['start_stop_obj']['start_days'] >= 20? 'bold': 'normal',
-                        'text-decoration':
-                        contStartStopObj[oneRow['fund_id']]['start_stop_obj']['start_days'] >= 20? 'none': 'line-through'
-                      }">
-                      {{contStartStopObj[oneRow['fund_id']]['start_stop_obj']['start_days']}}日
-                      </span>
+                    <span style="font-weight: bold; text-decoration: none;position: relative;--tooltip-left:-8rem;--tooltip-top:-2rem;"
+                    data-title="若连购小于20交易日则不宜停止" data-float-no-pos="">
+                      连购&nbsp;
+                      <template v-if="oneRow.hasOwnProperty('money') && oneRow['money'] < 0">
+                        <span style="font-weight:bold;">刚停止</span>
+                      </template>
+                      <template v-else>
+                        <span :style="{
+                          'font-size':
+                          contStartStopObj[oneRow['fund_id']]['start_stop_obj']['start_days'] >= 60? '1.3rem':
+                          contStartStopObj[oneRow['fund_id']]['start_stop_obj']['start_days'] >= 40? '1.2rem':
+                          contStartStopObj[oneRow['fund_id']]['start_stop_obj']['start_days'] >= 20? '1.1rem': '1rem',
+                          'font-weight':
+                          contStartStopObj[oneRow['fund_id']]['start_stop_obj']['start_days'] >= 20? 'bold': 'normal',
+                          'text-decoration':
+                          contStartStopObj[oneRow['fund_id']]['start_stop_obj']['start_days'] >= 20? 'none': 'line-through'
+                        }">
+                        {{contStartStopObj[oneRow['fund_id']]['start_stop_obj']['start_days']}}日
+                        </span>
+                      </template>
                     </span>
                   </div>
                 </template>
@@ -996,6 +1150,35 @@
         <div class="modal-footer">
           <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">取消</button>
           <button type="button" class="btn btn-warning" @click.prevent="removeCompose()">移出
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="modal fade" id="suggComposeDialog" tabindex="-1">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title">操作建议</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+          <template v-if="toBeSuggestCompose">
+            <h6>{{toBeSuggestCompose['fund_id']}}&nbsp;{{ toBeSuggestCompose['fund_name'] }}</h6>
+            <template v-for="one_sugg in totSuggObjs">
+              <div>
+                <div style="display: inline-block; width: 10rem;font-weight: bold;color: chocolate;">
+                  {{one_sugg['sugg_key']}}
+                </div>
+                <div style="display: inline-block;color: red;font-weight: bold;">
+                  {{one_sugg['sugg_val']}}
+                </div>
+              </div>
+            </template>
+          </template>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-warning" @click.prevent="hideSuggUi()">确认
           </button>
         </div>
       </div>
@@ -1265,7 +1448,7 @@ getAllBuyoutFutureRecords()
 /*
 * sold by bulk
 * */
-const dlgController = ref({ soldDlg: null, removeDlg: null, removeFromComposeDlg: null })
+const dlgController = ref({ soldDlg: null, removeDlg: null, removeFromComposeDlg: null, suggestDlg: null})
 const searchCond = ref()
 const searchTimer = ref(null)
 const searchByFundIdFoundFlag = ref(false)
@@ -1277,6 +1460,7 @@ onMounted(() => {
   dlgController.value.soldDlg = new Modal('#soldDialog', {})
   dlgController.value.removeDlg = new Modal('#removeDialog', {})
   dlgController.value.removeFromComposeDlg = new Modal('#removeComposeDialog', {})
+  dlgController.value.suggestDlg = new Modal('#suggComposeDialog', {})
 
   if (route.query.hasOwnProperty('dt_compose') && route.query['dt_compose']) {
     if (['ovtree', 'dolphin', 'trident', 'gdngoat'].indexOf(route.query['dt_compose'].trim()) !== -1) {
@@ -1305,6 +1489,25 @@ onMounted(() => {
   let _host = window.location.hostname;
   baseUrl4ProbeNav.value = _prot + "//" + _host + "/index.html?cust_fund_id="
   baseUrl4Report.value = _prot + "//" + _host + "/dt_plans_web/#/report?fund_id="
+
+  // 快捷键
+  document.addEventListener('keydown', function(e) {
+    console.log("*** quick keyboard press: ", e.keyCode);
+    if (e.ctrlKey && e.keyCode === 81) {
+      // ctrl + q
+      suggestComposeLogic()
+    } else if (e.ctrlKey && e.keyCode === 90) {
+      // ctrl + z
+      clearSelected()
+    } else if (e.ctrlKey && e.shiftKey && e.keyCode === 83) {
+      // ctrl + shift + s
+      sortByField('selected')
+    } else if (e.keyCode === 27) {
+      // ESC
+      hideSuggUi()
+      clearSelected()
+    }
+  })
 })
 
 onUnmounted(() => {
@@ -1449,6 +1652,32 @@ function sortByField(_field) {
         } else {
           return 0;
         }
+      });
+    }
+  } else if (_field === 'short_wav') {
+    if (sortFieldFlag.value) {
+      composeViewObjs.value.sort((a, b) => {
+        let _a_val = -9999
+        let _b_val = -9999
+        if (a.hasOwnProperty('quant_obj') && a['quant_obj'] && a['quant_obj'].hasOwnProperty('histo') && a['quant_obj']['histo']) {
+          _a_val = a['quant_obj']['histo']['max_hitted_times'] - a['quant_obj']['histo']['min_hitted_times'] 
+        }
+        if (b.hasOwnProperty('quant_obj') && b['quant_obj'] && b['quant_obj'].hasOwnProperty('histo') && b['quant_obj']['histo']) {
+          _b_val = b['quant_obj']['histo']['max_hitted_times'] - b['quant_obj']['histo']['min_hitted_times'] 
+        }
+        return _a_val - _b_val 
+      });
+    } else {
+      composeViewObjs.value.sort((a, b) => {
+        let _a_val = -9999
+        let _b_val = -9999
+        if (a.hasOwnProperty('quant_obj') && a['quant_obj'] && a['quant_obj'].hasOwnProperty('histo') && a['quant_obj']['histo']) {
+          _a_val = a['quant_obj']['histo']['max_hitted_times'] - a['quant_obj']['histo']['min_hitted_times'] 
+        }
+        if (b.hasOwnProperty('quant_obj') && b['quant_obj'] && b['quant_obj'].hasOwnProperty('histo') && b['quant_obj']['histo']) {
+          _b_val = b['quant_obj']['histo']['max_hitted_times'] - b['quant_obj']['histo']['min_hitted_times'] 
+        }
+        return _b_val - _a_val
       });
     }
   } else if (_field === 'positive') {
@@ -1720,6 +1949,10 @@ function selOrDesRow(oneRowObj) {
   } else {
     oneRowObj['currSelected'] = true
   }
+
+  if (oneRowObj['currSelected']) {
+    toBeSuggestCompose.value = oneRowObj
+  }
 }
 
 function clearSelected() {
@@ -1728,7 +1961,7 @@ function clearSelected() {
 
 function searchByCond() {
   clearSelected()
-  if (searchCond.value.trim() === '') {
+  if (!searchCond.value || searchCond.value.trim() === '') {
     return
   }
   let _foundCnt = 0
@@ -1792,6 +2025,175 @@ function searchByCond() {
   }
 }
 
+const toBeSuggestCompose = ref(null)
+const totSuggObjs = ref([])
+function suggestComposeLogic() {
+  if (!toBeSuggestCompose.value) {
+    return
+  }
+  totSuggObjs.value = []
+  let oneRowObj = toBeSuggestCompose.value
+  if (oneRowObj.hasOwnProperty('money') && oneRowObj['money'] <= -2) {
+    totSuggObjs.value.push({
+      "sugg_key": "当前已设置为出售",
+      "sugg_val": "不应该启动"
+    })
+  }
+  if (contStartStopObj.value.hasOwnProperty(oneRowObj['fund_id'])
+      && contStartStopObj.value[oneRowObj['fund_id']]['start_stop_obj']
+      && contStartStopObj.value[oneRowObj['fund_id']]['start_stop_obj']['cont_stop_flag']) {
+    if (contStartStopObj.value[oneRowObj['fund_id']]['start_stop_obj']['stop_days'] < 10) {
+      totSuggObjs.value.push({
+        "sugg_key": "当前连停<10",
+        "sugg_val": "不建议启动"
+      })
+    } else {
+      totSuggObjs.value.push({
+        "sugg_key": "当前连停>=10",
+        "sugg_val": "可以启动"
+      })
+    }
+  }
+  if (contStartStopObj.value.hasOwnProperty(oneRowObj['fund_id'])
+      && contStartStopObj.value[oneRowObj['fund_id']]['start_stop_obj']
+      && contStartStopObj.value[oneRowObj['fund_id']]['start_stop_obj']['cont_start_flag']) {
+    if (contStartStopObj.value[oneRowObj['fund_id']]['start_stop_obj']['start_days'] < 20) {
+      totSuggObjs.value.push({
+        "sugg_key": "当前连购<20",
+        "sugg_val": "不建议停止"
+      })
+    } else {
+      totSuggObjs.value.push({
+        "sugg_key": "当前连购>=20",
+        "sugg_val": "可以停止"
+      })
+    }
+  }
+
+  if (oneRowObj.hasOwnProperty('kbObj') && oneRowObj['kbObj'] &&
+      oneRowObj['kbObj'].hasOwnProperty('positive') && oneRowObj['kbObj']['positive'] &&
+      oneRowObj['kbObj']['positive'].hasOwnProperty('positive_reach_len')) {
+    if (oneRowObj['kbObj']['positive']['positive_reach_len'] >= 5) {
+      totSuggObjs.value.push({
+        "sugg_key": "当前已处于高点",
+        "sugg_val": "不建议启动"
+      })
+    }
+    if (oneRowObj['kbObj']['positive']['positive_reach_len'] >= 7) {
+      totSuggObjs.value.push({
+        "sugg_key": "当前已处于非常高点",
+        "sugg_val": "不建议启动，建议停止(减额/卖出)"
+      })
+    }
+  }
+  if (oneRowObj.hasOwnProperty('kbObj') && oneRowObj['kbObj'] &&
+      oneRowObj['kbObj'].hasOwnProperty('negative') && oneRowObj['kbObj']['negative'] &&
+      oneRowObj['kbObj']['negative'].hasOwnProperty('negative_reach_len')) {
+    if (oneRowObj['kbObj']['negative']['negative_reach_len'] >= 3) {
+      totSuggObjs.value.push({
+        "sugg_key": "当前已处于低点",
+        "sugg_val": "可以启动"
+      })
+    }
+    if (oneRowObj['kbObj']['negative']['negative_reach_len'] >= 6) {
+      totSuggObjs.value.push({
+        "sugg_key": "当前已处于非常低点",
+        "sugg_val": "可以启动，增额"
+      })
+    }
+  }
+
+  if (oneRowObj.hasOwnProperty('quant_obj') && oneRowObj['quant_obj']['max_hitted']) {
+    totSuggObjs.value.push({
+      "sugg_key": "当前向上突破",
+      "sugg_val": "可以启动"
+    })
+  }
+  if (oneRowObj.hasOwnProperty('quant_obj') && oneRowObj['quant_obj']['min_hitted']) {
+    totSuggObjs.value.push({
+      "sugg_key": "当前向下突破",
+      "sugg_val": "可以停止"
+    })
+  }
+
+  if (oneRowObj.hasOwnProperty('quant_obj') && oneRowObj['quant_obj'] != null &&
+  oneRowObj['quant_obj'].hasOwnProperty('histo') && oneRowObj['quant_obj']['histo'] != null &&
+  oneRowObj['quant_obj']['histo'].hasOwnProperty('latest_hitted_obj') && 
+  oneRowObj['quant_obj']['histo']['latest_hitted_obj'] != null &&
+  oneRowObj['quant_obj']['histo']['latest_hitted_obj']['max_hitted']) {
+    if (!oneRowObj['quant_obj']['histo']['latest_hitted_obj']['same_as_today'] && 
+    oneRowObj['quant_obj']['histo']['latest_hitted_obj']['distance_days'] < 10) {
+      totSuggObjs.value.push({
+        "sugg_key": "近期向上突破",
+        "sugg_val": "可以启动"
+      })
+    }
+  }
+
+  if (oneRowObj.hasOwnProperty('quant_obj') && oneRowObj['quant_obj'] != null &&
+  oneRowObj['quant_obj'].hasOwnProperty('histo') && oneRowObj['quant_obj']['histo'] != null &&
+  oneRowObj['quant_obj']['histo'].hasOwnProperty('latest_hitted_obj') && 
+  oneRowObj['quant_obj']['histo']['latest_hitted_obj'] != null &&
+  oneRowObj['quant_obj']['histo']['latest_hitted_obj']['min_hitted']) {
+    if (!oneRowObj['quant_obj']['histo']['latest_hitted_obj']['same_as_today'] && 
+    oneRowObj['quant_obj']['histo']['latest_hitted_obj']['distance_days'] < 5) {
+      totSuggObjs.value.push({
+        "sugg_key": "近期向下突破",
+        "sugg_val": "可以停止"
+      })
+    }
+  }
+
+  if (oneRowObj.hasOwnProperty('quant_obj') && oneRowObj['quant_obj'] != null &&
+  oneRowObj['quant_obj'].hasOwnProperty('histo') && oneRowObj['quant_obj']['histo'] != null) {
+    let _max_hitted_times = oneRowObj['quant_obj']['histo']['max_hitted_times']
+    let _min_hitted_times = oneRowObj['quant_obj']['histo']['min_hitted_times']
+    if (_max_hitted_times * 1.6 >= _min_hitted_times) {
+      totSuggObjs.value.push({
+        "sugg_key": "短时波动上行",
+        "sugg_val": "可以启动，增额"
+      })
+    } else if (_max_hitted_times * 2 <= _min_hitted_times) {
+      totSuggObjs.value.push({
+        "sugg_key": "短时波动下行",
+        "sugg_val": "可以停止，减额"
+      })
+    }
+  }
+
+  // if (oneRowObj.hasOwnProperty('money') && oneRowObj.hasOwnProperty('adjust_money') &&
+  //     oneRowObj['money'] != null && oneRowObj['adjust_money'] != null) {
+  //   if (oneRowObj['money'] >= 0) {
+  //     if (oneRowObj['money'] > oneRowObj['adjust_money']) {
+  //       totSuggObjs.value.push({
+  //         "sugg_key": "当前行情上行",
+  //         "sugg_val": "可以停止(减额/卖出)"
+  //       })
+  //     }
+  //     if (oneRowObj['money'] < oneRowObj['adjust_money']) {
+  //       totSuggObjs.value.push({
+  //         "sugg_key": "当前业绩下行",
+  //         "sugg_val": "可以启动(增额)"
+  //       })
+  //     }
+  //   }
+  // }
+
+  dlgController.value.suggestDlg.show();
+}
+
+function suggestCompose4Ui(event, oneRowObj) {
+  event.stopPropagation()
+  toBeSuggestCompose.value = oneRowObj;
+  suggestComposeLogic()
+}
+
+function hideSuggUi() {
+  if (dlgController.value.suggestDlg) {
+    dlgController.value.suggestDlg.hide()
+  }
+}
+
 </script>
 
 <style scoped>
@@ -1852,4 +2254,18 @@ function searchByCond() {
   padding: 2px 5px 2px 5px;
 }
 
+span[data-float-no-pos]:hover::after, a[data-float-no-pos]:hover::after, div[data-float-no-pos]:hover::after {
+    content: attr(data-title);
+    position: absolute;
+    top: var(--tooltip-top, auto);
+    left: var(--tooltip-left, auto);
+    z-index: 100;
+    background-color: aquamarine;
+    padding:0.2rem 0.5rem 0.1rem 0.5rem;
+    white-space: nowrap;
+    font-size: 0.95rem;
+    font-weight: bold;
+    color: red;
+    font-family: arial;
+  } 
 </style>
