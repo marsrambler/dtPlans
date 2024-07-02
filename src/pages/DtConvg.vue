@@ -9,9 +9,9 @@
       <div style="">
         丢失&nbsp;<span class="badge bg-warning text-bg-danger">{{ lostConvgNum }}</span>
       </div>
-      <div style=""><!--
-        --><input class="form-check-input" type="checkbox" v-model="showHides"><!--
-        -->&nbsp;隐藏&nbsp;<span class="badge bg-dark" style="cursor: pointer;" @click="clearAllHides()">{{
+      <div style="position: relative; top:4px;"><!--
+        --><input class="form-check-input" type="checkbox" id="chk_hidden" v-model="showHides"><!--
+        -->&nbsp;<label for="chk_hidden">隐藏</label>&nbsp;<span class="badge bg-dark" style="cursor: pointer;position:relative;top:-1px;" @click="clearAllHides()">{{
           currRepoHideNum }}</span><!--
       --></div>
       <input type="text" class="form-control-plaintext search_box" style="grid-column: 5 / span 2;" v-model="searchCond"

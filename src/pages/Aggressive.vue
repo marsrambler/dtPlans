@@ -3,9 +3,9 @@
     <div id="op_pane" :style="{ 'height': opPaneHeight + 'rem' }" class="grid_pane_c10">
       <div>总数&nbsp;<span class="badge bg-success">{{ currTotNum }}</span><!--
       --></div>
-      <div style=""><!--
-        --><input class="form-check-input" type="checkbox" v-model="showOnly3Convg"><!--
-        -->&nbsp;强收敛&nbsp;<span class="badge bg-danger">{{ threeConvgNum }}</span><!--
+      <div style="position: relative; top:4px;"><!--
+        --><input class="form-check-input" type="checkbox" id="chk_convg" v-model="showOnly3Convg"><!--
+        -->&nbsp;<label for="chk_convg">强收敛</label>&nbsp;<span class="badge bg-danger" style="position:relative;top:-1px;">{{ threeConvgNum }}</span><!--
       --></div>
       <div style="cursor: pointer;" @click="clearSelected()">
         选择&nbsp;<span class="badge bg-warning text-dark">{{ currSelectedNum }}</span>
@@ -13,9 +13,9 @@
       <div style="">
         丢失&nbsp;<span class="badge bg-warning text-bg-danger">{{ lostAggressiveNum }}</span>
       </div>
-      <div style=""><!--
-        --><input class="form-check-input" type="checkbox" v-model="showHides"><!--
-        -->&nbsp;隐藏&nbsp;<span class="badge bg-dark" style="cursor: pointer;" @click="clearAllHides()">{{ currRepoHideNum }}</span><!--
+      <div style="position: relative; top:4px;"><!--
+        --><input class="form-check-input" type="checkbox" id="chk_hidden" v-model="showHides"><!--
+        -->&nbsp;<label for="chk_hidden">隐藏</label>&nbsp;<span class="badge bg-dark" style="cursor: pointer;position:relative;top:-1px;" @click="clearAllHides()">{{ currRepoHideNum }}</span><!--
       --></div>
       <input type="text" class="form-control-plaintext search_box" style="grid-column: 6 / span 2;" v-model="searchCond"
              @keyup.enter="searchByCond()">

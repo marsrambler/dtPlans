@@ -69,7 +69,12 @@ getContStartStop()
 
 <template>
   <TopNavbar></TopNavbar>
-  <router-view></router-view>
+  <router-view v-slot="{ Component }">
+    <keep-alive>
+      <component :is="Component"></component>
+    </keep-alive>
+<!--    <component v-if="!route.meta.keepAlive" :is="Component"></component>--> <!-- v-if="route.meta.keepAlive" -->
+  </router-view>
 
   <div v-if="isApiInProgress" style="position: absolute; left: 50%; top: 50%;">
     <div class="spinner-border" role="status">

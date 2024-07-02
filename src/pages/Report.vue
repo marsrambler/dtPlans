@@ -451,7 +451,7 @@ import {
   minPaneWidth,
   topSecClass
 } from "../lib/commonUtils.js"
-import { onMounted, onUnmounted, computed, ref, watch, nextTick } from "vue";
+import {onMounted, onUnmounted, computed, ref, watch, nextTick, onActivated} from "vue";
 import { storeToRefs } from 'pinia'
 import { useZskbStore } from '../store/zskbStore';
 import { useReportStore } from "../store/reportStore.js";
@@ -509,6 +509,12 @@ onMounted(() => {
   baseUrl4ProbeNav.value = _prot + "//" + _host + "/index.html?dt_fund_id="
   baseUrl4ComposeNav.value = _prot + "//" + _host + "/dt_plans_web/#/?dt_fund_id="
 
+  /*
+  * logic moved to onActivated
+  * */
+})
+
+onActivated(() => {
   if (route.query.hasOwnProperty('fund_id') && route.query['fund_id']) {
     searchFundNameOrFundId.value = route.query['fund_id'].trim();
     searchByFundIdTimes.value = 0

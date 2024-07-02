@@ -3,20 +3,20 @@
     <div id="op_pane" :style="{ 'height': opPaneHeight + 'rem'}" class="grid_pane_c12">
       <div>总数&nbsp;<span class="badge bg-success">{{ currTotNum }}</span><!--
       --></div>
-      <div style=""><!--
-        --><input class="form-check-input" type="checkbox" v-model="showHides"><!--
-        -->&nbsp;隐藏&nbsp;<span class="badge bg-dark">{{ currRepoHideNum }}</span><!--
+      <div style="position: relative; top:4px;"><!--
+        --><input class="form-check-input" type="checkbox" id="chk_hide" v-model="showHides"><!--
+        -->&nbsp;<label for="chk_hide">隐藏</label>&nbsp;<span class="badge bg-dark" style="position: relative; top: -1px;">{{ currRepoHideNum }}</span><!--
       --></div>
       <div style="cursor: pointer;" @click="clearSelected()"><!--
         -->选择&nbsp;<span class="badge bg-warning text-dark">{{ currSelectedNum }}</span><!--
       --></div>
-      <div style="">
-        <input class="form-check-input" type="checkbox" v-model="showNewAdd"><!--
-        -->&nbsp;新加&nbsp;<span class="badge bg-info text-bg-success">{{ currNewAddNum }}</span><!--
+      <div style="position: relative; top:4px;">
+        <input class="form-check-input" type="checkbox" id="chk_new_add" v-model="showNewAdd"><!--
+        -->&nbsp;<label for="chk_new_add">新加</label>&nbsp;<span class="badge bg-info text-bg-success" style="position: relative; top: -1px;">{{ currNewAddNum }}</span><!--
       --></div>
-      <div style="">
-        <input class="form-check-input" type="checkbox" v-model="showKanban"><!--
-        -->&nbsp;看板&nbsp;<span class="badge bg-primary text-bg-primary">{{ currKanbanNum }}</span><!--
+      <div style="position: relative; top:4px;">
+        <input class="form-check-input" type="checkbox" id="chk_kb" v-model="showKanban"><!--
+        -->&nbsp;<label for="chk_kb">看板</label>&nbsp;<span class="badge bg-primary text-bg-primary" style="position: relative; top: -1px;">{{ currKanbanNum }}</span><!--
       --></div>
       <input class="btn btn-primary btn-sm" type="button" value="前移选择" @click="sortByField('selected')">
       <!--

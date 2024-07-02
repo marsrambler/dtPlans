@@ -10,24 +10,24 @@
       </div>
 
       <div class="form-check form_check_cust">
-          <input class="form-check-input" type="checkbox" v-model="show4SoldOnly">
-          <label class="form-check-label" for="flexCheckDefault">待卖&nbsp;</label>
-          <span class="badge bg-warning">{{ tot4SoldNum }}</span>
+          <input class="form-check-input" type="checkbox" id="to_be_sold" v-model="show4SoldOnly">
+          <label class="form-check-label" for="to_be_sold">待卖&nbsp;</label>
+          <span class="badge bg-warning" style="position: relative; top: -1px;">{{ tot4SoldNum }}</span>
       </div>
       <div class="form-check form_check_cust">
-          <input class="form-check-input" type="checkbox" v-model="showPauseOnly">
-          <label class="form-check-label" for="flexCheckDefault">待买&nbsp;</label>
-          <span class="badge bg-warning">{{ totPauseNum }}</span>
+          <input class="form-check-input" type="checkbox" id="to_be_buy" v-model="showPauseOnly">
+          <label class="form-check-label" for="to_be_buy">待买&nbsp;</label>
+          <span class="badge bg-warning" style="position: relative; top: -1px;">{{ totPauseNum }}</span>
       </div>
       <div class="form-check form_check_cust">
-          <input class="form-check-input" type="checkbox" v-model="showAdjustOnly">
-          <label class="form-check-label" for="flexCheckDefault">调整&nbsp;</label>
-          <span class="badge bg-warning">{{ totAdjustNum }}</span>
+          <input class="form-check-input" type="checkbox" id="to_be_adj" v-model="showAdjustOnly">
+          <label class="form-check-label" for="to_be_adj">调整&nbsp;</label>
+          <span class="badge bg-warning" style="position: relative; top: -1px;">{{ totAdjustNum }}</span>
       </div>
       <div class="form-check form_check_cust">
-          <input class="form-check-input" type="checkbox" v-model="showPoleOnly">
-          <label class="form-check-label" for="flexCheckDefault">突破&nbsp;</label>
-          <span class="badge bg-warning">{{ totPoleNum }}</span>
+          <input class="form-check-input" type="checkbox" id="to_be_thres" v-model="showPoleOnly">
+          <label class="form-check-label" for="to_be_thres">突破&nbsp;</label>
+          <span class="badge bg-warning" style="position: relative; top: -1px;">{{ totPoleNum }}</span>
       </div>
 
       <div style="cursor: pointer;" @click="clearSelected()">
@@ -1201,7 +1201,7 @@ import {
   getHitStyle,
   get_suggestion_by_wav
 } from "../lib/commonUtils.js"
-import {onMounted, computed, ref, watch, nextTick, onUnmounted} from "vue";
+import {onMounted, computed, ref, watch, nextTick, onUnmounted, onActivated} from "vue";
 import { storeToRefs } from 'pinia'
 import { useComposeStore } from "../store/composeStore.js";
 import { useZskbStore } from "../store/zskbStore.js"
@@ -1462,28 +1462,9 @@ onMounted(() => {
   dlgController.value.removeFromComposeDlg = new Modal('#removeComposeDialog', {})
   dlgController.value.suggestDlg = new Modal('#suggComposeDialog', {})
 
-  if (route.query.hasOwnProperty('dt_compose') && route.query['dt_compose']) {
-    if (['ovtree', 'dolphin', 'trident', 'gdngoat'].indexOf(route.query['dt_compose'].trim()) !== -1) {
-      compose_name.value = route.query['dt_compose'].trim();
-    } else {
-      console.error("Internal error as query string can not find: ", route.query['dt_compose'])
-    }
-  }
-  if (route.query.hasOwnProperty('dt_fund_id') && route.query['dt_fund_id']) {
-    searchCond.value = route.query['dt_fund_id'].trim();
-    searchByFundIdTimes.value = 0
-    if (searchCond.value.length === 6) {
-      searchTimer.value = setInterval(() => {
-        searchByCond()
-        if (searchByFundIdFoundFlag.value || searchByFundIdTimes.value >= 10) {
-          if (searchTimer.value) {
-            console.warn("clear search timer in compose page")
-            clearInterval(searchTimer.value)
-          }
-        }
-      }, 1000)
-    }
-  }
+  /*
+  * logic moved to onActivated
+  * */
   
   let _prot = window.location.protocol;
   let _host = window.location.hostname;
@@ -1510,6 +1491,31 @@ onMounted(() => {
   })
 })
 
+onActivated( () => {
+  if (route.query.hasOwnProperty('dt_compose') && route.query['dt_compose']) {
+    if (['ovtree', 'dolphin', 'trident', 'gdngoat'].indexOf(route.query['dt_compose'].trim()) !== -1) {
+      compose_name.value = route.query['dt_compose'].trim();
+    } else {
+      console.error("Internal error as query string can not find: ", route.query['dt_compose'])
+    }
+  }
+  if (route.query.hasOwnProperty('dt_fund_id') && route.query['dt_fund_id']) {
+    searchCond.value = route.query['dt_fund_id'].trim();
+    searchByFundIdTimes.value = 0
+    if (searchCond.value.length === 6) {
+      searchTimer.value = setInterval(() => {
+        searchByCond()
+        if (searchByFundIdFoundFlag.value || searchByFundIdTimes.value >= 10) {
+          if (searchTimer.value) {
+            console.warn("clear search timer in compose page")
+            clearInterval(searchTimer.value)
+          }
+        }
+      }, 1000)
+    }
+  }
+})
+
 onUnmounted(() => {
   if (searchTimer.value) {
     console.warn("clear search timer in compose page")
@@ -1533,9 +1539,9 @@ async function soldFixedFundByBulkUi(_fund_id, _fund_name, _one_hold_obj_end, _h
 }
 
 async function soldFixedFundByBulk() {
+  dlgController.value.soldDlg.hide()
   await soldComposeFixedHold(fund_id_sold.value, fund_name_sold.value, one_hold_obj_end.value, hold_objs.value)
   await setComposeSoldDate(fund_one_row_obj.value['fund_id'], fund_one_row_obj.value['fund_name'], fund_one_row_obj.value['compose_name'], -1, fund_one_row_obj.value['buyin_source'])
-  dlgController.value.soldDlg.hide()
 }
 
 const fund_id_remove = ref('')
@@ -1578,9 +1584,9 @@ function removeCompose4Ui(event, oneRowObj) {
 }
 
 async function removeCompose() {
+  dlgController.value.removeFromComposeDlg.hide()
   await addOrRemoveCompose(toBeRemoveFundFromCompose.value['fund_id'], toBeRemoveFundFromCompose.value['fund_name'], 
   toBeRemoveFundFromCompose.value['compose_name'])
-  dlgController.value.removeFromComposeDlg.hide()
 }
 
 const sortFieldName = ref('')

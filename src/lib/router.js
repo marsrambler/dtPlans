@@ -11,31 +11,52 @@ import DtConvg from "../pages/DtConvg.vue";
 const routes = [
     {
         path: '/',
-        component: Compose
+        component: Compose,
+        meta: {
+            keepalive: true
+        }
     },
     {
         path: '/repo/',
-        component: Zsrepo
+        component: Zsrepo,
+        meta: {
+            keepalive: true
+        }
     },
     {
         path: '/kanban/',
-        component: Zskb
+        component: Zskb,
+        meta: {
+            keepalive: true
+        }
     },
     {
         path: '/report/',
-        component: Report
+        component: Report,
+        meta: {
+            keepalive: false
+        }
     },
     {
         path: '/recycle/',
-        component: RepoRecycle
+        component: RepoRecycle,
+        meta: {
+            keepalive: true
+        }
     },
     {
         path: '/aggressive/',
-        component: Aggressive
+        component: Aggressive,
+        meta: {
+            keepalive: true
+        }
     },
     {
         path: '/convg/',
-        component: DtConvg
+        component: DtConvg,
+        meta: {
+            keepalive: true
+        }
     }
 ]
 
