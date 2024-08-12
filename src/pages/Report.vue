@@ -3,14 +3,26 @@
     <div id="op_pane" :style="{ 'height': opPaneHeight + 'rem' }" class="grid_pane_c12">
       <div>请求ID号(,)</div>
       <input type="text" v-model="requireFundIds" class="form-control-plaintext search_box"
-        style="grid-column: 2 / span 3; padding-left: 0.5rem;">
+        style="grid-column: 2 / span 2; padding-left: 0.2rem;">
       <input class="btn btn-primary btn-sm" type="button" value="请求" @click="requireDynValues4ui();">
       <input class="btn btn-warning btn-sm" type="button" value="刷新" @click="getRecordsAndRates('refresh');">
       <input class="btn btn-info btn-sm" type="button" v-bind:value="canAddAllFlag? '全选' : '取消'"
       @click="allAllFundIntoRequestList();">
       <input type="text" v-model="searchFundNameOrFundId" class="form-control-plaintext search_box"
-             style="grid-column: 8 / span 2; padding-left: 0.5rem;" @keyup.enter="excuteSearchFund()">
+             style="padding-left: 0.2rem;" @keyup.enter="excuteSearchFund()">
       <input class="btn btn-primary btn-sm" type="button" value="查找" @click="excuteSearchFund();">
+      <div class="form-check form_check_cust" style="margin-left: 1rem;">
+        <input class="form-check-input" type="checkbox" id="inc_perc" v-model="inc_earn_perc">
+        <label class="form-check-label" for="inc_perc">百分比</label>
+      </div>
+      <div class="form-check form_check_cust" style="margin-left: 1rem;">
+        <input class="form-check-input" type="checkbox" id="inc_comments" v-model="inc_comments">
+        <label class="form-check-label" for="inc_comments">笔记</label>
+      </div>
+      <div class="form-check form_check_cust" style="margin-left: 0rem;">
+        <input class="form-check-input" type="checkbox" id="show_latest" v-model="onlyShowLatest">
+        <label class="form-check-label" for="show_latest">仅看最近</label>
+      </div>
     </div>
     <table id="table_header" class="table table-bordered" style="margin-bottom: 0;">
       <thead style="">
@@ -464,8 +476,12 @@ const zskbStore = useZskbStore()
 const { zskbObjs } = storeToRefs(zskbStore)
 
 const reportStore = useReportStore()
-const { dynRecordObjs } = storeToRefs(reportStore)
-const { requireDynValues, getRecordsAndRates, removeLocalDynvalue, getBigPoolFixedHold, getIndexRtRate } = reportStore
+const { dynRecordObjs_full, dynRecordObjs_latest, dynRecordObjs, onlyShowLatest } = storeToRefs(reportStore)
+const { requireDynValues, getRecordsAndRates, removeLocalDynvalue, getBigPoolFixedHold, getIndexRtRate, removeDate4Report } = reportStore
+
+const composeStore = useComposeStore()
+const {noteReportObjs} = storeToRefs(composeStore)
+const {getFundNotes4Report} = composeStore
 
 const colWidMap = {
   'col_1': 6,
@@ -530,6 +546,8 @@ onActivated(() => {
       }, 1000)
     }
   }
+  // each time goes to this page, get the fund notes again
+  getFundNotes4Report()
 })
 
 onUnmounted(() => {
@@ -567,6 +585,24 @@ watch(requireFundIds, () => {
       })
     }
   })
+})
+
+const backup_fund_id = ref(null)
+watch(dynRecordObjs, () => {
+    if (!dynRecordObjs.value || dynRecordObjs.value.length === 0 || !backup_fund_id.value) {
+      return
+    }
+    const fund_match = (elem) => elem['fund_id'] === backup_fund_id.value
+    let _idx = dynRecordObjs.value.findIndex(fund_match)
+    if (_idx === -1) {
+      console.error("Internal error, find dynRecordObjs failed by fund id: ", backup_fund_id.value)
+    } else {
+      console.log("**** restore report dyn record obj successfully, fund id: ", backup_fund_id.value)
+      dynRecordObjs.value[_idx]['currSelected'] = true
+      currDynValue.value = dynRecordObjs.value[_idx]
+      scrollViewBySelection()
+    }
+    backup_fund_id.value = null
 })
 
 function requireDynValues4ui() {
@@ -885,6 +921,66 @@ const chartOptions = ref({
           // fillInSoldDate(_date_str)
         }
       }
+    },
+    {
+      // write notes earn (positive, red)
+      width: 35,
+      height: 35,
+      name: '笔记盈利标',
+      type: 'flags',
+      data: [],
+      onSeries: 'dataseries',
+      shape: 'diamond',
+      lineWidth: 2,
+      color: 'red',
+      style: {
+        color: 'red',
+        fontSize: 14
+      },
+      events: {
+        click: function (e) {
+        }
+      }
+    },
+    {
+      // write notes earn (negative, red)
+      width: 35,
+      height: 35,
+      name: '笔记亏损标',
+      type: 'flags',
+      data: [],
+      onSeries: 'dataseries',
+      shape: 'diamond',
+      lineWidth: 2,
+      color: 'green',
+      style: {
+        color: 'green',
+        fontSize: 14
+      },
+      events: {
+        click: function (e) {
+        }
+      }
+    },
+    {
+      // write notes - show notes
+      // width: 100,
+      // height: 16,
+      name: '笔记日记标',
+      type: 'flags',
+      data: [],
+      onSeries: 'dataseries',
+      shape: 'squarebin',
+      lineWidth: 2,
+      color: 'black',
+      style: {
+        color: 'black',
+        fontSize: 14
+      },
+      events: {
+        click: function (e) {
+        }
+      }
     }
   ]
 });
@@ -893,8 +989,11 @@ const currDynValue = ref(null)
 const minPriceVal = ref(0)
 const maxPriceVal = ref(0)
 const priceDistance = ref(0)
+const inc_earn_perc = ref(false)
+const inc_comments = ref(false)
 
 watch(currDynValue, () => {
+
   if (!currDynValue.value) {
     return
   }
@@ -906,6 +1005,9 @@ watch(currDynValue, () => {
   chartOptions.value['series'][5]['data'] = []
   chartOptions.value['series'][6]['data'] = []
   chartOptions.value['series'][7]['data'] = []
+  chartOptions.value['series'][8]['data'] = []
+  chartOptions.value['series'][9]['data'] = []
+  chartOptions.value['series'][10]['data'] = []
 
   let _price_arr = []
   // price list 
@@ -989,6 +1091,125 @@ watch(currDynValue, () => {
       })
     })
   }
+
+  // write note earn positive
+  if (inc_earn_perc.value) {
+    if (noteReportObjs.value && noteReportObjs.value.hasOwnProperty(currDynValue.value['fund_id'])) {
+      let _note_objs = noteReportObjs.value[currDynValue.value['fund_id']]['note_objs']
+      if (_note_objs.length > 0) {
+        _note_objs.forEach(element => {
+          if (element['perc_val'] >= 0) {
+            let _timestamp = Date.parse(element['date_str'])
+            chartOptions.value['series'][8]['data'].push({
+              x: _timestamp,
+              title: element['perc_str']
+            })
+          }
+        })
+      }
+    }
+  }
+
+  // write note earn negative
+  if (inc_earn_perc.value) {
+    if (noteReportObjs.value && noteReportObjs.value.hasOwnProperty(currDynValue.value['fund_id'])) {
+      let _note_objs = noteReportObjs.value[currDynValue.value['fund_id']]['note_objs']
+      if (_note_objs.length > 0) {
+        _note_objs.forEach(element => {
+          if (element['perc_val'] < 0 && element['perc_val'] > -90) {
+            let _timestamp = Date.parse(element['date_str'])
+            chartOptions.value['series'][9]['data'].push({
+              x: _timestamp,
+              title: element['perc_str']
+            })
+          }
+        })
+      }
+    }
+  }
+
+  // write note earn negative
+  if (inc_comments.value) {
+    if (noteReportObjs.value && noteReportObjs.value.hasOwnProperty(currDynValue.value['fund_id'])) {
+      let _note_objs = noteReportObjs.value[currDynValue.value['fund_id']]['note_objs']
+      if (_note_objs.length > 0) {
+        _note_objs.forEach(element => {
+          let _timestamp = Date.parse(element['date_str'])
+          chartOptions.value['series'][10]['data'].push({
+            x: _timestamp,
+            title: element['comments']
+          })
+        })
+      }
+    }
+  }
+
+  backup_fund_id.value = currDynValue.value['fund_id']
+
+}, {
+  deep: true
+})
+
+watch([inc_earn_perc, inc_comments], () => {
+  if (!currDynValue.value) {
+    return
+  }
+
+  chartOptions.value['series'][8]['data'] = []
+  chartOptions.value['series'][9]['data'] = []
+  chartOptions.value['series'][10]['data'] = []
+
+  // write note earn positive
+  if (inc_earn_perc.value) {
+    if (noteReportObjs.value && noteReportObjs.value.hasOwnProperty(currDynValue.value['fund_id'])) {
+      let _note_objs = noteReportObjs.value[currDynValue.value['fund_id']]['note_objs']
+      if (_note_objs.length > 0) {
+        _note_objs.forEach(element => {
+          if (element['perc_val'] >= 0) {
+            let _timestamp = Date.parse(element['date_str'])
+            chartOptions.value['series'][8]['data'].push({
+              x: _timestamp,
+              title: element['perc_str']
+            })
+          }
+        })
+      }
+    }
+  }
+
+  // write note earn negative
+  if (inc_earn_perc.value) {
+    if (noteReportObjs.value && noteReportObjs.value.hasOwnProperty(currDynValue.value['fund_id'])) {
+      let _note_objs = noteReportObjs.value[currDynValue.value['fund_id']]['note_objs']
+      if (_note_objs.length > 0) {
+        _note_objs.forEach(element => {
+          if (element['perc_val'] < 0 && element['perc_val'] > -90) {
+            let _timestamp = Date.parse(element['date_str'])
+            chartOptions.value['series'][9]['data'].push({
+              x: _timestamp,
+              title: element['perc_str']
+            })
+          }
+        })
+      }
+    }
+  }
+
+  // write note earn negative
+  if (inc_comments.value) {
+    if (noteReportObjs.value && noteReportObjs.value.hasOwnProperty(currDynValue.value['fund_id'])) {
+      let _note_objs = noteReportObjs.value[currDynValue.value['fund_id']]['note_objs']
+      if (_note_objs.length > 0) {
+        _note_objs.forEach(element => {
+          let _timestamp = Date.parse(element['date_str'])
+          chartOptions.value['series'][10]['data'].push({
+            x: _timestamp,
+            title: element['comments']
+          })
+        })
+      }
+    }
+  }
 }, {
   deep: true
 })
@@ -1045,9 +1266,9 @@ function removeAscDateByStr(_date_str, oneRow, _equal = true, _to_right = true) 
 
 function removeAscDate(oneRow) {
   if (!oneRow['remove_asc_or_desc_or_sold_date'] || !currDynValue.value) {
-    return
+    return false
   }
-  removeAscDateByStr(oneRow['remove_asc_or_desc_or_sold_date'].trim(), oneRow)
+  return removeAscDateByStr(oneRow['remove_asc_or_desc_or_sold_date'].trim(), oneRow)
 }
 
 function removeDescDateByStr(_date_str, oneRow, _equal = true, _to_right = true) {
@@ -1066,9 +1287,9 @@ function removeDescDateByStr(_date_str, oneRow, _equal = true, _to_right = true)
 
 function removeDescDate(oneRow) {
   if (!oneRow['remove_asc_or_desc_or_sold_date'] || !currDynValue.value) {
-    return
+    return false
   }
-  removeDescDateByStr(oneRow['remove_asc_or_desc_or_sold_date'].trim(), oneRow)
+  return removeDescDateByStr(oneRow['remove_asc_or_desc_or_sold_date'].trim(), oneRow)
 }
 
 function removeSoldDateByStr(_date_str, oneRow) {
@@ -1095,26 +1316,35 @@ function removeSoldDateByStr(_date_str, oneRow) {
   soldHistoryWrapper_reverse.splice(_idx, 1)
 
   oneRow['statistics']['sold_times'] -= 1
+  return true
 }
 
 function removeSoldDate(oneRow) {
   if (!oneRow['remove_asc_or_desc_or_sold_date'] || !currDynValue.value) {
-    return
+    return false
   }
-  removeSoldDateByStr(oneRow['remove_asc_or_desc_or_sold_date'].trim(), oneRow)
+  return removeSoldDateByStr(oneRow['remove_asc_or_desc_or_sold_date'].trim(), oneRow)
 }
 
 function remove_Asc_or_Desc_or_Sold_Date(oneRow) {
   if (!oneRow['remove_date_type']) {
     return;
   }
+
+  let result = false
   if (oneRow['remove_date_type'] === 'asc') {
-    removeAscDate(oneRow)
+    result = removeAscDate(oneRow)
   } else if (oneRow['remove_date_type'] === 'desc') {
-    removeDescDate(oneRow)
+    result = removeDescDate(oneRow)
   } else if (oneRow['remove_date_type'] === 'sold') {
-    removeSoldDate(oneRow)
+    result = removeSoldDate(oneRow)
   }
+
+  if (result) {
+    backup_fund_id.value = oneRow['fund_id']
+    removeDate4Report(oneRow, oneRow['remove_date_type'])
+  }
+
   oneRow['remove_asc_or_desc_or_sold_date'] = ""
   oneRow['remove_date_type'] = ''
 }
@@ -1387,12 +1617,23 @@ function scrollViewBySelection() {
 }
 
 function genReport(oneRow) {
+  if (dynRecordObjs_full && dynRecordObjs_full.value && dynRecordObjs_full.value.length > 0) {
+    dynRecordObjs_full.value.forEach(elem => {
+      elem['currSelected'] = false
+    })
+  }
+  if (dynRecordObjs_latest && dynRecordObjs_latest.value && dynRecordObjs_latest.value.length > 0) {
+    dynRecordObjs_latest.value.forEach(elem => {
+      elem['currSelected'] = false
+    })
+  }
   if (currDynValue.value === null ||
   currDynValue.value['fund_id'] != oneRow['fund_id']) {
     yAxisTopAdjTimes.value = 0;
     yAxisBtmAdjTimes.value = 0;
     picHeightAdjVal.value = 400;
     currDynValue.value = oneRow;
+    currDynValue.value['currSelected'] = true
   } else {
     currDynValue.value = null
   }

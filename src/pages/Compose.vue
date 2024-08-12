@@ -230,17 +230,33 @@
                     <span style="">{{ oneRow.fund_id }}&nbsp;</span>
                   </template>
                 </div>
-                <div>{{ oneRow.fund_name }}&nbsp;
-                  <template v-if="oneRow['last_sold_date']">
-                    <a v-bind:href="baseUrl4Report + oneRow['fund_id']" _target="blank" style="text-decoration: none" title="看走势">
-                      <span style="color:red;font-weight: bold;font-size:1.1rem;">售:&nbsp;{{ oneRow['last_sold_date'] }}
-                        <template v-if="oneRow.hasOwnProperty('last_sold_days') && oneRow['last_sold_days'] != null">
-                        &nbsp;|&nbsp;{{ oneRow['last_sold_days'] }}日
-                        </template>
-                      </span>
-                    </a>
-                  </template>
-                </div>
+                <template v-if="noteObjs[oneRow['fund_id']] && noteObjs[oneRow['fund_id']]['full_comments'] && noteObjs[oneRow['fund_id']]['full_comments'].length > 0">
+                  <div style="position: relative;--tooltip-left:0rem;--tooltip-top:1.5rem;"
+                       v-bind:data-title="noteObjs[oneRow['fund_id']]['full_comments']" data-float-no-pos-sm="">{{ oneRow.fund_name }}&nbsp;
+                    <template v-if="oneRow['last_sold_date']">
+                      <a v-bind:href="baseUrl4Report + oneRow['fund_id']" _target="blank" style="text-decoration: none" title="看走势">
+                        <span style="color:red;font-weight: bold;font-size:1.1rem;">售:&nbsp;{{ oneRow['last_sold_date'] }}
+                          <template v-if="oneRow.hasOwnProperty('last_sold_days') && oneRow['last_sold_days'] != null">
+                          &nbsp;|&nbsp;{{ oneRow['last_sold_days'] }}日
+                          </template>
+                        </span>
+                      </a>
+                    </template>
+                  </div>
+                </template>
+                <template v-else>
+                  <div>{{ oneRow.fund_name }}&nbsp;
+                    <template v-if="oneRow['last_sold_date']">
+                      <a v-bind:href="baseUrl4Report + oneRow['fund_id']" _target="blank" style="text-decoration: none" title="看走势">
+                        <span style="color:red;font-weight: bold;font-size:1.1rem;">售:&nbsp;{{ oneRow['last_sold_date'] }}
+                          <template v-if="oneRow.hasOwnProperty('last_sold_days') && oneRow['last_sold_days'] != null">
+                          &nbsp;|&nbsp;{{ oneRow['last_sold_days'] }}日
+                          </template>
+                        </span>
+                      </a>
+                    </template>
+                  </div>
+                </template>
               </td>
               <td colspan="2" v-bind:class="{ sel_row: oneRow['currSelected'] }">
                 <template v-if="oneRow['kbObj']">
@@ -317,16 +333,20 @@
                   </div>
                 </template>
                 <template v-if="oneRow.hasOwnProperty('money') && oneRow['money'] > 0 && (!buyout_future_objs.hasOwnProperty(oneRow['fund_id']) || !buyout_future_objs[oneRow['fund_id']])">
-                  <button type="button" class="btn btn-secondary" style="font-size: 0.8rem;"
+                  <button type="button" class="btn btn-secondary" style="font-size: 0.8rem; margin-right: 0.5rem;"
                           @click.stop="removeFixedFund4TodayUi(oneRow['fund_id'], oneRow['fund_name'])">
                     撤今日
                   </button>
                 </template>
                 <template v-else-if="oneRow.hasOwnProperty('money') && oneRow['money'] > 0 && (buyout_future_objs.hasOwnProperty(oneRow['fund_id']) && buyout_future_objs[oneRow['fund_id']] != null)">
-                  <span class="badge bg-success text-bg-success big_badge" style="">
+                  <span class="badge bg-success text-bg-success big_badge" style="margin-right: 0.5rem;">
                     已撤销
                   </span>
                 </template>
+                <button type="button" class="btn btn-primary" style="font-size: 0.8rem;"
+                        @click.stop="switchWriteNote(oneRow)">
+                  笔记
+                </button>
               </td>
               <td style="line-height: 2rem;" v-bind:class="{ sel_row: oneRow['currSelected'] }">
                 <div>
@@ -453,6 +473,60 @@
                 </template>
               </td>
             </tr>
+            <tr v-if="oneRow['show_write_note']">
+              <td colspan="9" style="background-color: lightblue;">
+                <div style="display: flex;flex-direction: row;flex-wrap: nowrap;column-gap: 0.5rem;align-items: center;">
+                  <div style="display: inline-block;">日期:</div>
+                  <input type="text" class=""
+                         style="display: inline-block;border-radius:5px;border-width: 0;outline:none;width:6.5rem;"
+                         v-model="oneRow['write_note_date']">
+                  <div style="display: inline-block;">盈利:</div>
+                  <input type="text" class=""
+                         style="display: inline-block;border-radius:5px;border-width: 0;outline:none;width:4rem;"
+                         v-model="oneRow['write_note_perc']">
+                  <div style="display: inline-block;">日记:</div>
+                  <input type="text" class=""
+                         style="display: inline-block;border-radius:5px;border-width: 0;outline:none;flex-grow:0.9;"
+                         v-model="oneRow['write_note_comments']">
+                  <button type="button" class="btn btn-warning"
+                          style="font-size:0.9rem;display:inline-block;width:6rem;"
+                          v-bind:disabled="
+                          (!oneRow['write_note_date'] || oneRow['write_note_date'].trim() == '')
+                       || (
+                           (!oneRow['write_note_perc'] || oneRow['write_note_perc'].trim() == '')
+                           &&(!oneRow['write_note_comments'] || oneRow['write_note_comments'].trim() == '')
+                          )
+                       || (oneRow['write_note_perc'].trim() != ''
+                           && oneRow['write_note_perc'].indexOf('%') == -1
+                          )
+                          "
+                          @click="updateFundNotes(oneRow);">
+                    保存
+                  </button>
+                  <button type="button" class="btn btn-danger"
+                          style="font-size:0.9rem;display:inline-block;width:6rem;"
+                          v-bind:disabled="!oneRow['write_note_date'] || oneRow['write_note_date'].trim() == ''"
+                          @click="removeFundNotes(oneRow);">
+                    删除
+                  </button>
+                  <template v-if="oneRow['note_objs'].length > 0">
+                    <div style="display:inline-block;flex-grow:0.1;color:darkgreen;">共({{oneRow['note_objs'].length}})条</div>
+                    <button type="button" class="btn btn-secondary"
+                            style="font-size:0.8rem;display:inline-block;width:4rem;"
+                            v-bind:disabled="oneRow['curr_note_idx'] <= 0"
+                            @click="navigateNote(oneRow, true)">
+                      前向
+                    </button>
+                    <button type="button" class="btn btn-secondary"
+                            style="font-size:0.8rem;display:inline-block;width:4rem;"
+                            v-bind:disabled="oneRow['curr_note_idx'] >= oneRow['note_objs'].length - 1"
+                            @click="navigateNote(oneRow, false)">
+                      后向
+                    </button>
+                  </template>
+                </div>
+              </td>
+            </tr>
           </template>
           <template v-else>
             <tr v-bind:id="oneRow.fund_id" style="cursor: pointer;" @click="selOrDesRow(oneRow)"
@@ -494,22 +568,43 @@
                     </span>
                   </template>
                 </div>
-                <div>{{ oneRow.fund_name }}&nbsp;
-                  <template v-if="oneRow['kbObj']">
-                    <span style="font-size: 1rem; font-style: italic;text-decoration: underline;">
-                      {{ oneRow.kbObj.statistics.fund_perc_len }}
-                    </span>
-                  </template>
-                  <template v-if="oneRow['last_sold_date']">
-                    <a v-bind:href="baseUrl4Report + oneRow['fund_id']" _target="blank" style="text-decoration: none" title="看走势">
-                      <span style="color:red;font-weight: bold;font-size:1.1rem;">&nbsp;&nbsp;售:&nbsp;{{ oneRow['last_sold_date'] }}
-                        <template v-if="oneRow.hasOwnProperty('last_sold_days') && oneRow['last_sold_days'] != null">
-                        &nbsp;|&nbsp;{{ oneRow['last_sold_days'] }}日
-                        </template>
+                <template v-if="noteObjs[oneRow['fund_id']] && noteObjs[oneRow['fund_id']]['full_comments'] && noteObjs[oneRow['fund_id']]['full_comments'].length > 0">
+                  <div style="position: relative;--tooltip-left:0rem;--tooltip-top:1.5rem;"
+                       v-bind:data-title="noteObjs[oneRow['fund_id']]['full_comments']" data-float-no-pos-sm="">{{ oneRow.fund_name }}&nbsp;
+                    <template v-if="oneRow['kbObj']">
+                      <span style="font-size: 1rem; font-style: italic;text-decoration: underline;">
+                        {{ oneRow.kbObj.statistics.fund_perc_len }}
                       </span>
-                    </a>
-                  </template>
-                </div>
+                    </template>
+                    <template v-if="oneRow['last_sold_date']">
+                      <a v-bind:href="baseUrl4Report + oneRow['fund_id']" _target="blank" style="text-decoration: none" title="看走势">
+                        <span style="color:red;font-weight: bold;font-size:1.1rem;">&nbsp;&nbsp;售:&nbsp;{{ oneRow['last_sold_date'] }}
+                          <template v-if="oneRow.hasOwnProperty('last_sold_days') && oneRow['last_sold_days'] != null">
+                          &nbsp;|&nbsp;{{ oneRow['last_sold_days'] }}日
+                          </template>
+                        </span>
+                      </a>
+                    </template>
+                  </div>
+                </template>
+                <template v-else>
+                  <div>{{ oneRow.fund_name }}&nbsp;
+                    <template v-if="oneRow['kbObj']">
+                      <span style="font-size: 1rem; font-style: italic;text-decoration: underline;">
+                        {{ oneRow.kbObj.statistics.fund_perc_len }}
+                      </span>
+                    </template>
+                    <template v-if="oneRow['last_sold_date']">
+                      <a v-bind:href="baseUrl4Report + oneRow['fund_id']" _target="blank" style="text-decoration: none" title="看走势">
+                        <span style="color:red;font-weight: bold;font-size:1.1rem;">&nbsp;&nbsp;售:&nbsp;{{ oneRow['last_sold_date'] }}
+                          <template v-if="oneRow.hasOwnProperty('last_sold_days') && oneRow['last_sold_days'] != null">
+                          &nbsp;|&nbsp;{{ oneRow['last_sold_days'] }}日
+                          </template>
+                        </span>
+                      </a>
+                    </template>
+                  </div>
+                </template>
                 <div>
                   <template v-if="oneRow['kbObj']">
                     <span v-bind:class="getCardStyle(oneRow.kbObj.statistics.day_200_thres)">&nbsp;</span>
@@ -811,16 +906,20 @@
                   </div>
                 </template>
                 <template v-if="oneRow.hasOwnProperty('money') && oneRow['money'] > 0 && (!buyout_future_objs.hasOwnProperty(oneRow['fund_id']) || !buyout_future_objs[oneRow['fund_id']])">
-                  <button type="button" class="btn btn-secondary" style="font-size: 0.8rem;"
+                  <button type="button" class="btn btn-secondary" style="font-size: 0.8rem; margin-right: 0.5rem;"
                           @click.stop="removeFixedFund4TodayUi(oneRow['fund_id'], oneRow['fund_name'])">
                     撤今日
                   </button>
                 </template>
                 <template v-else-if="oneRow.hasOwnProperty('money') && oneRow['money'] > 0 && (buyout_future_objs.hasOwnProperty(oneRow['fund_id']) && buyout_future_objs[oneRow['fund_id']] != null)">
-                  <span class="badge bg-success text-bg-success big_badge" style="">
+                  <span class="badge bg-success text-bg-success big_badge" style="margin-right: 0.5rem;">
                     已撤销
                   </span>
                 </template>
+                <button type="button" class="btn btn-primary" style="font-size: 0.8rem;"
+                        @click.stop="switchWriteNote(oneRow)">
+                  笔记
+                </button>
               </td>
               <td style="line-height: 2rem;" v-bind:class="{ sel_row: oneRow['currSelected'] }">
                 <template v-if="oneRow['plan_buyin_money']">
@@ -960,6 +1059,60 @@
               <td colspan="9" style="background-color: lightblue;">
                 <img v-bind:src="'../wav-report/' + oneRow['fund_id'] + '.png'"
                   style="width: 100%; height: 100%; max-width: 100%;" class="img-fluid" alt="Responsive image">
+              </td>
+            </tr>
+            <tr v-if="oneRow['show_write_note']">
+              <td colspan="9" style="background-color: lightblue;">
+                <div style="display: flex;flex-direction: row;flex-wrap: nowrap;column-gap: 0.5rem;align-items: center;">
+                  <div style="display: inline-block;">日期:</div>
+                  <input type="text" class=""
+                         style="display: inline-block;border-radius:5px;border-width: 0;outline:none;width:6.5rem;"
+                         v-model="oneRow['write_note_date']">
+                  <div style="display: inline-block;">盈利:</div>
+                  <input type="text" class=""
+                         style="display: inline-block;border-radius:5px;border-width: 0;outline:none;width:4rem;"
+                         v-model="oneRow['write_note_perc']">
+                  <div style="display: inline-block;">日记:</div>
+                  <input type="text" class=""
+                         style="display: inline-block;border-radius:5px;border-width: 0;outline:none;flex-grow:0.9;"
+                         v-model="oneRow['write_note_comments']">
+                  <button type="button" class="btn btn-warning"
+                          style="font-size:0.9rem;display:inline-block;width:6rem;"
+                          v-bind:disabled="
+                          (!oneRow['write_note_date'] || oneRow['write_note_date'].trim() == '')
+                       || (
+                           (!oneRow['write_note_perc'] || oneRow['write_note_perc'].trim() == '')
+                           &&(!oneRow['write_note_comments'] || oneRow['write_note_comments'].trim() == '')
+                          )
+                       || (oneRow['write_note_perc'].trim() != ''
+                           && oneRow['write_note_perc'].indexOf('%') == -1
+                          )
+                          "
+                          @click="updateFundNotes(oneRow);">
+                    保存
+                  </button>
+                  <button type="button" class="btn btn-danger"
+                          style="font-size:0.9rem;display:inline-block;width:6rem;"
+                          v-bind:disabled="!oneRow['write_note_date'] || oneRow['write_note_date'].trim() == ''"
+                          @click="removeFundNotes(oneRow);">
+                    删除
+                  </button>
+                  <template v-if="oneRow['note_objs'].length > 0">
+                    <div style="display:inline-block;flex-grow:0.1;color:darkgreen;">共({{oneRow['note_objs'].length}})条</div>
+                    <button type="button" class="btn btn-secondary"
+                            style="font-size:0.8rem;display:inline-block;width:4rem;"
+                            v-bind:disabled="oneRow['curr_note_idx'] <= 0"
+                            @click="navigateNote(oneRow, true)">
+                      前向
+                    </button>
+                    <button type="button" class="btn btn-secondary"
+                            style="font-size:0.8rem;display:inline-block;width:4rem;"
+                            v-bind:disabled="oneRow['curr_note_idx'] >= oneRow['note_objs'].length - 1"
+                            @click="navigateNote(oneRow, false)">
+                      后向
+                    </button>
+                  </template>
+                </div>
               </td>
             </tr>
           </template>
@@ -1199,7 +1352,7 @@ import {
   getPosColor,
   getNegColor,
   getHitStyle,
-  get_suggestion_by_wav
+  get_suggestion_by_wav, getTodayStr
 } from "../lib/commonUtils.js"
 import {onMounted, computed, ref, watch, nextTick, onUnmounted, onActivated} from "vue";
 import { storeToRefs } from 'pinia'
@@ -1211,8 +1364,8 @@ import { useRoute } from 'vue-router'
 
 const route = useRoute()
 const composeStore = useComposeStore()
-const { composeObjs, fixedHoldObjs, totMoney, totPositiveNum, totPoleNum, totEarnMoney, totEarnRate, totSetBuy, totPlanBuy, diffBuySet } = storeToRefs(composeStore)
-const { getAllCompose, setComposeProperty, setComposeSoldDate, getComposeFixedHold, addOrRemoveCompose } = composeStore
+const { composeObjs, fixedHoldObjs, totMoney, totPositiveNum, totPoleNum, totEarnMoney, totEarnRate, totSetBuy, totPlanBuy, diffBuySet, noteObjs } = storeToRefs(composeStore)
+const { getAllCompose, setComposeProperty, setComposeSoldDate, getComposeFixedHold, addOrRemoveCompose, getFundNotes4Edit, updateFundNotes, removeFundNotes } = composeStore
 const buyInOutStore = useBuyInOutStore()
 const { buyoutRecords, wav_reports, buyout_future_objs, contStartStopObj} = storeToRefs(buyInOutStore)
 const { getAllBuyoutRecords, soldComposeFixedHold, buyOutFixedFund, calculatePlanMoney, buyOutFixedFundOfToday, getAllBuyoutFutureRecords } = buyInOutStore
@@ -1273,6 +1426,11 @@ watch([composeObjs, compose_name, fixedHoldObjs, buyoutRecords, show4SoldOnly, s
       if (elem['compose_objs'] && elem['compose_objs'].length > 0) {
         elem['compose_objs'].forEach(_obj => {
           _obj['show_temp_quant_tip'] = false
+          _obj['write_note_date'] = getTodayStr()
+          _obj['write_note_perc'] = ''
+          _obj['write_note_comments'] = ''
+          _obj['note_objs'] = []
+          _obj['curr_note_idx'] = -1
         })
       }
     })
@@ -1442,8 +1600,21 @@ watch([composeObjs, compose_name, fixedHoldObjs, buyoutRecords, show4SoldOnly, s
 
 }, { immediate: true })
 
+watch([composeViewObjs, noteObjs], () => {
+  if (composeViewObjs.value.length > 0 && noteObjs.value) {
+    composeViewObjs.value.forEach(elem => {
+      if (noteObjs.value.hasOwnProperty(elem['fund_id'])) {
+        if (noteObjs.value[elem['fund_id']].hasOwnProperty('note_objs')) {
+          elem['note_objs'] = noteObjs.value[elem['fund_id']]['note_objs']
+        }
+      }
+    })
+  }
+}, { immediate: true })
+
 getAllBuyoutRecords()
 getAllBuyoutFutureRecords()
+getFundNotes4Edit()
 
 /*
 * sold by bulk
@@ -1949,6 +2120,64 @@ function switchWavDisp(oneRowObj) {
   }
 }
 
+function switchWriteNote(oneRowObj) {
+  alignWriteNote(oneRowObj)
+  if (!oneRowObj.hasOwnProperty('show_write_note')) {
+    oneRowObj['show_write_note'] = true;
+  } else {
+    oneRowObj['show_write_note'] = !oneRowObj['show_write_note'];
+  }
+}
+
+function alignWriteNote(oneRowObj) {
+  if (noteObjs.value && noteObjs.value.hasOwnProperty(oneRowObj['fund_id'])) {
+    oneRowObj['note_objs'] = noteObjs.value[oneRowObj['fund_id']]['note_objs']
+  } else {
+    oneRowObj['note_objs'] = []
+  }
+  let _today_str = getTodayStr()
+  if (oneRowObj['note_objs'].length > 0) {
+    let _last_note = oneRowObj['note_objs'][oneRowObj['note_objs'].length - 1]
+    if (_last_note['date_str'] == _today_str) {
+      oneRowObj['write_note_date'] = _last_note['date_str']
+      oneRowObj['write_note_perc'] = _last_note['perc_str']
+      oneRowObj['write_note_comments'] = _last_note['comments']
+      oneRowObj['curr_note_idx'] = oneRowObj['note_objs'].length - 1
+    } else {
+      oneRowObj['write_note_date'] = getTodayStr()
+      oneRowObj['write_note_perc'] = ''
+      oneRowObj['write_note_comments'] = ''
+      oneRowObj['curr_note_idx'] = -1
+    }
+  } else {
+    oneRowObj['write_note_date'] = getTodayStr()
+    oneRowObj['write_note_perc'] = ''
+    oneRowObj['write_note_comments'] = ''
+    oneRowObj['curr_note_idx'] = -1
+  }
+}
+
+function navigateNote(oneRowObj, bPrev=true) {
+  if (!oneRowObj['note_objs'] || oneRowObj['note_objs'].length == 0) {
+    return
+  }
+  if (bPrev) {
+    oneRowObj['curr_note_idx'] -= 1
+    if (oneRowObj['curr_note_idx'] <= 0) {
+      oneRowObj['curr_note_idx'] = 0
+    }
+  } else {
+    oneRowObj['curr_note_idx'] += 1
+    if (oneRowObj['curr_note_idx'] >= oneRowObj['note_objs'].length - 1) {
+      oneRowObj['curr_note_idx'] = oneRowObj['note_objs'].length - 1
+    }
+  }
+  let _one_note = oneRowObj['note_objs'][oneRowObj['curr_note_idx']]
+  oneRowObj['write_note_date'] = _one_note['date_str']
+  oneRowObj['write_note_perc'] = _one_note['perc_str']
+  oneRowObj['write_note_comments'] = _one_note['comments']
+}
+
 function selOrDesRow(oneRowObj) {
   if (oneRowObj.hasOwnProperty('currSelected')) {
     oneRowObj['currSelected'] = !oneRowObj['currSelected']
@@ -2273,5 +2502,20 @@ span[data-float-no-pos]:hover::after, a[data-float-no-pos]:hover::after, div[dat
     font-weight: bold;
     color: red;
     font-family: arial;
-  } 
+  }
+
+span[data-float-no-pos-sm]:hover::after, div[data-float-no-pos-sm]:hover::after {
+  content: attr(data-title);
+  position: absolute;
+  top: var(--tooltip-top, auto);
+  left: var(--tooltip-left, auto);
+  z-index: 100;
+  background-color: lightgrey;
+  padding:0.2rem 0.5rem 0.1rem 0.5rem;
+  font-size: 0.8rem;
+  font-weight: bold;
+  color: darkblue;
+  font-family: arial;
+  white-space: pre;
+}
 </style>

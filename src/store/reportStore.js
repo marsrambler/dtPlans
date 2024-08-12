@@ -9,11 +9,15 @@ import {getTodayStr} from "../lib/commonUtils.js";
 export const useReportStore = defineStore('report-store', () => {
     // state
     const dynRecordObjs = ref([])
+    const dynRecordObjs_full = ref([])
+    const dynRecordObjs_latest = ref([])
+    const onlyShowLatest = ref(false)
     const retroFundObj = ref(null)
     const fixedFundObjs = ref([])
     const fixedHoldObjs = ref([])
     const fixed_status_data_obj = ref(null)
     const indexRtRateObjs = ref(null)
+    const removedDateObjs = ref([])
 
     const composeStore = useComposeStore()
     const {composeObjs} = storeToRefs(composeStore)
@@ -41,8 +45,19 @@ export const useReportStore = defineStore('report-store', () => {
         try {
             const response = await axiosInst.get("dt-plans/api/get-fund-records-rate/" + _refresh)
             if (response.status === 200) {
-                dynRecordObjs.value = await response.data
-                dynRecordObjs.value.forEach(elem => {
+                const _response = await response.data
+                dynRecordObjs_full.value = _response['full']
+                dynRecordObjs_latest.value = _response['latest']
+
+                dynRecordObjs_full.value.forEach(elem => {
+                    if (elem['soldHistoryWrapper'] && elem['soldHistoryWrapper'].length > 0) {
+                        let _soldHistoryWrapper = [...elem['soldHistoryWrapper']] //JSON.parse(JSON.stringify(elem['soldHistoryWrapper']))
+                        elem['soldHistoryWrapper_reverse'] = _soldHistoryWrapper.reverse()
+                    } else {
+                        elem['soldHistoryWrapper_reverse'] = []
+                    }
+                })
+                dynRecordObjs_latest.value.forEach(elem => {
                     if (elem['soldHistoryWrapper'] && elem['soldHistoryWrapper'].length > 0) {
                         let _soldHistoryWrapper = [...elem['soldHistoryWrapper']] //JSON.parse(JSON.stringify(elem['soldHistoryWrapper']))
                         elem['soldHistoryWrapper_reverse'] = _soldHistoryWrapper.reverse()
@@ -52,11 +67,19 @@ export const useReportStore = defineStore('report-store', () => {
                 })
             } else {
                 console.error("axios get records and rates failed: ", response)
-                dynRecordObjs.value = []
+                dynRecordObjs_full.value = []
+                dynRecordObjs_latest.value = []
             }
         } catch (error) {
             console.log("axios get records and rates failed: ", error)
-            dynRecordObjs.value = []
+            dynRecordObjs_full.value = []
+            dynRecordObjs_latest.value = []
+        }
+
+        if (onlyShowLatest.value) {
+            dynRecordObjs.value = dynRecordObjs_latest.value
+        } else {
+            dynRecordObjs.value = dynRecordObjs_full.value
         }
     }
 
@@ -181,7 +204,49 @@ export const useReportStore = defineStore('report-store', () => {
         }
     }
 
-    watch([dynRecordObjs, retroFundObj, fixedFundObjs, composeObjs, fixedHoldObjs, fixed_status_data_obj, indexRtRateObjs], () => {
+    async function removeDate4Report(oneRow, remove_date_type) {
+        try {
+            const response = await axiosInst.post("dt-plans/api/remove-date-4-report", {
+                'fund_id': oneRow['fund_id'],
+                'fund_name': oneRow['fund_name'],
+                'remove_date': oneRow['remove_asc_or_desc_or_sold_date'],
+                'remove_date_type': remove_date_type
+            })
+            if (response.status === 200) {
+                useApiStore().pop_alert_msg("删除指定日期成功: " + oneRow['fund_name'])
+                await getRecordsAndRates('no')
+            } else {
+                console.error("axios remove date for report failed: ", response)
+            }
+        } catch (error) {
+            console.log("axios remove date for report failed: ", error)
+        }
+    }
+
+    async function getRemovedDate4Report() {
+        try {
+            const response = await axiosInst.get("dt-plans/api/get-removed-dates")
+            if (response.status == 200) {
+                removedDateObjs.value = await response.data;
+            } else {
+                console.error("axios get removed dates failed: ", response)
+                removedDateObjs.value = []
+            }
+        } catch (error) {
+            console.log("axios get removed dates error: ", error)
+            removedDateObjs.value = []
+        }
+    }
+
+    watch (onlyShowLatest, () => {
+        if (onlyShowLatest.value) {
+            dynRecordObjs.value = dynRecordObjs_latest.value
+        } else {
+            dynRecordObjs.value = dynRecordObjs_full.value
+        }
+    })
+
+    watch([dynRecordObjs, retroFundObj, fixedFundObjs, composeObjs, fixedHoldObjs, fixed_status_data_obj, indexRtRateObjs, removedDateObjs], () => {
         //console.log("watch in report store: ", dynRecordObjs.value, retroFundObj.value, fixedFundObjs.value, composeObjs.value, fixedHoldObjs.value, fixed_status_data_obj.value)
         if (!dynRecordObjs.value || dynRecordObjs.value.length === 0) {
             console.warn("*** reportStore *** bypass as dynRecordObjs is null")
@@ -204,6 +269,9 @@ export const useReportStore = defineStore('report-store', () => {
         } else if (!indexRtRateObjs.value) {
             console.warn("*** reportStore *** bypass as indexRtRateObjs is null")
             return
+        } else if (!removedDateObjs.value) {
+            console.warn("*** reportStore *** bypass as removedDateObjs is null")
+            return
         }
         console.log("*** reportStore *** dynRecordObjs: ", dynRecordObjs.value)
         console.log("*** reportStore *** retroFundObj: ", retroFundObj.value)
@@ -212,6 +280,7 @@ export const useReportStore = defineStore('report-store', () => {
         console.log("*** reportStore *** fixedHoldObjs: ", fixedHoldObjs.value)
         console.log("*** reportStore *** fixed_status_data_obj: ", fixed_status_data_obj.value)
         console.log("*** reportStore *** indexRtRateObjs: ", indexRtRateObjs.value)
+        console.log("*** reportStore *** removedDateObjs: ", removedDateObjs.value)
 
         dynRecordObjs.value.forEach(elem => {
             elem['show_summ_tip'] = false;
@@ -290,11 +359,15 @@ export const useReportStore = defineStore('report-store', () => {
 
     return {
         dynRecordObjs,
+        dynRecordObjs_full,
+        dynRecordObjs_latest,
+        onlyShowLatest,
         retroFundObj,
         fixedFundObjs,
         fixedHoldObjs,
         fixed_status_data_obj,
         indexRtRateObjs,
+        removedDateObjs,
         requireDynValues,
         getRecordsAndRates,
         getRetroFunds,
@@ -302,6 +375,8 @@ export const useReportStore = defineStore('report-store', () => {
         getAllComposeFixedHold,
         getBigPoolFixedHold,
         getIndexRtRate,
-        removeLocalDynvalue
+        removeLocalDynvalue,
+        removeDate4Report,
+        getRemovedDate4Report
     }
 });

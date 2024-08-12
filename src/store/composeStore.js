@@ -16,6 +16,8 @@ export const useComposeStore = defineStore('compose-store', () => {
     const totSetBuy = ref(0)
     const totPlanBuy = ref(0)
     const diffBuySet = ref(0)
+    const noteObjs = ref([])
+    const noteReportObjs = ref([])
 
     // action
     async function getAllCompose() {
@@ -112,6 +114,93 @@ export const useComposeStore = defineStore('compose-store', () => {
         }
     }
 
+    async function getFundNotes4Edit() {
+        try {
+            const response = await axiosInst.get("api/get-fund-notes/single")
+            if (response.status == 200) {
+                let _ret_objs = await response.data;
+                for (let _key in _ret_objs) {
+                    let full_comments = ''
+                    if (_ret_objs[_key].hasOwnProperty('note_objs') && _ret_objs[_key]['note_objs'].length > 0) {
+                        for (let idx = 0; idx < _ret_objs[_key]['note_objs'].length; idx++) {
+                            full_comments += _ret_objs[_key]['note_objs'][idx]['date_str'] + " " + _ret_objs[_key]['note_objs'][idx]['perc_str'] + " " + _ret_objs[_key]['note_objs'][idx]['comments']
+                            if (idx != _ret_objs[_key]['note_objs'].length - 1) {
+                                full_comments += " &#10;"
+                            }
+                        }
+                    }
+                    const div = document.createElement('div')
+                    div.innerHTML = full_comments;
+                    _ret_objs[_key]['full_comments'] = div.innerHTML;
+                }
+                noteObjs.value = _ret_objs;
+            } else {
+                console.error("axios get all writing notes failed: ", response)
+                noteObjs.value = []
+            }
+        } catch (error) {
+            console.log("axios get all writing notes error: ", error)
+            noteObjs.value = []
+        }
+    }
+
+    async function getFundNotes4Report() {
+        try {
+            const response = await axiosInst.get("api/get-fund-notes/all")
+            if (response.status == 200) {
+                noteReportObjs.value = await response.data;
+            } else {
+                console.error("axios get all combined notes failed: ", response)
+                noteReportObjs.value = []
+            }
+        } catch (error) {
+            console.log("axios get all combined notes error: ", error)
+            noteReportObjs.value = []
+        }
+    }
+
+    async function updateFundNotes(rowObj) {
+        try {
+            const response = await axiosInst.post("api/add-or-update-fund-notes", {
+                'fund_id': rowObj['fund_id'],
+                'fund_name': rowObj['fund_name'],
+                'write_note_date': rowObj['write_note_date'],
+                'write_note_perc': (!rowObj['write_note_perc'] || rowObj['write_note_perc'].trim() == '')?'-999%' : rowObj['write_note_perc'],
+                'write_note_comments': rowObj['write_note_comments']
+            })
+            if (response.status == 200) {
+                // await response.data
+                useApiStore().pop_alert_msg("写入日记成功: " + rowObj['fund_name'])
+                await getFundNotes4Edit()
+                await getFundNotes4Report()
+            } else {
+                console.error("axios add or update note failed: ", response)
+            }
+        } catch (error) {
+            console.log("axios add or update note error: ", error)
+        }
+    }
+
+    async function removeFundNotes(rowObj) {
+        try {
+            const response = await axiosInst.post("api/remove-fund-notes", {
+                'fund_id': rowObj['fund_id'],
+                'fund_name': rowObj['fund_name'],
+                'write_note_date': rowObj['write_note_date']
+            })
+            if (response.status == 200) {
+                // await response.data
+                useApiStore().pop_alert_msg("删除日记成功: " + rowObj['fund_name'])
+                await getFundNotes4Edit()
+                await getFundNotes4Report()
+            } else {
+                console.error("axios remove note failed: ", response)
+            }
+        } catch (error) {
+            console.log("axios remove note error: ", error)
+        }
+    }
+
     return {
         composeObjs,
         fixedHoldObjs,
@@ -123,10 +212,16 @@ export const useComposeStore = defineStore('compose-store', () => {
         totSetBuy,
         totPlanBuy,
         diffBuySet,
+        noteObjs,
+        noteReportObjs,
         getAllCompose,
         addOrRemoveCompose,
         setComposeProperty,
         setComposeSoldDate,
-        getComposeFixedHold
+        getComposeFixedHold,
+        getFundNotes4Edit,
+        getFundNotes4Report,
+        updateFundNotes,
+        removeFundNotes
     }
 });
