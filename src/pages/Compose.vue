@@ -29,6 +29,11 @@
           <label class="form-check-label" for="to_be_thres">突破&nbsp;</label>
           <span class="badge bg-warning" style="position: relative; top: -1px;">{{ totPoleNum }}</span>
       </div>
+      <div class="form-check form_check_cust">
+        <input class="form-check-input" type="checkbox" id="to_be_note" v-model="showNoteOnly">
+        <label class="form-check-label" for="to_be_note">笔记&nbsp;</label>
+        <span class="badge bg-warning" style="position: relative; top: -1px;">{{ totNoteNum }}</span>
+      </div>
 
       <div style="cursor: pointer;" @click="clearSelected()">
         &nbsp;选择&nbsp;<span class="badge bg-warning text-dark">{{ currSelectedNum }}</span>
@@ -232,7 +237,12 @@
                 </div>
                 <template v-if="noteObjs[oneRow['fund_id']] && noteObjs[oneRow['fund_id']]['full_comments'] && noteObjs[oneRow['fund_id']]['full_comments'].length > 0">
                   <div style="position: relative;--tooltip-left:0rem;--tooltip-top:1.5rem;"
-                       v-bind:data-title="noteObjs[oneRow['fund_id']]['full_comments']" data-float-no-pos-sm="">{{ oneRow.fund_name }}&nbsp;
+                       v-bind:data-title="noteObjs[oneRow['fund_id']]['full_comments']" data-float-no-pos-sm="">{{ oneRow.fund_name }}
+                    <template v-if="noteObjs && noteObjs[oneRow['fund_id']] && noteObjs[oneRow['fund_id']]['note_objs'] && noteObjs[oneRow['fund_id']]['note_objs'].length > 0">
+                        <span style="font-weight:bold;color:red;border:solid 1px red;border-radius:5px; padding:0 5px 0 3px;font-size:0.9rem;margin-left:0.2rem;margin-right:0.2rem;">
+                        {{noteObjs[oneRow['fund_id']]['note_objs'].length}}
+                        </span>
+                    </template>
                     <template v-if="oneRow['last_sold_date']">
                       <a v-bind:href="baseUrl4Report + oneRow['fund_id']" _target="blank" style="text-decoration: none" title="看走势">
                         <span style="color:red;font-weight: bold;font-size:1.1rem;">售:&nbsp;{{ oneRow['last_sold_date'] }}
@@ -333,19 +343,21 @@
                   </div>
                 </template>
                 <template v-if="oneRow.hasOwnProperty('money') && oneRow['money'] > 0 && (!buyout_future_objs.hasOwnProperty(oneRow['fund_id']) || !buyout_future_objs[oneRow['fund_id']])">
-                  <button type="button" class="btn btn-secondary" style="font-size: 0.8rem; margin-right: 0.5rem;"
+                  <button type="button" class="btn btn-secondary" style="font-size: 0.8rem; margin-right: 0.5rem;padding-left:5px;padding-right:5px"
                           @click.stop="removeFixedFund4TodayUi(oneRow['fund_id'], oneRow['fund_name'])">
                     撤今日
                   </button>
                 </template>
                 <template v-else-if="oneRow.hasOwnProperty('money') && oneRow['money'] > 0 && (buyout_future_objs.hasOwnProperty(oneRow['fund_id']) && buyout_future_objs[oneRow['fund_id']] != null)">
-                  <span class="badge bg-success text-bg-success big_badge" style="margin-right: 0.5rem;">
-                    已撤销
+                  <span class="badge bg-success text-bg-success big_badge" style="margin-right: 0.5rem;padding-left:5px;padding-right:5px">
+                    已撤
                   </span>
                 </template>
-                <button type="button" class="btn btn-primary" style="font-size: 0.8rem;"
+                <button type="button" class="btn btn-primary" style="font-size: 0.8rem;padding-left:5px;padding-right:5px;"
                         @click.stop="switchWriteNote(oneRow)">
-                  笔记
+                  笔记<template v-if="noteObjs && noteObjs[oneRow['fund_id']] && noteObjs[oneRow['fund_id']]['note_objs'] && noteObjs[oneRow['fund_id']]['note_objs'].length > 0">
+                    ({{noteObjs[oneRow['fund_id']]['note_objs'].length}})
+                  </template>
                 </button>
               </td>
               <td style="line-height: 2rem;" v-bind:class="{ sel_row: oneRow['currSelected'] }">
@@ -570,7 +582,12 @@
                 </div>
                 <template v-if="noteObjs[oneRow['fund_id']] && noteObjs[oneRow['fund_id']]['full_comments'] && noteObjs[oneRow['fund_id']]['full_comments'].length > 0">
                   <div style="position: relative;--tooltip-left:0rem;--tooltip-top:1.5rem;"
-                       v-bind:data-title="noteObjs[oneRow['fund_id']]['full_comments']" data-float-no-pos-sm="">{{ oneRow.fund_name }}&nbsp;
+                       v-bind:data-title="noteObjs[oneRow['fund_id']]['full_comments']" data-float-no-pos-sm="">{{ oneRow.fund_name }}
+                    <template v-if="noteObjs && noteObjs[oneRow['fund_id']] && noteObjs[oneRow['fund_id']]['note_objs'] && noteObjs[oneRow['fund_id']]['note_objs'].length > 0">
+                        <span style="font-weight:bold;color:red;border:solid 1px red;border-radius:5px; padding:0 5px 0 3px;font-size:0.9rem;margin-left:0.2rem;margin-right:0.2rem;">
+                        {{noteObjs[oneRow['fund_id']]['note_objs'].length}}
+                        </span>
+                    </template>
                     <template v-if="oneRow['kbObj']">
                       <span style="font-size: 1rem; font-style: italic;text-decoration: underline;">
                         {{ oneRow.kbObj.statistics.fund_perc_len }}
@@ -906,19 +923,21 @@
                   </div>
                 </template>
                 <template v-if="oneRow.hasOwnProperty('money') && oneRow['money'] > 0 && (!buyout_future_objs.hasOwnProperty(oneRow['fund_id']) || !buyout_future_objs[oneRow['fund_id']])">
-                  <button type="button" class="btn btn-secondary" style="font-size: 0.8rem; margin-right: 0.5rem;"
+                  <button type="button" class="btn btn-secondary" style="font-size: 0.8rem; margin-right: 0.5rem;padding-left:5px;padding-right:5px"
                           @click.stop="removeFixedFund4TodayUi(oneRow['fund_id'], oneRow['fund_name'])">
                     撤今日
                   </button>
                 </template>
                 <template v-else-if="oneRow.hasOwnProperty('money') && oneRow['money'] > 0 && (buyout_future_objs.hasOwnProperty(oneRow['fund_id']) && buyout_future_objs[oneRow['fund_id']] != null)">
-                  <span class="badge bg-success text-bg-success big_badge" style="margin-right: 0.5rem;">
-                    已撤销
+                  <span class="badge bg-success text-bg-success big_badge" style="margin-right: 0.5rem;padding-left:5px;padding-right:5px">
+                    已撤
                   </span>
                 </template>
-                <button type="button" class="btn btn-primary" style="font-size: 0.8rem;"
+                <button type="button" class="btn btn-primary" style="font-size: 0.8rem;padding-left:5px;padding-right:5px;"
                         @click.stop="switchWriteNote(oneRow)">
-                  笔记
+                  笔记<template v-if="noteObjs && noteObjs[oneRow['fund_id']] && noteObjs[oneRow['fund_id']]['note_objs'] && noteObjs[oneRow['fund_id']]['note_objs'].length > 0">
+                    ({{noteObjs[oneRow['fund_id']]['note_objs'].length}})
+                  </template>
                 </button>
               </td>
               <td style="line-height: 2rem;" v-bind:class="{ sel_row: oneRow['currSelected'] }">
@@ -1417,10 +1436,13 @@ const show4SoldOnly = ref(false)
 const showPauseOnly = ref(false)
 const showAdjustOnly = ref(false)
 const showPoleOnly = ref(false)
+const showNoteOnly = ref(false)
 const tot4SoldNum = ref(0)
 const totPauseNum = ref(0)
 const totAdjustNum = ref(0)
-watch([composeObjs, compose_name, fixedHoldObjs, buyoutRecords, show4SoldOnly, showPauseOnly, showAdjustOnly, showPoleOnly], () => {
+const totNoteNum = ref(0)
+
+watch([composeObjs, compose_name, fixedHoldObjs, buyoutRecords, noteObjs, show4SoldOnly, showPauseOnly, showAdjustOnly, showPoleOnly, showNoteOnly], () => {
   if (composeObjs && composeObjs.value && composeObjs.value.length > 0) {
     composeObjs.value.forEach(elem => {
       if (elem['compose_objs'] && elem['compose_objs'].length > 0) {
@@ -1439,7 +1461,7 @@ watch([composeObjs, compose_name, fixedHoldObjs, buyoutRecords, show4SoldOnly, s
   if (composeObjs && composeObjs.value && composeObjs.value.length > 0) {
     if (compose_name.value === 'all') {
       composeObjs.value.forEach(item => {
-        if (!show4SoldOnly.value && !showPauseOnly.value && !showAdjustOnly.value && !showPoleOnly.value) {
+        if (!show4SoldOnly.value && !showPauseOnly.value && !showAdjustOnly.value && !showPoleOnly.value && !showNoteOnly.value) {
           composeViewObjs.value.push(...item['compose_objs'])
         } else {
           item['compose_objs'].forEach(_obj => {
@@ -1470,13 +1492,20 @@ watch([composeObjs, compose_name, fixedHoldObjs, buyoutRecords, show4SoldOnly, s
             if (showPoleOnly.value && !_added_in) {
               if (_obj.hasOwnProperty("quant_obj") && _obj['quant_obj']['hitted']) {
                 composeViewObjs.value.push(_obj)
+                _added_in = true
+              }
+            }
+            if (showNoteOnly.value && !_added_in) {
+              if (noteObjs.value.hasOwnProperty(_obj['fund_id']) && noteObjs.value[_obj['fund_id']].hasOwnProperty('note_objs')
+                  && noteObjs.value[_obj['fund_id']]['note_objs'].length > 0) {
+                composeViewObjs.value.push(_obj)
               }
             }
           })
         }
       })
     } else {
-      if (!show4SoldOnly.value && !showPauseOnly.value && !showAdjustOnly.value && !showPoleOnly.value) {
+      if (!show4SoldOnly.value && !showPauseOnly.value && !showAdjustOnly.value && !showPoleOnly.value && !showNoteOnly.value) {
         composeViewObjs.value = composeObjs.value.find(item => item['compose_name'] === compose_name.value)['compose_objs']
       } else {
         let _match_composes = composeObjs.value.find(item => item['compose_name'] === compose_name.value)
@@ -1508,7 +1537,14 @@ watch([composeObjs, compose_name, fixedHoldObjs, buyoutRecords, show4SoldOnly, s
           if (showPoleOnly.value && !_added_in) {
               if (_obj.hasOwnProperty("quant_obj") && _obj['quant_obj']['hitted']) {
                 composeViewObjs.value.push(_obj)
+                _added_in = true
               }
+          }
+          if (showNoteOnly.value && !_added_in) {
+            if (noteObjs.value.hasOwnProperty(_obj['fund_id']) && noteObjs.value[_obj['fund_id']].hasOwnProperty('note_objs')
+                && noteObjs.value[_obj['fund_id']]['note_objs'].length > 0) {
+              composeViewObjs.value.push(_obj)
+            }
           }
         })
       }
@@ -1546,6 +1582,7 @@ watch([composeObjs, compose_name, fixedHoldObjs, buyoutRecords, show4SoldOnly, s
   totPauseNum.value = 0
   totAdjustNum.value = 0
   totPoleNum.value = 0
+  totNoteNum.value = 0
 
   if (composeViewObjs.value.length > 0) {
 
@@ -1585,6 +1622,11 @@ watch([composeObjs, compose_name, fixedHoldObjs, buyoutRecords, show4SoldOnly, s
         totPoleNum.value = totPoleNum.value + 1
       }
       calculatePlanMoney('compose', elem)
+
+      if (noteObjs.value.hasOwnProperty(elem['fund_id']) && noteObjs.value[elem['fund_id']].hasOwnProperty('note_objs')
+          && noteObjs.value[elem['fund_id']]['note_objs'].length > 0) {
+        totNoteNum.value = totNoteNum.value + 1
+      }
     })
 
     if (totMoney.value > 0) {
@@ -2489,33 +2531,4 @@ function hideSuggUi() {
   padding: 2px 5px 2px 5px;
 }
 
-span[data-float-no-pos]:hover::after, a[data-float-no-pos]:hover::after, div[data-float-no-pos]:hover::after {
-    content: attr(data-title);
-    position: absolute;
-    top: var(--tooltip-top, auto);
-    left: var(--tooltip-left, auto);
-    z-index: 100;
-    background-color: aquamarine;
-    padding:0.2rem 0.5rem 0.1rem 0.5rem;
-    white-space: nowrap;
-    font-size: 0.95rem;
-    font-weight: bold;
-    color: red;
-    font-family: arial;
-  }
-
-span[data-float-no-pos-sm]:hover::after, div[data-float-no-pos-sm]:hover::after {
-  content: attr(data-title);
-  position: absolute;
-  top: var(--tooltip-top, auto);
-  left: var(--tooltip-left, auto);
-  z-index: 100;
-  background-color: lightgrey;
-  padding:0.2rem 0.5rem 0.1rem 0.5rem;
-  font-size: 0.8rem;
-  font-weight: bold;
-  color: darkblue;
-  font-family: arial;
-  white-space: pre;
-}
 </style>

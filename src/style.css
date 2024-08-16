@@ -128,3 +128,33 @@ table {
     width: 100%;
     padding: 0 1rem 0 1rem;
 }
+
+span[data-float-no-pos]:hover::after, a[data-float-no-pos]:hover::after, div[data-float-no-pos]:hover::after {
+    content: attr(data-title);
+    position: absolute;
+    top: var(--tooltip-top, auto);
+    left: var(--tooltip-left, auto);
+    z-index: 100;
+    background-color: aquamarine;
+    padding:0.2rem 0.5rem 0.1rem 0.5rem;
+    white-space: nowrap;
+    font-size: 0.95rem;
+    font-weight: bold;
+    color: red;
+    font-family: arial;
+}
+
+span[data-float-no-pos-sm]:hover::after, div[data-float-no-pos-sm]:hover::after {
+    content: attr(data-title);
+    position: absolute;
+    top: var(--tooltip-top, auto);
+    left: var(--tooltip-left, auto);
+    z-index: 100;
+    background-color: lightgrey;
+    padding:0.2rem 0.5rem 0.1rem 0.5rem;
+    font-size: 0.8rem;
+    font-weight: bold;
+    color: darkblue;
+    font-family: arial;
+    white-space: pre;
+}

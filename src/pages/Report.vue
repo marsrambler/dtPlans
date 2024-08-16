@@ -118,7 +118,21 @@
               v-bind:class="{ sel_row: oneRow['currSelected'] }">
             <td v-bind:class="{ sel_row: oneRow['currSelected'] }">
               <div>{{ oneRow.fund_id }}</div>
-              <div>{{ oneRow.fund_name }}</div>
+              <template v-if="noteObjs[oneRow['fund_id']] && noteObjs[oneRow['fund_id']]['full_comments'] && noteObjs[oneRow['fund_id']]['full_comments'].length > 0">
+                <div style="position: relative;--tooltip-left:0rem;--tooltip-top:1.5rem;cursor: pointer;"
+                     v-bind:data-title="noteObjs[oneRow['fund_id']]['full_comments']" data-float-no-pos-sm="" @click.stop="switchWriteNote(oneRow)">{{ oneRow.fund_name }}
+                  <template v-if="noteObjs && noteObjs[oneRow['fund_id']] && noteObjs[oneRow['fund_id']]['note_objs'] && noteObjs[oneRow['fund_id']]['note_objs'].length > 0">
+                        <span style="font-weight:bold;color:red;border:solid 1px red;border-radius:5px; padding:0 5px 0 3px;font-size:0.9rem;margin-left:0.2rem;margin-right:0.2rem;">
+                        {{noteObjs[oneRow['fund_id']]['note_objs'].length}}
+                        </span>
+                  </template>
+                </div>
+              </template>
+              <template v-else>
+                <div style="cursor: pointer;" @click.stop="switchWriteNote(oneRow)">
+                  {{ oneRow.fund_name }}
+                </div>
+              </template>
               <div>净值日:&nbsp;<span class="text-bg-warning">{{ oneRow.statistics?.latest_price_date }}</span></div>
             </td>
             <td v-bind:class="{ sel_row: oneRow['currSelected'] }">
@@ -240,6 +254,60 @@
                 <button type="button" class="btn btn-warning" @click="removeDynFileFromUi($event, oneRow)">
                   删除
                 </button>
+              </div>
+            </td>
+          </tr>
+          <tr v-if="oneRow['show_write_note']">
+            <td colspan="8" style="background-color: lightblue;">
+              <div style="display: flex;flex-direction: row;flex-wrap: nowrap;column-gap: 0.5rem;align-items: center;">
+                <div style="display: inline-block;">日期:</div>
+                <input type="text" class=""
+                       style="display: inline-block;border-radius:5px;border-width: 0;outline:none;width:6.5rem;"
+                       v-model="oneRow['write_note_date']">
+                <div style="display: inline-block;">盈利:</div>
+                <input type="text" class=""
+                       style="display: inline-block;border-radius:5px;border-width: 0;outline:none;width:4rem;"
+                       v-model="oneRow['write_note_perc']">
+                <div style="display: inline-block;">日记:</div>
+                <input type="text" class=""
+                       style="display: inline-block;border-radius:5px;border-width: 0;outline:none;flex-grow:0.9;"
+                       v-model="oneRow['write_note_comments']">
+                <button type="button" class="btn btn-warning"
+                        style="font-size:0.9rem;display:inline-block;width:6rem;"
+                        v-bind:disabled="
+                          (!oneRow['write_note_date'] || oneRow['write_note_date'].trim() == '')
+                       || (
+                           (!oneRow['write_note_perc'] || oneRow['write_note_perc'].trim() == '')
+                           &&(!oneRow['write_note_comments'] || oneRow['write_note_comments'].trim() == '')
+                          )
+                       || (oneRow['write_note_perc'].trim() != ''
+                           && oneRow['write_note_perc'].indexOf('%') == -1
+                          )
+                          "
+                        @click="updateFundNotes(oneRow);">
+                  保存
+                </button>
+                <button type="button" class="btn btn-danger"
+                        style="font-size:0.9rem;display:inline-block;width:6rem;"
+                        v-bind:disabled="!oneRow['write_note_date'] || oneRow['write_note_date'].trim() == ''"
+                        @click="removeFundNotes(oneRow);">
+                  删除
+                </button>
+                <template v-if="oneRow['note_objs'].length > 0">
+                  <div style="display:inline-block;flex-grow:0.1;color:darkgreen;">共({{oneRow['note_objs'].length}})条</div>
+                  <button type="button" class="btn btn-secondary"
+                          style="font-size:0.8rem;display:inline-block;width:4rem;"
+                          v-bind:disabled="oneRow['curr_note_idx'] <= 0"
+                          @click="navigateNote(oneRow, true)">
+                    前向
+                  </button>
+                  <button type="button" class="btn btn-secondary"
+                          style="font-size:0.8rem;display:inline-block;width:4rem;"
+                          v-bind:disabled="oneRow['curr_note_idx'] >= oneRow['note_objs'].length - 1"
+                          @click="navigateNote(oneRow, false)">
+                    后向
+                  </button>
+                </template>
               </div>
             </td>
           </tr>
@@ -461,7 +529,7 @@ import {
   tabHeaderHeight,
   tabContTopPos,
   minPaneWidth,
-  topSecClass
+  topSecClass, getTodayStr
 } from "../lib/commonUtils.js"
 import {onMounted, onUnmounted, computed, ref, watch, nextTick, onActivated} from "vue";
 import { storeToRefs } from 'pinia'
@@ -480,8 +548,8 @@ const { dynRecordObjs_full, dynRecordObjs_latest, dynRecordObjs, onlyShowLatest 
 const { requireDynValues, getRecordsAndRates, removeLocalDynvalue, getBigPoolFixedHold, getIndexRtRate, removeDate4Report } = reportStore
 
 const composeStore = useComposeStore()
-const {noteReportObjs} = storeToRefs(composeStore)
-const {getFundNotes4Report} = composeStore
+const {noteObjs, noteReportObjs} = storeToRefs(composeStore)
+const {getFundNotes4Report, getFundNotes4Edit, updateFundNotes, removeFundNotes} = composeStore
 
 const colWidMap = {
   'col_1': 6,
@@ -548,6 +616,7 @@ onActivated(() => {
   }
   // each time goes to this page, get the fund notes again
   getFundNotes4Report()
+  getFundNotes4Edit()
 })
 
 onUnmounted(() => {
@@ -1802,6 +1871,65 @@ const summ_level_tips_map = {
 				'4.3': {'cmt': '售出近|量化停', 'bgcolor': 'cornsilk', 'color': 'red', 'bd': 'dashed 2px red'},
 				'-1': {'cmt': '已经终止', 'bgcolor': 'black', 'color': 'white', 'bd': ''}
 			};
+
+function switchWriteNote(oneRowObj) {
+  alignWriteNote(oneRowObj)
+  if (!oneRowObj.hasOwnProperty('show_write_note')) {
+    oneRowObj['show_write_note'] = true;
+  } else {
+    oneRowObj['show_write_note'] = !oneRowObj['show_write_note'];
+  }
+}
+
+function alignWriteNote(oneRowObj) {
+  if (noteObjs.value && noteObjs.value.hasOwnProperty(oneRowObj['fund_id'])) {
+    oneRowObj['note_objs'] = noteObjs.value[oneRowObj['fund_id']]['note_objs']
+  } else {
+    oneRowObj['note_objs'] = []
+  }
+  let _today_str = getTodayStr()
+  if (oneRowObj['note_objs'].length > 0) {
+    let _last_note = oneRowObj['note_objs'][oneRowObj['note_objs'].length - 1]
+    if (_last_note['date_str'] == _today_str) {
+      oneRowObj['write_note_date'] = _last_note['date_str']
+      oneRowObj['write_note_perc'] = _last_note['perc_str']
+      oneRowObj['write_note_comments'] = _last_note['comments']
+      oneRowObj['curr_note_idx'] = oneRowObj['note_objs'].length - 1
+    } else {
+      oneRowObj['write_note_date'] = getTodayStr()
+      oneRowObj['write_note_perc'] = ''
+      oneRowObj['write_note_comments'] = ''
+      oneRowObj['curr_note_idx'] = -1
+    }
+  } else {
+    oneRowObj['write_note_date'] = getTodayStr()
+    oneRowObj['write_note_perc'] = ''
+    oneRowObj['write_note_comments'] = ''
+    oneRowObj['curr_note_idx'] = -1
+  }
+}
+
+function navigateNote(oneRowObj, bPrev=true) {
+  if (!oneRowObj['note_objs'] || oneRowObj['note_objs'].length == 0) {
+    return
+  }
+  if (bPrev) {
+    oneRowObj['curr_note_idx'] -= 1
+    if (oneRowObj['curr_note_idx'] <= 0) {
+      oneRowObj['curr_note_idx'] = 0
+    }
+  } else {
+    oneRowObj['curr_note_idx'] += 1
+    if (oneRowObj['curr_note_idx'] >= oneRowObj['note_objs'].length - 1) {
+      oneRowObj['curr_note_idx'] = oneRowObj['note_objs'].length - 1
+    }
+  }
+  let _one_note = oneRowObj['note_objs'][oneRowObj['curr_note_idx']]
+  oneRowObj['write_note_date'] = _one_note['date_str']
+  oneRowObj['write_note_perc'] = _one_note['perc_str']
+  oneRowObj['write_note_comments'] = _one_note['comments']
+}
+
 </script>
 
 <style scoped>
