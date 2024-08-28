@@ -13,7 +13,7 @@
       <input class="btn btn-primary btn-sm" type="button" value="查找" @click="excuteSearchFund();">
       <div class="form-check form_check_cust" style="margin-left: 1rem;">
         <input class="form-check-input" type="checkbox" id="inc_perc" v-model="inc_earn_perc">
-        <label class="form-check-label" for="inc_perc">百分比</label>
+        <label class="form-check-label" for="inc_perc">盈利</label>
       </div>
       <div class="form-check form_check_cust" style="margin-left: 1rem;">
         <input class="form-check-input" type="checkbox" id="inc_comments" v-model="inc_comments">
@@ -992,44 +992,49 @@ const chartOptions = ref({
       }
     },
     {
-      // write notes earn (positive, red)
-      width: 35,
-      height: 35,
-      name: '笔记盈利标',
-      type: 'flags',
-      data: [],
-      onSeries: 'dataseries',
-      shape: 'diamond',
-      lineWidth: 2,
-      color: 'red',
-      style: {
-        color: 'red',
-        fontSize: 14
-      },
-      events: {
-        click: function (e) {
-        }
-      }
+      // write notes earn (positive, red) --- changed!!!
+      // earn rate loop
+      // width: 35,
+      // height: 35,
+      // name: '笔记盈利标',
+      // type: 'flags',
+      // data: [],
+      // onSeries: 'dataseries',
+      // shape: 'diamond',
+      // lineWidth: 2,
+      // color: 'red',
+      // style: {
+      //   color: 'red',
+      //   fontSize: 14
+      // },
+      // events: {
+      //   click: function (e) {
+      //   }
+      // }
+      name: '盈利曲线',
+      data: []
     },
     {
       // write notes earn (negative, red)
-      width: 35,
-      height: 35,
-      name: '笔记亏损标',
-      type: 'flags',
-      data: [],
-      onSeries: 'dataseries',
-      shape: 'diamond',
-      lineWidth: 2,
-      color: 'green',
-      style: {
-        color: 'green',
-        fontSize: 14
-      },
-      events: {
-        click: function (e) {
-        }
-      }
+      // width: 35,
+      // height: 35,
+      // name: '笔记亏损标',
+      // type: 'flags',
+      // data: [],
+      // onSeries: 'dataseries',
+      // shape: 'diamond',
+      // lineWidth: 2,
+      // color: 'green',
+      // style: {
+      //   color: 'green',
+      //   fontSize: 14
+      // },
+      // events: {
+      //   click: function (e) {
+      //   }
+      // }
+      name: '未使用曲线',
+      data: []
     },
     {
       // write notes - show notes
@@ -1161,41 +1166,51 @@ watch(currDynValue, () => {
     })
   }
 
-  // write note earn positive
   if (inc_earn_perc.value) {
-    if (noteReportObjs.value && noteReportObjs.value.hasOwnProperty(currDynValue.value['fund_id'])) {
-      let _note_objs = noteReportObjs.value[currDynValue.value['fund_id']]['note_objs']
-      if (_note_objs.length > 0) {
-        _note_objs.forEach(element => {
-          if (element['perc_val'] >= 0) {
-            let _timestamp = Date.parse(element['date_str'])
-            chartOptions.value['series'][8]['data'].push({
-              x: _timestamp,
-              title: element['perc_str']
-            })
-          }
-        })
-      }
+    if (currDynValue.value['earnLoopList4draw'] && currDynValue.value['earnLoopList4draw'].length > 0) {
+      currDynValue.value['earnLoopList4draw'].forEach(element => {
+        let _timestamp = Date.parse(element['last_price_date'])
+        let _tot_earn_rate = element['tot_earn_rate'] / (currDynValue.value['earnLoopMax'] - currDynValue.value['earnLoopMin']) * priceDistance.value / 3
+        chartOptions.value['series'][8]['data'].push([_timestamp, _tot_earn_rate])
+      })
     }
   }
 
+  // write note earn positive
+  // if (inc_earn_perc.value) {
+  //   if (noteReportObjs.value && noteReportObjs.value.hasOwnProperty(currDynValue.value['fund_id'])) {
+  //     let _note_objs = noteReportObjs.value[currDynValue.value['fund_id']]['note_objs']
+  //     if (_note_objs.length > 0) {
+  //       _note_objs.forEach(element => {
+  //         if (element['perc_val'] >= 0) {
+  //           let _timestamp = Date.parse(element['date_str'])
+  //           chartOptions.value['series'][8]['data'].push({
+  //             x: _timestamp,
+  //             title: element['perc_str']
+  //           })
+  //         }
+  //       })
+  //     }
+  //   }
+  // }
+
   // write note earn negative
-  if (inc_earn_perc.value) {
-    if (noteReportObjs.value && noteReportObjs.value.hasOwnProperty(currDynValue.value['fund_id'])) {
-      let _note_objs = noteReportObjs.value[currDynValue.value['fund_id']]['note_objs']
-      if (_note_objs.length > 0) {
-        _note_objs.forEach(element => {
-          if (element['perc_val'] < 0 && element['perc_val'] > -90) {
-            let _timestamp = Date.parse(element['date_str'])
-            chartOptions.value['series'][9]['data'].push({
-              x: _timestamp,
-              title: element['perc_str']
-            })
-          }
-        })
-      }
-    }
-  }
+  // if (inc_earn_perc.value) {
+  //   if (noteReportObjs.value && noteReportObjs.value.hasOwnProperty(currDynValue.value['fund_id'])) {
+  //     let _note_objs = noteReportObjs.value[currDynValue.value['fund_id']]['note_objs']
+  //     if (_note_objs.length > 0) {
+  //       _note_objs.forEach(element => {
+  //         if (element['perc_val'] < 0 && element['perc_val'] > -90) {
+  //           let _timestamp = Date.parse(element['date_str'])
+  //           chartOptions.value['series'][9]['data'].push({
+  //             x: _timestamp,
+  //             title: element['perc_str']
+  //           })
+  //         }
+  //       })
+  //     }
+  //   }
+  // }
 
   // write note earn negative
   if (inc_comments.value) {
@@ -1228,41 +1243,51 @@ watch([inc_earn_perc, inc_comments], () => {
   chartOptions.value['series'][9]['data'] = []
   chartOptions.value['series'][10]['data'] = []
 
-  // write note earn positive
   if (inc_earn_perc.value) {
-    if (noteReportObjs.value && noteReportObjs.value.hasOwnProperty(currDynValue.value['fund_id'])) {
-      let _note_objs = noteReportObjs.value[currDynValue.value['fund_id']]['note_objs']
-      if (_note_objs.length > 0) {
-        _note_objs.forEach(element => {
-          if (element['perc_val'] >= 0) {
-            let _timestamp = Date.parse(element['date_str'])
-            chartOptions.value['series'][8]['data'].push({
-              x: _timestamp,
-              title: element['perc_str']
-            })
-          }
-        })
-      }
+    if (currDynValue.value['earnLoopList4draw'] && currDynValue.value['earnLoopList4draw'].length > 0) {
+      currDynValue.value['earnLoopList4draw'].forEach(element => {
+        let _timestamp = Date.parse(element['last_price_date'])
+        let _tot_earn_rate = element['tot_earn_rate'] / (currDynValue.value['earnLoopMax'] - currDynValue.value['earnLoopMin']) * priceDistance.value / 3
+        chartOptions.value['series'][8]['data'].push([_timestamp, _tot_earn_rate])
+      })
     }
   }
 
+  // write note earn positive
+  // if (inc_earn_perc.value) {
+  //   if (noteReportObjs.value && noteReportObjs.value.hasOwnProperty(currDynValue.value['fund_id'])) {
+  //     let _note_objs = noteReportObjs.value[currDynValue.value['fund_id']]['note_objs']
+  //     if (_note_objs.length > 0) {
+  //       _note_objs.forEach(element => {
+  //         if (element['perc_val'] >= 0) {
+  //           let _timestamp = Date.parse(element['date_str'])
+  //           chartOptions.value['series'][8]['data'].push({
+  //             x: _timestamp,
+  //             title: element['perc_str']
+  //           })
+  //         }
+  //       })
+  //     }
+  //   }
+  // }
+
   // write note earn negative
-  if (inc_earn_perc.value) {
-    if (noteReportObjs.value && noteReportObjs.value.hasOwnProperty(currDynValue.value['fund_id'])) {
-      let _note_objs = noteReportObjs.value[currDynValue.value['fund_id']]['note_objs']
-      if (_note_objs.length > 0) {
-        _note_objs.forEach(element => {
-          if (element['perc_val'] < 0 && element['perc_val'] > -90) {
-            let _timestamp = Date.parse(element['date_str'])
-            chartOptions.value['series'][9]['data'].push({
-              x: _timestamp,
-              title: element['perc_str']
-            })
-          }
-        })
-      }
-    }
-  }
+  // if (inc_earn_perc.value) {
+  //   if (noteReportObjs.value && noteReportObjs.value.hasOwnProperty(currDynValue.value['fund_id'])) {
+  //     let _note_objs = noteReportObjs.value[currDynValue.value['fund_id']]['note_objs']
+  //     if (_note_objs.length > 0) {
+  //       _note_objs.forEach(element => {
+  //         if (element['perc_val'] < 0 && element['perc_val'] > -90) {
+  //           let _timestamp = Date.parse(element['date_str'])
+  //           chartOptions.value['series'][9]['data'].push({
+  //             x: _timestamp,
+  //             title: element['perc_str']
+  //           })
+  //         }
+  //       })
+  //     }
+  //   }
+  // }
 
   // write note earn negative
   if (inc_comments.value) {

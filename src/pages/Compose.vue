@@ -1249,9 +1249,32 @@
         </template>
       </tbody>
       <tfoot>
-        <tr style="line-height: 5rem; border-color: white;">
-          <td colspan="9">
-            &nbsp;
+        <tr style="line-height: 5rem; border-color: white;height:5rem;">
+          <td colspan="9" style="padding:0 !important;vertical-align:top !important;">
+            <div style="background-color: cornsilk;padding:0px !important;display:none;">
+              <div style="text-decoration: underline;line-height:1.8;padding: 5px 5px 5px 1rem;background-color:chocolate;color:white;">自定义加入组合</div>
+              <div style="display:flex;flex-direction:row;column-gap:0.5rem;align-items:center;line-height:1.8;padding:5px 1rem 10px 1rem;">
+                <span>ID</span>
+                <input type="text" style="width: 6rem; border-radius: 5px;" v-model="custAddFundId" @click.stop>
+                <span>Name</span>
+                <input type="text" style="width: 6rem; border-radius: 5px; flex-grow: 0.9;" v-model="custAddFundName" @click.stop>
+                <span>组合</span>
+                <select class="form-select" @click.stop v-model="custAddComposeName" style="width: 5rem; flex-grow:0.05;">
+                  <template v-for="option in buy_in_from_plan">
+                    <template v-if="option.source_val != 'all'">
+                      <option v-bind:value="option.source_val">
+                        {{ option.source_name }}
+                      </option>
+                    </template>
+                  </template>
+                </select>
+                <span>金额</span>
+                <input type="number" style="width: 4rem; border-radius: 5px;" v-model="custAddMoney" @click.stop>
+                <button type="button" class="btn btn-outline-danger mw4_ctl" @click.stop="custAddCompose4Ui()"
+                v-bind:disabled="custAddFundId==null||custAddFundId.length != 6||custAddFundName==''||custAddComposeName==null">保存
+                </button>
+              </div>
+            </div>
           </td>
         </tr>
       </tfoot>
@@ -1351,6 +1374,31 @@
         </div>
         <div class="modal-footer">
           <button type="button" class="btn btn-warning" @click.prevent="hideSuggUi()">确认
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="modal fade" id="custAddComposeDialog" tabindex="-1">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title">加入确认</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+          <h6>以下将被加入进组合: </h6>
+          <div>ID: {{custAddFundId}}</div>
+          <div>Name: {{custAddFundName}}</div>
+          <div>组合：{{custAddComposeName}}</div>
+          <div>Money：{{custAddMoney}}</div>
+          <template v-if="custAddError != ''">
+          <div style="color:red;font-weight:bold;">错误：{{custAddError}}</div>
+          </template>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" @click.prevent="cancelCustAddCompose()">取消</button>
+          <button type="button" class="btn btn-warning" @click.prevent="custAddComposeLogic()">加入
           </button>
         </div>
       </div>
@@ -1661,7 +1709,7 @@ getFundNotes4Edit()
 /*
 * sold by bulk
 * */
-const dlgController = ref({ soldDlg: null, removeDlg: null, removeFromComposeDlg: null, suggestDlg: null})
+const dlgController = ref({ soldDlg: null, removeDlg: null, removeFromComposeDlg: null, suggestDlg: null, custAddDlg: null})
 const searchCond = ref()
 const searchTimer = ref(null)
 const searchByFundIdFoundFlag = ref(false)
@@ -1674,6 +1722,7 @@ onMounted(() => {
   dlgController.value.removeDlg = new Modal('#removeDialog', {})
   dlgController.value.removeFromComposeDlg = new Modal('#removeComposeDialog', {})
   dlgController.value.suggestDlg = new Modal('#suggComposeDialog', {})
+  dlgController.value.custAddDlg = new Modal('#custAddComposeDialog', {})
 
   /*
   * logic moved to onActivated
@@ -2469,6 +2518,46 @@ function hideSuggUi() {
   if (dlgController.value.suggestDlg) {
     dlgController.value.suggestDlg.hide()
   }
+}
+
+const custAddFundId = ref(null)
+const custAddFundName = ref('')
+const custAddComposeName = ref(null)
+const custAddMoney = ref(0)
+const custAddError = ref('')
+
+function custAddCompose4Ui() {
+  custAddError.value = ''
+  dlgController.value.custAddDlg.show();
+}
+
+async function custAddComposeLogic() {
+  if (isNaN(parseInt(custAddFundId.value))) {
+    custAddError.value = '非法的fund id'
+    return
+  }
+  for (let _comp_obj of composeObjs.value) {
+    if (_comp_obj['compose_objs'] && _comp_obj['compose_objs'].length > 0) {
+      let _result = _comp_obj['compose_objs'].findIndex(elem => elem['fund_id'] == custAddFundId.value)
+      if (_result != -1) {
+        custAddError.value = '组合中已经存在fund id'
+        return
+      }
+    }
+  }
+  dlgController.value.custAddDlg.hide();
+  await addOrRemoveCompose(custAddFundId.value, custAddFundName.value, custAddComposeName.value, custAddMoney.value);
+  custAddFundId.value = ''
+  custAddFundName.value = ''
+  custAddComposeName.value = null
+  custAddMoney.value = 0
+}
+
+function cancelCustAddCompose() {
+  if (dlgController.value.custAddDlg) {
+    dlgController.value.custAddDlg.hide();
+  }
+  custAddError.value = ''
 }
 
 </script>
