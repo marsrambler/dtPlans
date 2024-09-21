@@ -205,7 +205,7 @@
               v-bind:class="{ sel_row: oneRow['currSelected'] }"
               :ref="(el) => { if (el) { rowElements[oneRow.fund_id] = el; } }">
               <td v-bind:class="{ sel_row: oneRow['currSelected'] }">
-                <div>
+                <div style="display: flex; align-items: center;">
                   <template v-if="oneRow['compose_name'] === 'ovtree'">
                     <span class="badge bg-primary text-bg-success big_badge">
                       橄榄树
@@ -226,6 +226,14 @@
                       金毛羊
                     </span>
                   </template>
+                  <span style="padding: 1px 3px; border-radius: 5px; border: solid 1px darkgreen; color: darkgreen; margin-left: 0.5rem; margin-right: 0.5rem; cursor: pointer;"
+                  @click.stop="addBuyOrSoldNote(oneRow['fund_id'], oneRow['fund_name'], true, false, oneRow['compose_name'])">
+                    想买
+                  </span>
+                  <span style="padding: 1px 3px; border-radius: 5px; border: solid 1px chocolate; color: chocolate; cursor: pointer;"
+                  @click.stop="addBuyOrSoldNote(oneRow['fund_id'], oneRow['fund_name'], false, true, oneRow['compose_name'])">
+                    想卖
+                  </span>
                 </div>
                 <div>
                   <template v-if="oneRow['has_bonus']">
@@ -545,7 +553,7 @@
               v-bind:class="{ sel_row: oneRow['currSelected'] }"
               :ref="(el) => { if (el) { rowElements[oneRow.fund_id] = el; } }">
               <td v-bind:class="{ sel_row: oneRow['currSelected'] }">
-                <div>
+                <div style="display: flex; align-items: center;">
                   <template v-if="oneRow['compose_name'] === 'ovtree'">
                     <span class="badge bg-primary text-bg-success big_badge">
                       橄榄树
@@ -566,6 +574,14 @@
                       金毛羊
                     </span>
                   </template>
+                  <span style="padding: 1px 3px; border-radius: 5px; border: solid 1px darkgreen; color: darkgreen; margin-left: 0.5rem; margin-right: 0.5rem; cursor: pointer;"
+                  @click.stop="addBuyOrSoldNote(oneRow['fund_id'], oneRow['fund_name'], true, false, oneRow['compose_name'])">
+                    想买
+                  </span>
+                  <span style="padding: 1px 3px; border-radius: 5px; border: solid 1px chocolate; color: chocolate; cursor: pointer;"
+                  @click.stop="addBuyOrSoldNote(oneRow['fund_id'], oneRow['fund_name'], false, true, oneRow['compose_name'])">
+                    想卖
+                  </span>
                 </div>
                 <div>
                   <template v-if="oneRow['fixedHoldObj'] && oneRow['fixedHoldObj']['has_bonus']">
@@ -622,7 +638,7 @@
                     </template>
                   </div>
                 </template>
-                <div>
+                <div style="margin-top:8px;">
                   <template v-if="oneRow['kbObj']">
                     <span v-bind:class="getCardStyle(oneRow.kbObj.statistics.day_200_thres)">&nbsp;</span>
                     <span v-bind:class="getCardStyle(oneRow.kbObj.statistics.day_300_thres)">&nbsp;</span>
@@ -835,7 +851,7 @@
               </td>
               <td style="text-align: center;" v-bind:class="{ sel_row: oneRow['currSelected'] }">
                 <template v-if="oneRow['kbObj']">
-                  <div style="height: 1.8em;">
+                  <div style="height:1.8em;">
                     <span v-bind:class="getHitStyle(oneRow.kbObj.positive.day_5_positive_reach)">&nbsp;</span>
                     <span v-bind:class="getHitStyle(oneRow.kbObj.positive.day_10_positive_reach)">&nbsp;</span>
                     <span v-bind:class="getHitStyle(oneRow.kbObj.positive.day_20_positive_reach)">&nbsp;</span>
@@ -850,19 +866,19 @@
                       <span v-bind:class="getHitStyle(oneRow.kbObj.positive.day_220_positive_reach)">&nbsp;</span>
                     </template>
                   </div>
-                  <div style="height: 1.8em;">
-                    <span v-bind:class="getHitStyle(oneRow.kbObj.negative.day_5_negative_reach)">&nbsp;</span>
-                    <span v-bind:class="getHitStyle(oneRow.kbObj.negative.day_10_negative_reach)">&nbsp;</span>
-                    <span v-bind:class="getHitStyle(oneRow.kbObj.negative.day_20_negative_reach)">&nbsp;</span>
-                    <span v-bind:class="getHitStyle(oneRow.kbObj.negative.day_60_negative_reach)">&nbsp;</span>
-                    <span v-bind:class="getHitStyle(oneRow.kbObj.negative.day_90_negative_reach)">&nbsp;</span>
-                    <span v-bind:class="getHitStyle(oneRow.kbObj.negative.day_120_negative_reach)">&nbsp;</span>
-                    <span v-bind:class="getHitStyle(oneRow.kbObj.negative.day_160_negative_reach)">&nbsp;</span>
-                    <template v-if="oneRow.kbObj.negative.hasOwnProperty('day_200_negative_reach')">
-                      <span v-bind:class="getHitStyle(oneRow.kbObj.negative.day_200_negative_reach)">&nbsp;</span>
+                  <div style="height:1.8em;margin-top:5px;">
+                    <span v-bind:class="getHitStyle(oneRow.kbObj.negative.day_5_negative_reach, false)">&nbsp;</span>
+                    <span v-bind:class="getHitStyle(oneRow.kbObj.negative.day_10_negative_reach, false)">&nbsp;</span>
+                    <span v-bind:class="getHitStyle(oneRow.kbObj.negative.day_20_negative_reach, false)">&nbsp;</span>
+                    <span v-bind:class="getHitStyle(oneRow.kbObj.negative.day_60_negative_reach, false)">&nbsp;</span>
+                    <span v-bind:class="getHitStyle(oneRow.kbObj.negative.day_90_negative_reach, false)">&nbsp;</span>
+                    <span v-bind:class="getHitStyle(oneRow.kbObj.negative.day_120_negative_reach, false)">&nbsp;</span>
+                    <span v-bind:class="getHitStyle(oneRow.kbObj.negative.day_160_negative_reach, false)">&nbsp;</span>
+                    <template v-if="oneRow.kbObj.negative.hasOwnProperty('day_200_negative_reach', false)">
+                      <span v-bind:class="getHitStyle(oneRow.kbObj.negative.day_200_negative_reach, false)">&nbsp;</span>
                     </template>
                     <template v-else>
-                      <span v-bind:class="getHitStyle(oneRow.kbObj.negative.day_220_negative_reach)">&nbsp;</span>
+                      <span v-bind:class="getHitStyle(oneRow.kbObj.negative.day_220_negative_reach, false)">&nbsp;</span>
                     </template>
                   </div>
                   <div style="height: 3em; margin-top: 0.4rem; border-top: solid 1px darkgray; cursor: pointer;"
@@ -1435,7 +1451,7 @@ const { composeObjs, fixedHoldObjs, totMoney, totPositiveNum, totPoleNum, totEar
 const { getAllCompose, setComposeProperty, setComposeSoldDate, getComposeFixedHold, addOrRemoveCompose, getFundNotes4Edit, updateFundNotes, removeFundNotes } = composeStore
 const buyInOutStore = useBuyInOutStore()
 const { buyoutRecords, wav_reports, buyout_future_objs, contStartStopObj} = storeToRefs(buyInOutStore)
-const { getAllBuyoutRecords, soldComposeFixedHold, buyOutFixedFund, calculatePlanMoney, buyOutFixedFundOfToday, getAllBuyoutFutureRecords } = buyInOutStore
+const { getAllBuyoutRecords, soldComposeFixedHold, buyOutFixedFund, calculatePlanMoney, buyOutFixedFundOfToday, getAllBuyoutFutureRecords, addBuyOrSoldNote } = buyInOutStore
 const zskbStore = useZskbStore()
 const { zskbObjs } = storeToRefs(zskbStore)
 

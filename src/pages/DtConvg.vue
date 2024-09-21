@@ -229,7 +229,7 @@
                   <div>
                     {{ oneRow.fund_name }}
                   </div>
-                  <div>
+                  <div style="margin-top:8px;">
                     <span v-bind:class="getCardStyle(oneRow.statistics.day_200_thres)">&nbsp;</span>
                     <span v-bind:class="getCardStyle(oneRow.statistics.day_300_thres)">&nbsp;</span>
                     <span v-bind:class="getCardStyle(oneRow.statistics.day_400_thres)">&nbsp;</span>
@@ -306,7 +306,7 @@
                   </div>
                 </td>
                 <td v-bind:class="{ sel_row: oneRow['currSelected'] }" style="text-align: center;">
-                  <div style="height: 1.8em;">
+                  <div style="height:1.8em;">
                     <span v-bind:class="getHitStyle(oneRow.positive.day_5_positive_reach)">&nbsp;</span>
                     <span v-bind:class="getHitStyle(oneRow.positive.day_10_positive_reach)">&nbsp;</span>
                     <span v-bind:class="getHitStyle(oneRow.positive.day_20_positive_reach)">&nbsp;</span>
@@ -316,15 +316,15 @@
                     <span v-bind:class="getHitStyle(oneRow.positive.day_160_positive_reach)">&nbsp;</span>
                     <span v-bind:class="getHitStyle(oneRow.positive.day_200_positive_reach)">&nbsp;</span>
                   </div>
-                  <div style="height: 1.8em;">
-                    <span v-bind:class="getHitStyle(oneRow.negative.day_5_negative_reach)">&nbsp;</span>
-                    <span v-bind:class="getHitStyle(oneRow.negative.day_10_negative_reach)">&nbsp;</span>
-                    <span v-bind:class="getHitStyle(oneRow.negative.day_20_negative_reach)">&nbsp;</span>
-                    <span v-bind:class="getHitStyle(oneRow.negative.day_60_negative_reach)">&nbsp;</span>
-                    <span v-bind:class="getHitStyle(oneRow.negative.day_90_negative_reach)">&nbsp;</span>
-                    <span v-bind:class="getHitStyle(oneRow.negative.day_120_negative_reach)">&nbsp;</span>
-                    <span v-bind:class="getHitStyle(oneRow.negative.day_160_negative_reach)">&nbsp;</span>
-                    <span v-bind:class="getHitStyle(oneRow.negative.day_200_negative_reach)">&nbsp;</span>
+                  <div style="height:1.8em;margin-top:5px;">
+                    <span v-bind:class="getHitStyle(oneRow.negative.day_5_negative_reach, false)">&nbsp;</span>
+                    <span v-bind:class="getHitStyle(oneRow.negative.day_10_negative_reach, false)">&nbsp;</span>
+                    <span v-bind:class="getHitStyle(oneRow.negative.day_20_negative_reach, false)">&nbsp;</span>
+                    <span v-bind:class="getHitStyle(oneRow.negative.day_60_negative_reach, false)">&nbsp;</span>
+                    <span v-bind:class="getHitStyle(oneRow.negative.day_90_negative_reach, false)">&nbsp;</span>
+                    <span v-bind:class="getHitStyle(oneRow.negative.day_120_negative_reach, false)">&nbsp;</span>
+                    <span v-bind:class="getHitStyle(oneRow.negative.day_160_negative_reach, false)">&nbsp;</span>
+                    <span v-bind:class="getHitStyle(oneRow.negative.day_200_negative_reach, false)">&nbsp;</span>
                   </div>
                   <div style="height: 3em; margin-top: 0.4rem; border-top: solid 1px darkgray; cursor: pointer;"
                     :style="{ 'background-color': (oneRow['show_wav'] ? 'cornsilk' : ''), 'font-style': (oneRow['show_wav'] ? 'italic' : '') }"

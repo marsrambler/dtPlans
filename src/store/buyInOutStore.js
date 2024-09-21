@@ -619,6 +619,43 @@ export const useBuyInOutStore = defineStore('buyInOut-store', () => {
         }
     }
 
+    async function addBuyOrSoldNote(fund_id, fund_name, for_buy, for_sold, _compose_name='') {
+        if (!for_buy && !for_sold) {
+            console.error("buy or sold should be selected at least one");
+            return;
+        }
+        var compose_name = '';
+        if (_compose_name == 'ovtree') {
+            compose_name = '橄榄树';
+        } else if (_compose_name == 'dolphin') {
+            compose_name = '海豚';
+        } else if (_compose_name == 'trident') {
+            compose_name = '三叉戟';
+        } else if (_compose_name == 'gdngoat') {
+            compose_name = '金毛羊';
+        } else if (_compose_name == 'bigpool') {
+            compose_name = '大池';
+        }
+        try {
+            const response = await axiosInst.post("api/add_sold_buy_notes", {
+                'fund_id': fund_id,
+                'fund_name': fund_name,
+                'date_str': getTodayStr(),
+                'for_buy': for_buy,
+                'for_sold': for_sold,
+                'compose_name': compose_name
+            })
+            if (response.status == 200) {
+                await response.data
+                useApiStore().pop_alert_msg("登记买入卖出成功: " + fund_name)
+            } else {
+                console.error("axios add buy or sold note failed: ", response)
+            }
+        } catch (error) {
+            console.log("axios add buy or sold note error: ", error)
+        }
+    }
+
     return {
         buyoutRecords,
         buyin_records,
@@ -636,7 +673,8 @@ export const useBuyInOutStore = defineStore('buyInOut-store', () => {
         buyOutFixedFundOfToday,
         calculatePlanMoney,
         getAllBuyoutFutureRecords,
-        getContStartStop
+        getContStartStop,
+        addBuyOrSoldNote
     }
 
 });

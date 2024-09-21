@@ -117,7 +117,23 @@
               :ref="(el) => { if (el) { rowElements[oneRow.fund_id] = el; } }"
               v-bind:class="{ sel_row: oneRow['currSelected'] }">
             <td v-bind:class="{ sel_row: oneRow['currSelected'] }">
-              <div>{{ oneRow.fund_id }}</div>
+              <div style="display: flex; align-items: center;">
+                <span>
+                {{ oneRow.fund_id }}
+                </span>
+                <span style="padding: 1px 3px; border-radius: 5px; border: solid 1px darkgreen; color: darkgreen; margin-left: 0.5rem; margin-right: 0.5rem; cursor: pointer;"
+                @click.stop="addBuyOrSoldNote(oneRow['fund_id'], oneRow['fund_name'], true, false,
+                  (oneRow['tranStateObj'] && oneRow['tranStateObj']['compose_plan'])? oneRow['tranStateObj']['compose_plan'] : ''
+                )">
+                想买
+                </span>
+                <span style="padding: 1px 3px; border-radius: 5px; border: solid 1px chocolate; color: chocolate; cursor: pointer;"
+                @click.stop="addBuyOrSoldNote(oneRow['fund_id'], oneRow['fund_name'], false, true,
+                  (oneRow['tranStateObj'] && oneRow['tranStateObj']['compose_plan'])? oneRow['tranStateObj']['compose_plan'] : ''
+                )">
+                想卖
+                </span>                
+              </div>
               <template v-if="noteObjs[oneRow['fund_id']] && noteObjs[oneRow['fund_id']]['full_comments'] && noteObjs[oneRow['fund_id']]['full_comments'].length > 0">
                 <div style="position: relative;--tooltip-left:0rem;--tooltip-top:1.5rem;cursor: pointer;"
                      v-bind:data-title="noteObjs[oneRow['fund_id']]['full_comments']" data-float-no-pos-sm="" @click.stop="switchWriteNote(oneRow)">{{ oneRow.fund_name }}
@@ -407,9 +423,9 @@
                   <div class="para_info">
                     <div>
                       <template v-if="oneRow['tranStateObj']['compose_plan'] === 'ovtree'">
-                      <span class="badge bg-primary text-bg-success big_badge stack_2_info">
-                        橄榄树
-                      </span>
+                        <span class="badge bg-primary text-bg-success big_badge stack_2_info">
+                          橄榄树
+                        </span>
                       </template>
                       <template v-else-if="oneRow['tranStateObj']['compose_plan'] === 'dolphin'">
                           <span class="badge bg-info text-bg-success big_badge stack_2_info">
@@ -536,7 +552,8 @@ import { storeToRefs } from 'pinia'
 import { useZskbStore } from '../store/zskbStore';
 import { useReportStore } from "../store/reportStore.js";
 import { Modal, Alert } from "bootstrap";
-import {useComposeStore} from "../store/composeStore.js";
+import { useComposeStore } from "../store/composeStore.js";
+import { useBuyInOutStore } from '../store/buyInOutStore.js';
 import { useRoute } from 'vue-router'
 
 const route = useRoute()
@@ -550,6 +567,9 @@ const { requireDynValues, getRecordsAndRates, removeLocalDynvalue, getBigPoolFix
 const composeStore = useComposeStore()
 const {noteObjs, noteReportObjs} = storeToRefs(composeStore)
 const {getFundNotes4Report, getFundNotes4Edit, updateFundNotes, removeFundNotes} = composeStore
+
+const buyInOutStore = useBuyInOutStore()
+const { addBuyOrSoldNote } = buyInOutStore
 
 const colWidMap = {
   'col_1': 6,

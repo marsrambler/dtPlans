@@ -89,13 +89,22 @@ function getNegColor(_val) {
     }
 }
 
-function getHitStyle(_val) {
-    if (_val > 0) {
-      return 'purple_card';
-    } else if (_val < 0) {
-      return 'grey_card';
+function getHitStyle(_val, _for_pos=true) {
+    if (_for_pos) {
+        if (_val > 0) {
+          return 'purple_card';
+        } else if (_val < 0) {
+          return 'grey_card';
+        }
+        return 'white_card';
+    } else {
+        if (_val > 0) {
+          return 'darkgreen_card';
+        } else if (_val < 0) {
+          return 'grey_card';
+        }
+        return 'white_card';
     }
-    return 'white_card';
 }
 
 function getTodayStr() {
