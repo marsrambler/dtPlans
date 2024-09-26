@@ -125,13 +125,13 @@
                 @click.stop="addBuyOrSoldNote(oneRow['fund_id'], oneRow['fund_name'], true, false,
                   (oneRow['tranStateObj'] && oneRow['tranStateObj']['compose_plan'])? oneRow['tranStateObj']['compose_plan'] : ''
                 )">
-                想买
+                想买<template v-if="buyOrSoldObj[oneRow['fund_id']] && buyOrSoldObj[oneRow['fund_id']]['buy_times']">({{buyOrSoldObj[oneRow['fund_id']]['buy_times']}})</template>
                 </span>
                 <span style="padding: 1px 3px; border-radius: 5px; border: solid 1px chocolate; color: chocolate; cursor: pointer;"
                 @click.stop="addBuyOrSoldNote(oneRow['fund_id'], oneRow['fund_name'], false, true,
                   (oneRow['tranStateObj'] && oneRow['tranStateObj']['compose_plan'])? oneRow['tranStateObj']['compose_plan'] : ''
                 )">
-                想卖
+                想卖<template v-if="buyOrSoldObj[oneRow['fund_id']] && buyOrSoldObj[oneRow['fund_id']]['sold_times']">({{buyOrSoldObj[oneRow['fund_id']]['sold_times']}})</template>
                 </span>                
               </div>
               <template v-if="noteObjs[oneRow['fund_id']] && noteObjs[oneRow['fund_id']]['full_comments'] && noteObjs[oneRow['fund_id']]['full_comments'].length > 0">
@@ -569,7 +569,8 @@ const {noteObjs, noteReportObjs} = storeToRefs(composeStore)
 const {getFundNotes4Report, getFundNotes4Edit, updateFundNotes, removeFundNotes} = composeStore
 
 const buyInOutStore = useBuyInOutStore()
-const { addBuyOrSoldNote } = buyInOutStore
+const { buyOrSoldObj } = storeToRefs(buyInOutStore)
+const { addBuyOrSoldNote, getBuyOrSoldNote } = buyInOutStore
 
 const colWidMap = {
   'col_1': 6,

@@ -228,11 +228,11 @@
                   </template>
                   <span style="padding: 1px 3px; border-radius: 5px; border: solid 1px darkgreen; color: darkgreen; margin-left: 0.5rem; margin-right: 0.5rem; cursor: pointer;"
                   @click.stop="addBuyOrSoldNote(oneRow['fund_id'], oneRow['fund_name'], true, false, oneRow['compose_name'])">
-                    想买
+                    想买<template v-if="buyOrSoldObj[oneRow['fund_id']] && buyOrSoldObj[oneRow['fund_id']]['buy_times']">({{buyOrSoldObj[oneRow['fund_id']]['buy_times']}})</template>
                   </span>
                   <span style="padding: 1px 3px; border-radius: 5px; border: solid 1px chocolate; color: chocolate; cursor: pointer;"
                   @click.stop="addBuyOrSoldNote(oneRow['fund_id'], oneRow['fund_name'], false, true, oneRow['compose_name'])">
-                    想卖
+                    想卖<template v-if="buyOrSoldObj[oneRow['fund_id']] && buyOrSoldObj[oneRow['fund_id']]['sold_times']">({{buyOrSoldObj[oneRow['fund_id']]['sold_times']}})</template>
                   </span>
                 </div>
                 <div>
@@ -576,11 +576,11 @@
                   </template>
                   <span style="padding: 1px 3px; border-radius: 5px; border: solid 1px darkgreen; color: darkgreen; margin-left: 0.5rem; margin-right: 0.5rem; cursor: pointer;"
                   @click.stop="addBuyOrSoldNote(oneRow['fund_id'], oneRow['fund_name'], true, false, oneRow['compose_name'])">
-                    想买
+                    想买<template v-if="buyOrSoldObj[oneRow['fund_id']] && buyOrSoldObj[oneRow['fund_id']]['buy_times']">({{buyOrSoldObj[oneRow['fund_id']]['buy_times']}})</template>
                   </span>
                   <span style="padding: 1px 3px; border-radius: 5px; border: solid 1px chocolate; color: chocolate; cursor: pointer;"
                   @click.stop="addBuyOrSoldNote(oneRow['fund_id'], oneRow['fund_name'], false, true, oneRow['compose_name'])">
-                    想卖
+                    想卖<template v-if="buyOrSoldObj[oneRow['fund_id']] && buyOrSoldObj[oneRow['fund_id']]['sold_times']">({{buyOrSoldObj[oneRow['fund_id']]['sold_times']}})</template>
                   </span>
                 </div>
                 <div>
@@ -1450,8 +1450,8 @@ const composeStore = useComposeStore()
 const { composeObjs, fixedHoldObjs, totMoney, totPositiveNum, totPoleNum, totEarnMoney, totEarnRate, totSetBuy, totPlanBuy, diffBuySet, noteObjs } = storeToRefs(composeStore)
 const { getAllCompose, setComposeProperty, setComposeSoldDate, getComposeFixedHold, addOrRemoveCompose, getFundNotes4Edit, updateFundNotes, removeFundNotes } = composeStore
 const buyInOutStore = useBuyInOutStore()
-const { buyoutRecords, wav_reports, buyout_future_objs, contStartStopObj} = storeToRefs(buyInOutStore)
-const { getAllBuyoutRecords, soldComposeFixedHold, buyOutFixedFund, calculatePlanMoney, buyOutFixedFundOfToday, getAllBuyoutFutureRecords, addBuyOrSoldNote } = buyInOutStore
+const { buyoutRecords, wav_reports, buyout_future_objs, contStartStopObj, buyOrSoldObj} = storeToRefs(buyInOutStore)
+const { getAllBuyoutRecords, soldComposeFixedHold, buyOutFixedFund, calculatePlanMoney, buyOutFixedFundOfToday, getAllBuyoutFutureRecords, addBuyOrSoldNote, getBuyOrSoldNote } = buyInOutStore
 const zskbStore = useZskbStore()
 const { zskbObjs } = storeToRefs(zskbStore)
 
@@ -1656,8 +1656,12 @@ watch([composeObjs, compose_name, fixedHoldObjs, buyoutRecords, noteObjs, show4S
         let lastHoldObj = fixedHoldObj['hold_objs'][fixedHoldObj['hold_objs'].length - 1]
         totMoney.value += lastHoldObj['accu_money']
         totEarnMoney.value += lastHoldObj['accu_pure_profit']
-        totSetBuy.value += elem['money']
-        totPlanBuy.value += elem['adjust_money']
+        if (elem['money'] > 0) {
+          totSetBuy.value += elem['money']
+        }
+        if (elem['adjust_money'] > 0) {
+          totPlanBuy.value += elem['adjust_money']
+        }
       }
 
       if (elem.hasOwnProperty('kbObj') && elem['kbObj'] != null) {

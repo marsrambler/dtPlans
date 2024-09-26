@@ -13,6 +13,7 @@ export const useBuyInOutStore = defineStore('buyInOut-store', () => {
     const wav_reports = ref([])
     const buyout_future_objs = ref({})
     const contStartStopObj = ref({})
+    const buyOrSoldObj = ref({})
 
     // action
     async function getAllBuyoutRecords() {
@@ -648,11 +649,42 @@ export const useBuyInOutStore = defineStore('buyInOut-store', () => {
             if (response.status == 200) {
                 await response.data
                 useApiStore().pop_alert_msg("登记买入卖出成功: " + fund_name)
+                await getBuyOrSoldNote();
             } else {
                 console.error("axios add buy or sold note failed: ", response)
             }
         } catch (error) {
             console.log("axios add buy or sold note error: ", error)
+        }
+    }
+
+    async function getBuyOrSoldNote() {
+        try {
+            const response = await axiosInst.get("api/get_sold_buy_notes")
+            if (response.status == 200) {
+                let _ret_objs = await response.data;
+                for (let _key in _ret_objs) {
+                  let _sold_times = 0;
+                  let _buy_times = 0;
+                  if (_ret_objs[_key] && _ret_objs[_key].length > 0) {
+                      _ret_objs[_key].forEach(elem => {
+                        if (elem['for_buy']) {
+                          _buy_times += 1;
+                        }
+                        if (elem['for_sold']) {
+                          _sold_times += 1;
+                        }
+                      });
+                  }
+                  buyOrSoldObj.value[_key] = new Object;
+                  buyOrSoldObj.value[_key]['buy_times'] = _buy_times;
+                  buyOrSoldObj.value[_key]['sold_times'] = _sold_times;
+                }                 
+            } else {
+                console.error("axios get buy or sold failed: ", response)
+            }
+        } catch (error) {
+            console.log("axios get buy or sold error: ", error)
         }
     }
 
@@ -663,6 +695,7 @@ export const useBuyInOutStore = defineStore('buyInOut-store', () => {
         wav_reports,
         buyout_future_objs,
         contStartStopObj,
+        buyOrSoldObj,
         getAllBuyoutRecords,
         fundCanBeBuyOut,
         soldComposeFixedHold,
@@ -674,7 +707,8 @@ export const useBuyInOutStore = defineStore('buyInOut-store', () => {
         calculatePlanMoney,
         getAllBuyoutFutureRecords,
         getContStartStop,
-        addBuyOrSoldNote
+        addBuyOrSoldNote,
+        getBuyOrSoldNote
     }
 
 });
