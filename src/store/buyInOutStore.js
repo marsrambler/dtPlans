@@ -61,6 +61,7 @@ export const useBuyInOutStore = defineStore('buyInOut-store', () => {
         let _fund_id_array = [];
         let _fund_name_array = [];
         let _buyin_source_array = [];
+        let _tot_money = 0;
 
         for (let _idx = 0; _idx < _hold_objs.length; _idx++) {
             let _loop_obj = _hold_objs[_idx];
@@ -86,6 +87,7 @@ export const useBuyInOutStore = defineStore('buyInOut-store', () => {
             _distance_natural_array.push(_distance_natural);
             _buyin_source_array.push(_buyin_source);
             if (_loop_obj['fund_order'] == one_hold_obj_end['fund_order']) {
+                _tot_money = one_hold_obj_end['accu_money']
                 break;
             }
         }
@@ -98,7 +100,8 @@ export const useBuyInOutStore = defineStore('buyInOut-store', () => {
                 'fund_order_array': _fund_order_array,
                 'fund_name_array': _fund_name_array,
                 'distance_natural_array': _distance_natural_array,
-                'buyin_source_array': _buyin_source_array
+                'buyin_source_array': _buyin_source_array,
+                'tot_money': _tot_money
             })
             if (response.status === 200) {
                 useApiStore().pop_alert_msg("批量卖出成功: " + _fund_name, " 级别更新至4.3")
