@@ -1838,7 +1838,7 @@ async function removeFixedFundUi(_fund_id, _fund_name, _one_hold_obj, _oneRow) {
   fund_id_remove.value = _fund_id
   fund_name_remove.value = _fund_name
   one_hold_obj_remove.value = _one_hold_obj
-  fund_obj_remove = _oneRow
+  fund_obj_remove.value = _oneRow
   dlgController.value.removeDlg.show();
 }
 
@@ -1848,7 +1848,7 @@ async function removeFixedFund() {
     dlgController.value.removeDlg.hide()
   } else if (fixed_remove_type.value == 'remove today') {
     await buyOutFixedFundOfToday(fund_id_remove.value, fund_name_remove.value);
-    await setComposeProperty(fund_obj_remove['fund_id'], fund_obj_remove['fund_name'], fund_obj_remove['compose_name'], -1, fund_obj_remove['buyin_source']);
+    await setComposeProperty(fund_obj_remove.value['fund_id'], fund_obj_remove.value['fund_name'], fund_obj_remove.value['compose_name'], -1, fund_obj_remove.value['buyin_source']);
     dlgController.value.removeDlg.hide()
   } else {
     console.error("internal error as remove fund type does not match.")
@@ -1859,7 +1859,7 @@ async function removeFixedFund4TodayUi(_fund_id, _fund_name, _oneRow) {
   fixed_remove_type.value = 'remove today'
   fund_id_remove.value = _fund_id
   fund_name_remove.value = _fund_name
-  fund_obj_remove = _oneRow
+  fund_obj_remove.value = _oneRow
   dlgController.value.removeDlg.show();
 }
 
