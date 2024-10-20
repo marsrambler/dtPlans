@@ -352,7 +352,7 @@
                 </template>
                 <template v-if="oneRow.hasOwnProperty('money') && oneRow['money'] > 0 && (!buyout_future_objs.hasOwnProperty(oneRow['fund_id']) || !buyout_future_objs[oneRow['fund_id']])">
                   <button type="button" class="btn btn-secondary" style="font-size: 0.8rem; margin-right: 0.5rem;padding-left:5px;padding-right:5px"
-                          @click.stop="removeFixedFund4TodayUi(oneRow['fund_id'], oneRow['fund_name'])">
+                          @click.stop="removeFixedFund4TodayUi(oneRow['fund_id'], oneRow['fund_name'], oneRow)">
                     撤今日
                   </button>
                 </template>
@@ -940,7 +940,7 @@
                 </template>
                 <template v-if="oneRow.hasOwnProperty('money') && oneRow['money'] > 0 && (!buyout_future_objs.hasOwnProperty(oneRow['fund_id']) || !buyout_future_objs[oneRow['fund_id']])">
                   <button type="button" class="btn btn-secondary" style="font-size: 0.8rem; margin-right: 0.5rem;padding-left:5px;padding-right:5px"
-                          @click.stop="removeFixedFund4TodayUi(oneRow['fund_id'], oneRow['fund_name'])">
+                          @click.stop="removeFixedFund4TodayUi(oneRow['fund_id'], oneRow['fund_name'], oneRow)">
                     撤今日
                   </button>
                 </template>
@@ -1251,7 +1251,7 @@
                             </template>
                             <template v-else>
                               <input class="btn btn-danger btn-sm" type="button" value="删除"
-                                @click="removeFixedFundUi(oneRow['fund_id'], oneRow['fund_name'], one_hold_obj)">
+                                @click="removeFixedFundUi(oneRow['fund_id'], oneRow['fund_name'], one_hold_obj, oneRow)">
                             </template>
                           </td>
                         </tr>
@@ -1334,6 +1334,7 @@
           </template>
           <template v-else-if="fixed_remove_type == 'remove today'">
             <h6>以下将被撤销: </h6>
+            <h6>定投金额将会被设置为 0, 注意更新定投账户。</h6>
             <h6>{{ fund_id_remove }}&nbsp;{{ fund_name_remove }}</h6>
           </template>
         </div>
@@ -1830,12 +1831,14 @@ const fund_id_remove = ref('')
 const fund_name_remove = ref('')
 const one_hold_obj_remove = ref(null)
 const fixed_remove_type = ref('')
+const fund_obj_remove = ref(null)
 
-async function removeFixedFundUi(_fund_id, _fund_name, _one_hold_obj) {
+async function removeFixedFundUi(_fund_id, _fund_name, _one_hold_obj, _oneRow) {
   fixed_remove_type.value = 'remove old'
   fund_id_remove.value = _fund_id
   fund_name_remove.value = _fund_name
   one_hold_obj_remove.value = _one_hold_obj
+  fund_obj_remove = _oneRow
   dlgController.value.removeDlg.show();
 }
 
@@ -1844,17 +1847,19 @@ async function removeFixedFund() {
     buyOutFixedFund(fund_id_remove.value, fund_name_remove.value, one_hold_obj_remove.value)
     dlgController.value.removeDlg.hide()
   } else if (fixed_remove_type.value == 'remove today') {
-    buyOutFixedFundOfToday(fund_id_remove.value, fund_name_remove.value)
+    await buyOutFixedFundOfToday(fund_id_remove.value, fund_name_remove.value);
+    await setComposeProperty(fund_obj_remove['fund_id'], fund_obj_remove['fund_name'], fund_obj_remove['compose_name'], -1, fund_obj_remove['buyin_source']);
     dlgController.value.removeDlg.hide()
   } else {
     console.error("internal error as remove fund type does not match.")
   }
 }
 
-async function removeFixedFund4TodayUi(_fund_id, _fund_name) {
+async function removeFixedFund4TodayUi(_fund_id, _fund_name, _oneRow) {
   fixed_remove_type.value = 'remove today'
   fund_id_remove.value = _fund_id
   fund_name_remove.value = _fund_name
+  fund_obj_remove = _oneRow
   dlgController.value.removeDlg.show();
 }
 
