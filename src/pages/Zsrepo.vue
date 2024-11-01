@@ -1,6 +1,6 @@
 <template>
   <div :style="topSecClass">
-    <div id="op_pane" :style="{ 'height': opPaneHeight + 'rem'}" class="grid_pane_c12">
+    <div id="op_pane" :style="{ 'height': opPaneHeight + 'rem'}" class="grid_pane_c11">
       <div>总数&nbsp;<span class="badge bg-success">{{ currTotNum }}</span><!--
       --></div>
       <div style="position: relative; top:4px;"><!--

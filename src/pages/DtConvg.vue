@@ -483,7 +483,11 @@ const { getAllBuyinRecords, custBuyIn, calculatePlanMoney } = buyInOutStore
 
 const buy_in_from_plan = [
   { 'source_name': '无计划', 'source_val': 'noplan' },
-  { 'source_name': '海豚', 'source_val': 'dolphin' }
+  //不能放开选择，因为后台业务逻辑严格绑定了类别
+  //{'source_name': '橄榄树', 'source_val': 'ovtree'},
+  {'source_name': '海豚', 'source_val': 'dolphin'},
+  //{'source_name': '三叉戟', 'source_val': 'trident'},
+  //{'source_name': '金毛羊', 'source_val': 'gdngoat'}
 ]
 
 const colWidMap = {
@@ -805,21 +809,37 @@ function sortByField(_field) {
   } else if (_field === 'positive') {
     if (sortFieldFlag.value) {
       convgViewObjs.value.sort((a, b) => {
-        return a['positive']['positive_reach_len'] - b['positive']['positive_reach_len'];
+        if (a['positive']['positive_reach_len'] != b['positive']['positive_reach_len']) {
+          return a['positive']['positive_reach_len'] - b['positive']['positive_reach_len'];
+        } else {
+          return b['negative']['negative_reach_len'] - a['negative']['negative_reach_len'];
+        }
       });
     } else {
       convgViewObjs.value.sort((a, b) => {
-        return b['positive']['positive_reach_len'] - a['positive']['positive_reach_len'];
+        if (a['positive']['positive_reach_len'] != b['positive']['positive_reach_len']) {
+          return b['positive']['positive_reach_len'] - a['positive']['positive_reach_len'];
+        } else {
+          return a['negative']['negative_reach_len'] - b['negative']['negative_reach_len'];
+        }
       });
     }
   } else if (_field === 'negative') {
     if (sortFieldFlag.value) {
       convgViewObjs.value.sort((a, b) => {
-        return a['negative']['negative_reach_len'] - b['negative']['negative_reach_len'];
+        if (a['negative']['negative_reach_len'] != b['negative']['negative_reach_len']) {
+          return a['negative']['negative_reach_len'] - b['negative']['negative_reach_len'];
+        } else {
+          return b['positive']['positive_reach_len'] - a['positive']['positive_reach_len'];
+        }
       });
     } else {
       convgViewObjs.value.sort((a, b) => {
-        return b['negative']['negative_reach_len'] - a['negative']['negative_reach_len'];
+        if (a['negative']['negative_reach_len'] != b['negative']['negative_reach_len']) {
+          return b['negative']['negative_reach_len'] - a['negative']['negative_reach_len'];
+        } else {
+          return a['positive']['positive_reach_len'] - b['positive']['positive_reach_len'];
+        }
       });
     }
   } else if (_field === 'wav_rate') {

@@ -476,7 +476,7 @@ const {getAllBuyinRecords, custBuyIn, calculatePlanMoney} = buyInOutStore
 
 const buy_in_from_plan = [
   {'source_name': '无计划', 'source_val': 'noplan'},
-  {'source_name': '三叉戟', 'source_val': 'trident'},
+  //{'source_name': '三叉戟', 'source_val': 'trident'},
   {'source_name': '金毛羊', 'source_val': 'gdngoat'}
 ]
 
@@ -784,21 +784,37 @@ function sortByField(_field) {
   } else if (_field === 'positive') {
     if (sortFieldFlag.value) {
       aggressiveViewObjs.value.sort((a, b) => {
-        return a['positive']['positive_reach_len'] - b['positive']['positive_reach_len'];
+        if (a['positive']['positive_reach_len'] != b['positive']['positive_reach_len']) {
+          return a['positive']['positive_reach_len'] - b['positive']['positive_reach_len'];
+        } else {
+          return b['negative']['negative_reach_len'] - a['negative']['negative_reach_len'];
+        }
       });
     } else {
       aggressiveViewObjs.value.sort((a, b) => {
-        return b['positive']['positive_reach_len'] - a['positive']['positive_reach_len'];
+        if (a['positive']['positive_reach_len'] != b['positive']['positive_reach_len']) {
+          return b['positive']['positive_reach_len'] - a['positive']['positive_reach_len'];
+        } else {
+          return a['negative']['negative_reach_len'] - b['negative']['negative_reach_len'];
+        }
       });
     }
   } else if (_field === 'negative') {
     if (sortFieldFlag.value) {
       aggressiveViewObjs.value.sort((a, b) => {
-        return a['negative']['negative_reach_len'] - b['negative']['negative_reach_len'];
+        if (a['negative']['negative_reach_len'] != b['negative']['negative_reach_len']) {
+          return a['negative']['negative_reach_len'] - b['negative']['negative_reach_len'];
+        } else {
+          return b['positive']['positive_reach_len'] - a['positive']['positive_reach_len'];
+        }
       });
     } else {
       aggressiveViewObjs.value.sort((a, b) => {
-        return b['negative']['negative_reach_len'] - a['negative']['negative_reach_len'];
+        if (a['negative']['negative_reach_len'] != b['negative']['negative_reach_len']) {
+          return b['negative']['negative_reach_len'] - a['negative']['negative_reach_len'];
+        } else {
+          return a['positive']['positive_reach_len'] - b['positive']['positive_reach_len'];
+        }
       });
     }
   } else if (_field === 'wav_rate') {

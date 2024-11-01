@@ -53,8 +53,12 @@
         <tr :style="{ 'height': tabHeaderHeight + 'rem' }">
           <th :style="{ 'width': colWidMap['col_1'] + 'rem' }">
             <div>
-              <div class="w33_w_br">
-                <span>名称</span>
+              <div class="w33_w_br" @click="sortByField('day_xxx_thres')">
+                <template v-if="sortFieldName === 'day_xxx_thres'">
+                  <span v-if="sortFieldFlag"><i class="bi bi-arrow-up"></i></span>
+                  <span v-else><i class="bi bi-arrow-down"></i></span>
+                </template>
+                <span>趋势</span>
               </div>
               <div class="w33_w_br" @click="sortByField('fund_len')">
                 <template v-if="sortFieldName === 'fund_len'">
@@ -1887,7 +1891,33 @@ function sortByField(_field) {
     sortFieldFlag.value = true
   }
 
-  if (_field === 'min_earn') {
+if (_field === 'day_xxx_thres') {
+    if (sortFieldFlag.value) {
+      composeViewObjs.value.sort((a, b) => {
+        let a_val = 999;
+        let b_val = 999;
+        if (a['kbObj'] && a['kbObj']['statistics'] && a['kbObj']['statistics'].hasOwnProperty('day_sort_tot_thres')) {
+          a_val = a['kbObj']['statistics']['day_sort_tot_thres']
+        }
+        if (b['kbObj'] && b['kbObj']['statistics'] && b['kbObj']['statistics'].hasOwnProperty('day_sort_tot_thres')) {
+          b_val = b['kbObj']['statistics']['day_sort_tot_thres']
+        }
+        return a_val - b_val;
+      });
+    } else {
+      composeViewObjs.value.sort((a, b) => {
+        let a_val = -999;
+        let b_val = -999;
+        if (a['kbObj'] && a['kbObj']['statistics'] && a['kbObj']['statistics'].hasOwnProperty('day_sort_tot_thres')) {
+          a_val = a['kbObj']['statistics']['day_sort_tot_thres']
+        }
+        if (b['kbObj'] && b['kbObj']['statistics'] && b['kbObj']['statistics'].hasOwnProperty('day_sort_tot_thres')) {
+          b_val = b['kbObj']['statistics']['day_sort_tot_thres']
+        }
+        return b_val - a_val;
+      });
+    }
+  } else if (_field === 'min_earn') {
     if (sortFieldFlag.value) {
       composeViewObjs.value.sort((a, b) => {
         if (a['kbObj'] && a['kbObj']['statistics'] && a['kbObj']['statistics']['min_sort_tot_earn'] &&
@@ -1976,18 +2006,32 @@ function sortByField(_field) {
   } else if (_field === 'positive') {
     if (sortFieldFlag.value) {
       composeViewObjs.value.sort((a, b) => {
-        if (a['kbObj'] && a['kbObj']['positive'] &&
-          b['kbObj'] && b['kbObj']['positive']) {
-          return a['kbObj']['positive']['positive_reach_len'] - b['kbObj']['positive']['positive_reach_len'];
+        if (a['kbObj'] && a['kbObj']['positive'] && b['kbObj'] && b['kbObj']['positive']) {
+          if (a['kbObj']['positive']['positive_reach_len'] != b['kbObj']['positive']['positive_reach_len']) {
+            return a['kbObj']['positive']['positive_reach_len'] - b['kbObj']['positive']['positive_reach_len'];
+          } else {
+            if (a['kbObj'] && a['kbObj']['negative'] && b['kbObj'] && b['kbObj']['negative']) {
+              return b['kbObj']['negative']['negative_reach_len'] - a['kbObj']['negative']['negative_reach_len'];
+            } else {
+              return 0;
+            }
+          }
         } else {
           return 0;
         }
       });
     } else {
       composeViewObjs.value.sort((a, b) => {
-        if (a['kbObj'] && a['kbObj']['positive'] &&
-          b['kbObj'] && b['kbObj']['positive']) {
-          return b['kbObj']['positive']['positive_reach_len'] - a['kbObj']['positive']['positive_reach_len'];
+        if (a['kbObj'] && a['kbObj']['positive'] && b['kbObj'] && b['kbObj']['positive']) {
+          if (a['kbObj']['positive']['positive_reach_len'] != b['kbObj']['positive']['positive_reach_len']) {
+            return b['kbObj']['positive']['positive_reach_len'] - a['kbObj']['positive']['positive_reach_len'];
+          } else {
+            if (a['kbObj'] && a['kbObj']['negative'] && b['kbObj'] && b['kbObj']['negative']) {
+              return a['kbObj']['negative']['negative_reach_len'] - b['kbObj']['negative']['negative_reach_len'];
+            } else {
+              return 0;
+            }
+          }
         } else {
           return 0;
         }
@@ -1996,18 +2040,32 @@ function sortByField(_field) {
   } else if (_field === 'negative') {
     if (sortFieldFlag.value) {
       composeViewObjs.value.sort((a, b) => {
-        if (a['kbObj'] && a['kbObj']['negative'] &&
-          b['kbObj'] && b['kbObj']['negative']) {
-          return a['kbObj']['negative']['negative_reach_len'] - b['kbObj']['negative']['negative_reach_len'];
+        if (a['kbObj'] && a['kbObj']['negative'] && b['kbObj'] && b['kbObj']['negative']) {
+          if (a['kbObj']['negative']['negative_reach_len'] !=  b['kbObj']['negative']['negative_reach_len']) {
+            return a['kbObj']['negative']['negative_reach_len'] - b['kbObj']['negative']['negative_reach_len'];
+          } else {
+            if (a['kbObj'] && a['kbObj']['positive'] && b['kbObj'] && b['kbObj']['positive']) {
+              return b['kbObj']['positive']['positive_reach_len'] - a['kbObj']['positive']['positive_reach_len'];
+            } else {
+              return 0;
+            }
+          }
         } else {
           return 0;
         }
       });
     } else {
       composeViewObjs.value.sort((a, b) => {
-        if (a['kbObj'] && a['kbObj']['negative'] &&
-          b['kbObj'] && b['kbObj']['negative']) {
-          return b['kbObj']['negative']['negative_reach_len'] - a['kbObj']['negative']['negative_reach_len'];
+        if (a['kbObj'] && a['kbObj']['negative'] && b['kbObj'] && b['kbObj']['negative']) {
+          if (a['kbObj']['negative']['negative_reach_len'] !=  b['kbObj']['negative']['negative_reach_len']) {
+            return b['kbObj']['negative']['negative_reach_len'] - a['kbObj']['negative']['negative_reach_len'];
+          } else {
+            if (a['kbObj'] && a['kbObj']['positive'] && b['kbObj'] && b['kbObj']['positive']) {
+              return a['kbObj']['positive']['positive_reach_len'] - b['kbObj']['positive']['positive_reach_len'];
+            } else {
+              return 0;
+            }            
+          }
         } else {
           return 0;
         }

@@ -14,12 +14,13 @@ function getCardStyle(_val) {
     }
 }
 
-const typeMapObj = {0: '宽指', 1: '主题', 2: '行业', 3:'QDII'}
+const typeMapObj = {0: '宽指', 1: '主题', 2: '行业', 3: 'QDII', 4: '美债'}
 const type_map_objs_4_select = [
     {'source_name': '宽指', 'source_val': 0},
     {'source_name': '主题', 'source_val': 1},
     {'source_name': '行业', 'source_val': 2},
     {'source_name': 'QDII', 'source_val': 3},
+    {'source_name': '美债', 'source_val': 4}
 ]
 
 const navHeight = ref(3.5)

@@ -468,7 +468,7 @@ export const useBuyInOutStore = defineStore('buyInOut-store', () => {
                 }
                 elem['plan_buyin_money'] = parseInt(elem['plan_buyin_money']);
 
-            } else if (elem['compose_name'] === 'ovtree') {
+            } else if (elem['compose_name'] === 'ovtree' || elem['compose_name'] === 'trident') {
                 elem['plan_buyin_money'] = 60
                 if (elem['quant_obj'] && elem['quant_obj']['histo']) {
                     let _max_hitted_times = elem['quant_obj']['histo']['max_hitted_times']

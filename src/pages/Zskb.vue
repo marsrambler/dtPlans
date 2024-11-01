@@ -24,8 +24,12 @@
         <input class="form-check-input" type="checkbox" id="chk_qd" v-model="qdiiIdxOnly">
         <label class="form-check-label" for="chk_qd">QDII</label>
       </div>
+      <div class="form-check form_check_cust">
+        <input class="form-check-input" type="checkbox" id="chk_mz" v-model="mzIdxOnly">
+        <label class="form-check-label" for="chk_mz">美债</label>
+      </div>      
       <input class="btn btn-primary btn-sm" type="button" value="前移选择" @click="sortByField('selected')">
-      <input type="text" class="form-control-plaintext search_box" style="grid-column: 8 / span 2;" v-model="searchCond"
+      <input type="text" class="form-control-plaintext search_box" style="grid-column: 9 / span 2;" v-model="searchCond"
              @keyup.enter="searchByCond()">
       <input class="btn btn-primary btn-sm" type="button" value="查找" @click="searchByCond()">
       <input class="btn btn-warning btn-sm" type="button" value="刷新" @click="getZskb()">
@@ -449,9 +453,10 @@ const buy_in_esti_sugg_full = [
 const buy_in_from_plan = [
   {'source_name': '无计划', 'source_val': 'noplan'},
   {'source_name': '橄榄树', 'source_val': 'ovtree'},
-  // {'source_name': '海豚', 'source_val': 'dolphin'},
-  // { 'source_name': '三叉戟', 'source_val': 'trident' }
-  {'source_name': '金毛羊', 'source_val': 'gdngoat'}
+  //不能放开选择，因为后台业务逻辑严格绑定了类别
+  //{'source_name': '海豚', 'source_val': 'dolphin'},
+  {'source_name': '三叉戟', 'source_val': 'trident'},
+  //{'source_name': '金毛羊', 'source_val': 'gdngoat'}
 ]
 
 const colWidMap = {
@@ -474,9 +479,10 @@ const wideIdxOnly = ref(true)
 const topicIdxOnly = ref(true)
 const indusIdxOnly = ref(true)
 const qdiiIdxOnly = ref(true)
+const mzIdxOnly = ref(true)
 
-watch([zskbObjs, wideIdxOnly, topicIdxOnly, indusIdxOnly, qdiiIdxOnly, composeObjs], () => {
-  if (wideIdxOnly.value && topicIdxOnly.value && indusIdxOnly.value && qdiiIdxOnly.value) {
+watch([zskbObjs, wideIdxOnly, topicIdxOnly, indusIdxOnly, qdiiIdxOnly, mzIdxOnly, composeObjs], () => {
+  if (wideIdxOnly.value && topicIdxOnly.value && indusIdxOnly.value && qdiiIdxOnly.value && mzIdxOnly.value) {
     zskbViewObjs.value = zskbObjs.value
   } else {
     zskbViewObjs.value = []
@@ -508,6 +514,13 @@ watch([zskbObjs, wideIdxOnly, topicIdxOnly, indusIdxOnly, qdiiIdxOnly, composeOb
         }
       })
     }
+    if (mzIdxOnly.value) {
+      zskbObjs.value.forEach(elem => {
+        if (elem['indexType'] === 4) {
+          zskbViewObjs.value.push(elem)
+        }
+      })
+    }    
   }
   if (composeObjs && composeObjs.value && composeObjs.value.length > 0) {
     let _ovtree_fund_ids = composeObjs.value.find(item => item['compose_name'] === 'ovtree')['compose_objs'].map(item => item['fund_id'])
@@ -650,21 +663,37 @@ function sortByField(_field) {
   } else if (_field === 'positive') {
     if (sortFieldFlag.value) {
       zskbViewObjs.value.sort((a, b) => {
-        return a['positive']['positive_reach_len'] - b['positive']['positive_reach_len'];
+        if (a['positive']['positive_reach_len'] != b['positive']['positive_reach_len']) {
+          return a['positive']['positive_reach_len'] - b['positive']['positive_reach_len'];
+        } else {
+          return b['negative']['negative_reach_len'] - a['negative']['negative_reach_len'];
+        }
       });
     } else {
       zskbViewObjs.value.sort((a, b) => {
-        return b['positive']['positive_reach_len'] - a['positive']['positive_reach_len'];
+        if (a['positive']['positive_reach_len'] != b['positive']['positive_reach_len']) {
+          return b['positive']['positive_reach_len'] - a['positive']['positive_reach_len'];
+        } else {
+          return a['negative']['negative_reach_len'] - b['negative']['negative_reach_len'];
+        }
       });
     }
   } else if (_field === 'negative') {
     if (sortFieldFlag.value) {
       zskbViewObjs.value.sort((a, b) => {
-        return a['negative']['negative_reach_len'] - b['negative']['negative_reach_len'];
+        if (a['negative']['negative_reach_len'] != b['negative']['negative_reach_len']) {
+          return a['negative']['negative_reach_len'] - b['negative']['negative_reach_len'];
+        } else {
+          return b['positive']['positive_reach_len'] - a['positive']['positive_reach_len'];
+        }
       });
     } else {
       zskbViewObjs.value.sort((a, b) => {
-        return b['negative']['negative_reach_len'] - a['negative']['negative_reach_len'];
+        if (a['negative']['negative_reach_len'] != b['negative']['negative_reach_len']) {
+          return b['negative']['negative_reach_len'] - a['negative']['negative_reach_len'];
+        } else {
+          return a['positive']['positive_reach_len'] - b['positive']['positive_reach_len'];
+        }
       });
     }
   } else if (_field === 'wav_rate') {
