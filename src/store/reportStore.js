@@ -12,6 +12,7 @@ export const useReportStore = defineStore('report-store', () => {
     const dynRecordObjs_full = ref([])
     const dynRecordObjs_latest = ref([])
     const onlyShowLatest = ref(false)
+    const report_select = ref('all')
     const retroFundObj = ref(null)
     const fixedFundObjs = ref([])
     const fixedHoldObjs = ref([])
@@ -43,6 +44,9 @@ export const useReportStore = defineStore('report-store', () => {
 
     async function getRecordsAndRates(_refresh) {
         try {
+            dynRecordObjs_full.value = []
+            dynRecordObjs_latest.value = []
+
             const response = await axiosInst.get("dt-plans/api/get-fund-records-rate/" + _refresh)
             if (response.status === 200) {
                 const _response = await response.data
@@ -76,11 +80,11 @@ export const useReportStore = defineStore('report-store', () => {
             dynRecordObjs_latest.value = []
         }
 
-        if (onlyShowLatest.value) {
-            dynRecordObjs.value = dynRecordObjs_latest.value
-        } else {
-            dynRecordObjs.value = dynRecordObjs_full.value
-        }
+        // if (onlyShowLatest.value) {
+        //     dynRecordObjs.value = dynRecordObjs_latest.value
+        // } else {
+        //     dynRecordObjs.value = dynRecordObjs_full.value
+        // }
     }
 
     async function getRetroFunds() {
@@ -238,11 +242,69 @@ export const useReportStore = defineStore('report-store', () => {
         }
     }
 
-    watch (onlyShowLatest, () => {
-        if (onlyShowLatest.value) {
-            dynRecordObjs.value = dynRecordObjs_latest.value
-        } else {
-            dynRecordObjs.value = dynRecordObjs_full.value
+    watch ([onlyShowLatest, report_select, dynRecordObjs_latest, dynRecordObjs_full], () => {
+        if (!dynRecordObjs_latest.value || dynRecordObjs_latest.value.length === 0) {
+            console.warn("*** reportStore *** bypass as dynRecordObjs_latest is null")
+            return
+        }
+        if (!dynRecordObjs_full.value || dynRecordObjs_full.value.length === 0) {
+            console.warn("*** reportStore *** bypass as dynRecordObjs_full is null")
+            return
+        }
+        if (report_select.value === 'all') {
+            if (onlyShowLatest.value) {
+                dynRecordObjs.value = dynRecordObjs_latest.value
+            } else {
+                dynRecordObjs.value = dynRecordObjs_full.value
+            }
+        } else if (report_select.value === 'only_sold') {
+            if (onlyShowLatest.value) {
+                let _filterObjs = dynRecordObjs_latest.value.filter((elem) => elem['soldList4draw'] && elem['soldList4draw'].length > 0);
+                dynRecordObjs.value = _filterObjs
+            } else {
+                let _filterObjs = dynRecordObjs_full.value.filter((elem) => elem['soldList4draw'] && elem['soldList4draw'].length > 0);
+                dynRecordObjs.value = _filterObjs
+            }
+        } else if (report_select.value === 'only_non_sold') {
+            if (onlyShowLatest.value) {
+                let _filterObjs = dynRecordObjs_latest.value.filter((elem) => !elem['soldList4draw'] || elem['soldList4draw'].length === 0);
+                dynRecordObjs.value = _filterObjs
+            } else {
+                let _filterObjs = dynRecordObjs_full.value.filter((elem) => !elem['soldList4draw'] || elem['soldList4draw'].length === 0);
+                dynRecordObjs.value = _filterObjs
+            }
+        } else if (report_select.value === 'only_asc') {
+            if (onlyShowLatest.value) {
+                let _filterObjs = dynRecordObjs_latest.value.filter((elem) => elem['statistics'] && 
+                    elem['statistics'].hasOwnProperty('rate_from_last_sold') && 
+                    elem['statistics']['rate_from_last_sold'] >= 0.01 && 
+                    elem['soldList4draw'] && 
+                    elem['soldList4draw'].length > 0);
+                dynRecordObjs.value = _filterObjs
+            } else {
+                let _filterObjs = dynRecordObjs_full.value.filter((elem) => elem['statistics'] && 
+                    elem['statistics'].hasOwnProperty('rate_from_last_sold') && 
+                    elem['statistics']['rate_from_last_sold'] >= 0.01 && 
+                    elem['soldList4draw'] && 
+                    elem['soldList4draw'].length > 0);
+                dynRecordObjs.value = _filterObjs
+            }
+        } else if (report_select.value === 'only_dsc') {
+            if (onlyShowLatest.value) {
+                let _filterObjs = dynRecordObjs_latest.value.filter((elem) => elem['statistics'] && 
+                    elem['statistics'].hasOwnProperty('rate_from_last_sold') && 
+                    elem['statistics']['rate_from_last_sold'] < 0 && 
+                    elem['soldList4draw'] && 
+                    elem['soldList4draw'].length > 0);
+                dynRecordObjs.value = _filterObjs
+            } else {
+                let _filterObjs = dynRecordObjs_full.value.filter((elem) => elem['statistics'] && 
+                    elem['statistics'].hasOwnProperty('rate_from_last_sold') && 
+                    elem['statistics']['rate_from_last_sold'] < 0 && 
+                    elem['soldList4draw'] && 
+                    elem['soldList4draw'].length > 0);
+                dynRecordObjs.value = _filterObjs
+            }
         }
     })
 
@@ -362,6 +424,7 @@ export const useReportStore = defineStore('report-store', () => {
         dynRecordObjs_full,
         dynRecordObjs_latest,
         onlyShowLatest,
+        report_select,
         retroFundObj,
         fixedFundObjs,
         fixedHoldObjs,

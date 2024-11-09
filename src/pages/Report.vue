@@ -1,23 +1,37 @@
 <template>
   <div :style="topSecClass">
-    <div id="op_pane" :style="{ 'height': opPaneHeight + 'rem' }" class="grid_pane_c12">
-      <div>请求ID号(,)</div>
-      <input type="text" v-model="requireFundIds" class="form-control-plaintext search_box"
-        style="grid-column: 2 / span 2; padding-left: 0.2rem;">
+    <div id="op_pane" :style="{ 'height': opPaneHeight + 'rem' }" class="grid_pane_c8">
+      <div style="display: flex; flex-wrap: nowrap; align-items: center;">
+        <select class="form-select" style="width: 5.5rem;" v-model="report_select">
+          <option v-for="option in report_select_option" v-bind:value="option.source_val">
+            {{ option.source_name }}
+          </option>
+        </select>
+        <div style="display: inline-block;margin-left: 0.3rem; font-size:0.95rem; text-wrap: nowrap;">({{dynRecordObjs.length}})</div>
+      </div>
+      <!--
+      <div style="grid-column: 2 / span 3; display: flex; flex-wrap: nowrap; column-gap: 0.5rem; align-items: center;">
+        <div style="font-size:0.95rem; text-wrap: nowrap;">({{dynRecordObjs.length}})&nbsp;请求ID/,</div>
+        <input type="text" v-model="requireFundIds" class="form-control-plaintext search_box"
+          style="padding-left:0.2rem;padding-right:0.2rem;">      
+      </div>
       <input class="btn btn-primary btn-sm" type="button" value="请求" @click="requireDynValues4ui();">
+      -->
       <input class="btn btn-warning btn-sm" type="button" value="刷新" @click="getRecordsAndRates('refresh');">
+      <!--
       <input class="btn btn-info btn-sm" type="button" v-bind:value="canAddAllFlag? '全选' : '取消'"
       @click="allAllFundIntoRequestList();">
+      -->
       <input type="text" v-model="searchFundNameOrFundId" class="form-control-plaintext search_box"
              style="padding-left: 0.2rem;" @keyup.enter="excuteSearchFund()">
       <input class="btn btn-primary btn-sm" type="button" value="查找" @click="excuteSearchFund();">
       <div class="form-check form_check_cust" style="margin-left: 1rem;">
         <input class="form-check-input" type="checkbox" id="inc_perc" v-model="inc_earn_perc">
-        <label class="form-check-label" for="inc_perc">盈利</label>
+        <label class="form-check-label" for="inc_perc">盈利曲线</label>
       </div>
       <div class="form-check form_check_cust" style="margin-left: 1rem;">
         <input class="form-check-input" type="checkbox" id="inc_comments" v-model="inc_comments">
-        <label class="form-check-label" for="inc_comments">笔记</label>
+        <label class="form-check-label" for="inc_comments">笔记弹幕</label>
       </div>
       <div class="form-check form_check_cust" style="margin-left: 0rem;">
         <input class="form-check-input" type="checkbox" id="show_latest" v-model="onlyShowLatest">
@@ -255,10 +269,11 @@
             </td>
             <td style="text-align: center; padding-top: 0 !important; padding-bottom: 0 !important;" 
             v-bind:class="{ sel_row: oneRow['currSelected'] }">
-              <div class="flex_col" style="height: 9rem;">
+              <div class="flex_col"> <!-- style="height: 9rem;" -->
                 <button type="button" class="btn btn-primary" @click="genReport(oneRow)">
                   报告
                 </button>
+                <!--
                 <button type="button" class="btn btn-secondary" @click="addFundId4UpdateDynValue(oneRow['fund_id'])">
                   <template v-if="oneRow['add_refresh_flag']">
                     ✓刷新
@@ -270,6 +285,7 @@
                 <button type="button" class="btn btn-warning" @click="removeDynFileFromUi($event, oneRow)">
                   删除
                 </button>
+                -->
               </div>
             </td>
           </tr>
@@ -336,9 +352,9 @@
                 <button type="button" class="btn btn-secondary from_ctl_nr" @click="yAxisBtmAdjTimes -= 1;">&nbsp;-&nbsp;底</button>
                 <button type="button" class="btn btn-secondary from_ctl_nr" @click="picHeightAdjVal += 20;">&nbsp;+&nbsp;高</button>
                 <button type="button" class="btn btn-secondary from_ctl_nr" @click="picHeightAdjVal -= 20;">&nbsp;-&nbsp;高</button>
-                <input type="text" class="from_ctl_nr" style="width: 6.5rem;" v-model="oneRow['remove_asc_or_desc_or_sold_date']">
+                <input type="text" class="from_ctl_nr" style="width: 12rem;" v-model="oneRow['remove_asc_or_desc_or_sold_date']">
                 <button type="button" class="btn btn-secondary from_ctl_nr" @click="remove_Asc_or_Desc_or_Sold_Date(oneRow)"
-                        v-bind:disabled="!oneRow['remove_date_type'] || oneRow['remove_date_type'] ===''">
+                        v-bind:disabled="!oneRow['remove_date_type'] || oneRow['remove_date_type'] ==='' || remove_inprogress">
                   <template v-if="!oneRow['remove_date_type'] || oneRow['remove_date_type'] ===''">
                     移除项
                   </template>
@@ -561,7 +577,7 @@ const zskbStore = useZskbStore()
 const { zskbObjs } = storeToRefs(zskbStore)
 
 const reportStore = useReportStore()
-const { dynRecordObjs_full, dynRecordObjs_latest, dynRecordObjs, onlyShowLatest } = storeToRefs(reportStore)
+const { dynRecordObjs_full, dynRecordObjs_latest, dynRecordObjs, onlyShowLatest, report_select } = storeToRefs(reportStore)
 const { requireDynValues, getRecordsAndRates, removeLocalDynvalue, getBigPoolFixedHold, getIndexRtRate, removeDate4Report } = reportStore
 
 const composeStore = useComposeStore()
@@ -582,6 +598,14 @@ const colWidMap = {
   'col_7': 3.5,
   'col_8': 4
 }
+
+const report_select_option = [
+  { 'source_name': '全部', 'source_val': 'all' },
+  { 'source_name': '卖出', 'source_val': 'only_sold' },
+  { 'source_name': '非卖', 'source_val': 'only_non_sold' },
+  { 'source_name': '上涨', 'source_val': 'only_asc' },
+  { 'source_name': '下跌', 'source_val': 'only_dsc' }
+]
 
 // getRecordsAndRates('no')
 getBigPoolFixedHold()
@@ -1333,8 +1357,14 @@ function fillInAscDate(_date_str) {
   if (!currDynValue.value) {
     return
   }
-  currDynValue.value['remove_asc_or_desc_or_sold_date'] = _date_str
-  currDynValue.value['remove_date_type'] = 'asc'
+  if (currDynValue.value['remove_date_type'] === 'asc') {
+    if (currDynValue.value['remove_asc_or_desc_or_sold_date'].indexOf(_date_str) === -1) {
+      currDynValue.value['remove_asc_or_desc_or_sold_date'] = currDynValue.value['remove_asc_or_desc_or_sold_date'] + ";" + _date_str
+    }
+  } else {
+    currDynValue.value['remove_asc_or_desc_or_sold_date'] = _date_str
+    currDynValue.value['remove_date_type'] = 'asc'
+  }
   currDynValue.value['cut_buy_date_left_or_right'] = ""
 }
 
@@ -1342,8 +1372,14 @@ function fillInDescDate(_date_str) {
   if (!currDynValue.value) {
     return
   }
-  currDynValue.value['remove_asc_or_desc_or_sold_date'] = _date_str
-  currDynValue.value['remove_date_type'] = 'desc'
+  if (currDynValue.value['remove_date_type'] === 'desc') {
+    if (currDynValue.value['remove_asc_or_desc_or_sold_date'].indexOf(_date_str) === -1) {
+      currDynValue.value['remove_asc_or_desc_or_sold_date'] = currDynValue.value['remove_asc_or_desc_or_sold_date'] + ";" + _date_str
+    }
+  } else {
+    currDynValue.value['remove_asc_or_desc_or_sold_date'] = _date_str
+    currDynValue.value['remove_date_type'] = 'desc'
+  }
   currDynValue.value['cut_buy_date_left_or_right'] = ""
 }
 
@@ -1351,8 +1387,14 @@ function fillInSoldDate(_date_str) {
   if (!currDynValue.value) {
     return
   }
-  currDynValue.value['remove_asc_or_desc_or_sold_date'] = _date_str
-  currDynValue.value['remove_date_type'] = 'sold'
+  if (currDynValue.value['remove_date_type'] === 'sold') {
+    if (currDynValue.value['remove_asc_or_desc_or_sold_date'].indexOf(_date_str) === -1) {
+      currDynValue.value['remove_asc_or_desc_or_sold_date'] = currDynValue.value['remove_asc_or_desc_or_sold_date'] + ";" + _date_str
+    }
+  } else {
+    currDynValue.value['remove_asc_or_desc_or_sold_date'] = _date_str
+    currDynValue.value['remove_date_type'] = 'sold'
+  }
   currDynValue.value['cut_buy_date_left_or_right'] = ""
 }
 
@@ -1365,17 +1407,26 @@ function fillInBuyDate(_date_str) {
   currDynValue.value['remove_date_type'] = ''
 }
 
-function removeAscDateByStr(_date_str, oneRow, _equal = true, _to_right = true) {
-  let moneyAscChange4draw = currDynValue.value['moneyAscChange4draw']
-  const date_match = _equal? (elem) => elem['date_str'] === _date_str : _to_right? (elem) => elem['date_str'] >= _date_str : (elem) => elem['date_str'] <= _date_str
-  let _idx = moneyAscChange4draw.findIndex(date_match)
-  if (_idx === -1) {
-    return false
+function removeAscDateByStr(_date_str_list, oneRow, _equal = true, _to_right = true) {
+  let _arr = _date_str_list.split(";")
+  for (let _itx = 0; _itx < _arr.length; _itx++) {
+    let _date_str_temp = _arr[_itx]
+    let _date_str = _date_str_temp.trim()
+    if (_date_str == '') {
+      continue;
+    }
+    let moneyAscChange4draw = currDynValue.value['moneyAscChange4draw']
+    const date_match = _equal? (elem) => elem['date_str'] === _date_str : _to_right? (elem) => elem['date_str'] >= _date_str : (elem) => elem['date_str'] <= _date_str
+    let _idx = moneyAscChange4draw.findIndex(date_match)
+    if (_idx === -1) {
+      console.warn("removeAscDateByStr failed: ", _date_str, "_equal: ", _equal, " _to_right: ", _to_right);
+      return false
+    }
+    moneyAscChange4draw.splice(_idx, 1)
+    oneRow['statistics']['adjust_money_times'] -= 1
+    oneRow['statistics']['asc_money_times'] -= 1
+    oneRow['statistics']['asc_money_dates'].splice(_idx, 1)
   }
-  moneyAscChange4draw.splice(_idx, 1)
-  oneRow['statistics']['adjust_money_times'] -= 1
-  oneRow['statistics']['asc_money_times'] -= 1
-  oneRow['statistics']['asc_money_dates'].splice(_idx, 1)
   return true
 }
 
@@ -1386,17 +1437,26 @@ function removeAscDate(oneRow) {
   return removeAscDateByStr(oneRow['remove_asc_or_desc_or_sold_date'].trim(), oneRow)
 }
 
-function removeDescDateByStr(_date_str, oneRow, _equal = true, _to_right = true) {
-  let moneyDescChange4draw = currDynValue.value['moneyDescChange4draw']
-  const date_match = _equal? (elem) => elem['date_str'] === _date_str : _to_right? (elem) => elem['date_str'] >= _date_str : (elem) => elem['date_str'] <= _date_str
-  let _idx = moneyDescChange4draw.findIndex(date_match)
-  if (_idx === -1) {
-    return false
+function removeDescDateByStr(_date_str_list, oneRow, _equal = true, _to_right = true) {
+  let _arr = _date_str_list.split(";")
+  for (let _itx = 0; _itx < _arr.length; _itx++) {
+    let _date_str_temp = _arr[_itx]
+    let _date_str = _date_str_temp.trim()
+    if (_date_str === '') {
+      continue;
+    }
+    let moneyDescChange4draw = currDynValue.value['moneyDescChange4draw']
+    const date_match = _equal? (elem) => elem['date_str'] === _date_str : _to_right? (elem) => elem['date_str'] >= _date_str : (elem) => elem['date_str'] <= _date_str
+    let _idx = moneyDescChange4draw.findIndex(date_match)
+    if (_idx === -1) {
+      console.warn("removeDescDateByStr failed: ", _date_str, " _equal: ", _equal, " _to_right: ", _to_right);
+      return false
+    }
+    moneyDescChange4draw.splice(_idx, 1)
+    oneRow['statistics']['adjust_money_times'] -= 1
+    oneRow['statistics']['desc_money_times'] -= 1
+    oneRow['statistics']['desc_money_dates'].splice(_idx, 1)
   }
-  moneyDescChange4draw.splice(_idx, 1)
-  oneRow['statistics']['adjust_money_times'] -= 1
-  oneRow['statistics']['desc_money_times'] -= 1
-  oneRow['statistics']['desc_money_dates'].splice(_idx, 1)
   return true
 }
 
@@ -1407,30 +1467,41 @@ function removeDescDate(oneRow) {
   return removeDescDateByStr(oneRow['remove_asc_or_desc_or_sold_date'].trim(), oneRow)
 }
 
-function removeSoldDateByStr(_date_str, oneRow) {
-  let soldList4draw = currDynValue.value['soldList4draw']
-  const date_match = (elem) => elem['date_str'] === _date_str
-  let _idx = soldList4draw.findIndex(date_match)
-  if (_idx === -1 || _idx === soldList4draw.length - 1) {
-    return false
-  }
-  soldList4draw.splice(_idx, 1)
+function removeSoldDateByStr(_date_str_list, oneRow) {
+  let _arr = _date_str_list.split(";")
+  for (let _itx = 0; _itx < _arr.length; _itx++) {
+    let _date_str_temp = _arr[_itx]
+    let _date_str = _date_str_temp.trim()
+    if (_date_str === '') {
+      continue;
+    }
+    let soldList4draw = currDynValue.value['soldList4draw']
+    const date_match = (elem) => elem['date_str'] === _date_str
+    let _idx = soldList4draw.findIndex(date_match)
+    if (_idx === -1 || _idx === soldList4draw.length - 1) {
+      console.warn("removeSoldDateByStr [soldList4draw] failed: ", _date_str)
+      return false
+    }
+    soldList4draw.splice(_idx, 1)
 
-  let soldHistoryWrapper = currDynValue.value['soldHistoryWrapper']
-  _idx = soldHistoryWrapper.findIndex(date_match)
-  if (_idx === -1 || _idx === soldHistoryWrapper.length - 1) {
-    return false
-  }
-  soldHistoryWrapper.splice(_idx, 1)
+    let soldHistoryWrapper = currDynValue.value['soldHistoryWrapper']
+    _idx = soldHistoryWrapper.findIndex(date_match)
+    if (_idx === -1 || _idx === soldHistoryWrapper.length - 1) {
+      console.warn("removeSoldDateByStr [soldHistoryWrapper] failed: ", _date_str)
+      return false
+    }
+    soldHistoryWrapper.splice(_idx, 1)
 
-  let soldHistoryWrapper_reverse = currDynValue.value['soldHistoryWrapper_reverse']
-  _idx = soldHistoryWrapper_reverse.findIndex(date_match)
-  if (_idx === -1 || _idx === 0) {
-    return false
-  }
-  soldHistoryWrapper_reverse.splice(_idx, 1)
+    let soldHistoryWrapper_reverse = currDynValue.value['soldHistoryWrapper_reverse']
+    _idx = soldHistoryWrapper_reverse.findIndex(date_match)
+    if (_idx === -1 || _idx === 0) {
+      console.warn("removeSoldDateByStr [soldHistoryWrapper_reverse] failed: ", _date_str)
+      return false
+    }
+    soldHistoryWrapper_reverse.splice(_idx, 1)
 
-  oneRow['statistics']['sold_times'] -= 1
+    oneRow['statistics']['sold_times'] -= 1
+  }
   return true
 }
 
@@ -1441,11 +1512,17 @@ function removeSoldDate(oneRow) {
   return removeSoldDateByStr(oneRow['remove_asc_or_desc_or_sold_date'].trim(), oneRow)
 }
 
-function remove_Asc_or_Desc_or_Sold_Date(oneRow) {
+const remove_inprogress = ref(false)
+
+async function remove_Asc_or_Desc_or_Sold_Date(oneRow) {
   if (!oneRow['remove_date_type']) {
     return;
   }
-
+  if (remove_inprogress.value) {
+    console.warn("removing is in progress, return")
+    return;
+  }
+  remove_inprogress.value = true
   let result = false
   if (oneRow['remove_date_type'] === 'asc') {
     result = removeAscDate(oneRow)
@@ -1457,11 +1534,12 @@ function remove_Asc_or_Desc_or_Sold_Date(oneRow) {
 
   if (result) {
     backup_fund_id.value = oneRow['fund_id']
-    removeDate4Report(oneRow, oneRow['remove_date_type'])
+    await removeDate4Report(oneRow, oneRow['remove_date_type'])
   }
 
   oneRow['remove_asc_or_desc_or_sold_date'] = ""
   oneRow['remove_date_type'] = ''
+  remove_inprogress.value = false;
 }
 
 function cutBuyDate_left(oneRow) {
