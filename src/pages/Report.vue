@@ -17,7 +17,6 @@
       </div>
       <input class="btn btn-primary btn-sm" type="button" value="请求" @click="requireDynValues4ui();">
       -->
-      <input class="btn btn-warning btn-sm" type="button" value="刷新" @click="getRecordsAndRates('refresh');">
       <!--
       <input class="btn btn-info btn-sm" type="button" v-bind:value="canAddAllFlag? '全选' : '取消'"
       @click="allAllFundIntoRequestList();">
@@ -25,6 +24,7 @@
       <input type="text" v-model="searchFundNameOrFundId" class="form-control-plaintext search_box"
              style="padding-left: 0.2rem;" @keyup.enter="excuteSearchFund()">
       <input class="btn btn-primary btn-sm" type="button" value="查找" @click="excuteSearchFund();">
+      <input class="btn btn-warning btn-sm" type="button" value="刷新" @click="getRecordsAndRates('refresh');">
       <div class="form-check form_check_cust" style="margin-left: 1rem;">
         <input class="form-check-input" type="checkbox" id="inc_perc" v-model="inc_earn_perc">
         <label class="form-check-label" for="inc_perc">盈利曲线</label>
@@ -650,13 +650,13 @@ onActivated(() => {
     if (searchFundNameOrFundId.value.length === 6) {
       searchTimer.value = setInterval(() => {
         excuteSearchFund()
-        if (searchByFundIdFoundFlag.value || searchByFundIdTimes.value >= 10) {
+        if (searchByFundIdFoundFlag.value || searchByFundIdTimes.value >= 60) {
           if (searchTimer.value) {
             console.warn("clear search timer in report page")
             clearInterval(searchTimer.value)
           }
         }
-      }, 1000)
+      }, 2000)
     }
   }
   // each time goes to this page, get the fund notes again

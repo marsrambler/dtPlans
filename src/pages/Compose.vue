@@ -373,6 +373,30 @@
                 </button>
               </td>
               <td style="line-height: 2rem;" v-bind:class="{ sel_row: oneRow['currSelected'] }">
+                <div style="display:flex;align-items:center;">
+                  <span style="text-wrap:nowrap;">账户:&nbsp;&nbsp;</span>
+                  <select class="form-select nr_select" @click.stop v-model="oneRow['buyin_source']"
+                  :style="{
+                  'color': oneRow['buyin_source'] === 'jd'? 'blue': 
+                           oneRow['buyin_source'] === 'tt'? 'chocolate':
+                           oneRow['buyin_source'] === 'ths'? 'deeppink':
+                           oneRow['buyin_source'] === 'zfb'? 'purple':
+                           oneRow['buyin_source'] === 'gt'? 'indigo':
+                           oneRow['buyin_source'] === 'wx'? 'olive':
+                           oneRow['buyin_source'] === 'zs'? 'crimson': 'red',
+                  'border-color': oneRow['buyin_source'] === 'jd'? 'blue': 
+                           oneRow['buyin_source'] === 'tt'? 'chocolate':
+                           oneRow['buyin_source'] === 'ths'? 'deeppink':
+                           oneRow['buyin_source'] === 'zfb'? 'purple':
+                           oneRow['buyin_source'] === 'gt'? 'indigo':
+                           oneRow['buyin_source'] === 'wx'? 'olive':
+                           oneRow['buyin_source'] === 'zs'? 'crimson': 'red',
+                  'max-width': '6.2rem'}">
+                    <option v-for="option in buy_in_sources_options" v-bind:value="option.source_val">
+                      {{ option.source_name }}
+                    </option>
+                  </select>
+                </div>                
                 <div>
                   当前:&nbsp;
                   <input type="number" style="width: 4rem; border-radius: 5px;" v-model="oneRow['money']" @click.stop>
@@ -416,10 +440,10 @@
                     </template>
                   </template>
                 </div>
-                <div>
+                <div style="text-wrap:nowrap;">
                   <span style="font-size: 1rem; font-style: italic;text-decoration: underline;">{{
                     oneRow['last_adjust_money_date'] }}</span>&nbsp;
-                  <input class="btn btn-outline-danger btn-sm" type="button" value="保存"
+                  <input class="btn btn-outline-danger btn-sm" style="width:3.5rem;" type="button" value="保存"
                     @click.stop="setComposeProperty(oneRow['fund_id'], oneRow['fund_name'], oneRow['compose_name'], parseInt(oneRow['money']), oneRow['buyin_source'])">
                 </div>
               </td>
@@ -961,6 +985,30 @@
                 </button>
               </td>
               <td style="line-height: 2rem;" v-bind:class="{ sel_row: oneRow['currSelected'] }">
+                <div style="display:flex;align-items:center;">
+                  <span style="text-wrap:nowrap;">账户:&nbsp;&nbsp;</span>
+                  <select class="form-select nr_select" @click.stop v-model="oneRow['buyin_source']" 
+                  :style="{
+                  'color': oneRow['buyin_source'] === 'jd'? 'blue': 
+                           oneRow['buyin_source'] === 'tt'? 'chocolate':
+                           oneRow['buyin_source'] === 'ths'? 'deeppink':
+                           oneRow['buyin_source'] === 'zfb'? 'purple':
+                           oneRow['buyin_source'] === 'gt'? 'indigo':
+                           oneRow['buyin_source'] === 'wx'? 'olive':
+                           oneRow['buyin_source'] === 'zs'? 'crimson': 'red',
+                  'border-color': oneRow['buyin_source'] === 'jd'? 'blue': 
+                           oneRow['buyin_source'] === 'tt'? 'chocolate':
+                           oneRow['buyin_source'] === 'ths'? 'deeppink':
+                           oneRow['buyin_source'] === 'zfb'? 'purple':
+                           oneRow['buyin_source'] === 'gt'? 'indigo':
+                           oneRow['buyin_source'] === 'wx'? 'olive':
+                           oneRow['buyin_source'] === 'zs'? 'crimson': 'red',
+                  'max-width': '6.2rem'}">
+                    <option v-for="option in buy_in_sources_options" v-bind:value="option.source_val">
+                      {{ option.source_name }}
+                    </option>
+                  </select>
+                </div>                 
                 <template v-if="oneRow['plan_buyin_money']">
                   <div :style="{'color': oneRow['plan_buyin_money'] - oneRow['money'] >=10? '#f96' : 
                     oneRow['money'] - oneRow['plan_buyin_money'] >=10? 'red' : '',
@@ -1012,10 +1060,10 @@
                     </template>
                   </template>
                 </div>
-                <div style="height: 1.8rem;">
+                <div style="height: 1.8rem;text-wrap:nowrap;">
                   <span style="font-size: 1rem; font-style: italic;text-decoration: underline;">{{
                     oneRow['last_adjust_money_date'] }}</span>&nbsp;
-                  <input class="btn btn-outline-danger btn-sm" type="button" value="保存"
+                  <input class="btn btn-outline-danger btn-sm" style="width:3.5rem;" type="button" value="保存"
                     @click.stop="setComposeProperty(oneRow['fund_id'], oneRow['fund_name'], oneRow['compose_name'], parseInt(oneRow['money']), oneRow['buyin_source'])">
                 </div>
               </td>
@@ -1466,6 +1514,16 @@ const buy_in_from_plan = [
   { 'source_name': '海豚', 'source_val': 'dolphin' },
   { 'source_name': '三叉戟', 'source_val': 'trident' },
   { 'source_name': '金毛羊', 'source_val': 'gdngoat' }
+]
+
+const buy_in_sources_options = [
+  { 'source_name': '支付宝', 'source_val': 'zfb' },
+  { 'source_name': '微信', 'source_val': 'wx' },
+  { 'source_name': '天天', 'source_val': 'tt' },
+  { 'source_name': '国泰', 'source_val': 'gt' },
+  { 'source_name': '京东', 'source_val': 'jd' },
+  { 'source_name': '同花顺', 'source_val': 'ths' },
+  { 'source_name': '招商', 'source_val': 'zs' }
 ]
 
 const colWidMap = {

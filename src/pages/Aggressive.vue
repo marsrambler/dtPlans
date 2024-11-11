@@ -349,12 +349,12 @@
                   <div style="font-size: inherit;">{{ oneRow['manager_disp_1st_line'] }}</div>
                   <div style="font-size: inherit;">{{ oneRow['manager_disp_2nd_line'] }}</div>
                 </div>
-                <div class="right_pad">
+                <!-- <div class="right_pad" style="display: none;">
                       <button type="button" class="btn btn-outline-danger mw4_ctl" style="margin-top: 0.3rem;"
                               @click.stop="custBuyIn(oneRow.fund_id, oneRow.fund_name)"
                               v-bind:disabled="!oneRow['canGenMgr']">更新
                       </button>
-                </div>
+                </div> -->
               </td>
               <td class="nr_td" v-bind:class="{ sel_row: oneRow['currSelected'] }">
                 <template v-if="oneRow['tot_money']">

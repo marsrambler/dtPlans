@@ -160,31 +160,31 @@ export const useBuyInOutStore = defineStore('buyInOut-store', () => {
             console.log("axios get all buyin records error: ", error)
         }
     }
-
-    async function custBuyIn(cust_fund_id, cust_fund_name) {
-        try {
-            const response = await axiosInst.post("api/buy-in", {
-                'phone_num': '13426156189',
-                'fund_id': cust_fund_id,
-                'trade_date': getTodayStr(),
-                'money': 10,
-                'probe_date': "cust-probe-date",
-                'probe_type': "cust-probe-type",
-                'fund_name': cust_fund_name,
-                'buyin_source': "tt",
-                'buy_type': 100
-            })
-            if (response.status == 200) {
-                await response.data
-                useApiStore().pop_alert_msg("更新经理成功: " + cust_fund_name)
-                await getAllBuyinRecords()
-            } else {
-                console.error("axios set compose sold date failed: ", response)
-            }
-        } catch (error) {
-            console.log("axios set compose sold date error: ", error)
-        }
-    }
+    
+    // async function custBuyIn(cust_fund_id, cust_fund_name) {
+    //     try {
+    //         const response = await axiosInst.post("api/buy-in", {
+    //             'phone_num': '13426156189',
+    //             'fund_id': cust_fund_id,
+    //             'trade_date': getTodayStr(),
+    //             'money': 10,
+    //             'probe_date': "cust-probe-date",
+    //             'probe_type': "cust-probe-type",
+    //             'fund_name': cust_fund_name,
+    //             'buyin_source': "tt",
+    //             'buy_type': 100
+    //         })
+    //         if (response.status == 200) {
+    //             await response.data
+    //             useApiStore().pop_alert_msg("更新经理成功: " + cust_fund_name)
+    //             await getAllBuyinRecords()
+    //         } else {
+    //             console.error("axios set compose sold date failed: ", response)
+    //         }
+    //     } catch (error) {
+    //         console.log("axios set compose sold date error: ", error)
+    //     }
+    // }
 
     async function getFundWavReport() {
         try {
@@ -704,7 +704,7 @@ export const useBuyInOutStore = defineStore('buyInOut-store', () => {
         soldComposeFixedHold,
         buyOutFixedFund,
         getAllBuyinRecords,
-        custBuyIn,
+        //custBuyIn,
         getFundWavReport,
         buyOutFixedFundOfToday,
         calculatePlanMoney,
