@@ -372,6 +372,16 @@
                         橄榄树
                       </span>
                   </template>
+                  <template v-else-if="oneRow['compose_plan'] === 'flyhorse'">
+                      <span class="badge bg-secondary text-bg-success big_badge">
+                        飞马
+                      </span>
+                  </template>
+                  <template v-else-if="oneRow['compose_plan'] === 'medusa'">
+                      <span class="badge bg-warning text-bg-success big_badge">
+                        美杜莎
+                      </span>
+                  </template>                    
                   <template v-else-if="oneRow['compose_plan'] === 'dolphin'">
                       <span class="badge bg-info text-bg-success big_badge">
                         海豚
@@ -453,6 +463,8 @@ const buy_in_esti_sugg_full = [
 const buy_in_from_plan = [
   {'source_name': '无计划', 'source_val': 'noplan'},
   {'source_name': '橄榄树', 'source_val': 'ovtree'},
+  {'source_name': '飞马', 'source_val': 'flyhorse'},
+  {'source_name': '美杜莎', 'source_val': 'medusa'},    
   //不能放开选择，因为后台业务逻辑严格绑定了类别
   //{'source_name': '海豚', 'source_val': 'dolphin'},
   {'source_name': '三叉戟', 'source_val': 'trident'},
@@ -525,6 +537,10 @@ watch([zskbObjs, wideIdxOnly, topicIdxOnly, indusIdxOnly, qdiiIdxOnly, mzIdxOnly
   if (composeObjs && composeObjs.value && composeObjs.value.length > 0) {
     let _ovtree_fund_ids = composeObjs.value.find(item => item['compose_name'] === 'ovtree')['compose_objs'].map(item => item['fund_id'])
     let _ovtree_fund_objs = composeObjs.value.find(item => item['compose_name'] === 'ovtree')['compose_objs']
+    let _flyhorse_fund_ids = composeObjs.value.find(item => item['compose_name'] === 'flyhorse')['compose_objs'].map(item => item['fund_id'])
+    let _flyhorse_fund_objs = composeObjs.value.find(item => item['compose_name'] === 'flyhorse')['compose_objs']
+    let _medusa_fund_ids = composeObjs.value.find(item => item['compose_name'] === 'medusa')['compose_objs'].map(item => item['fund_id'])
+    let _medusa_fund_objs = composeObjs.value.find(item => item['compose_name'] === 'medusa')['compose_objs']        
     let _dolphin_fund_ids = composeObjs.value.find(item => item['compose_name'] === 'dolphin')['compose_objs'].map(item => item['fund_id'])
     let _dolphin_fund_objs = composeObjs.value.find(item => item['compose_name'] === 'dolphin')['compose_objs']
     let _trident_fund_ids = composeObjs.value.find(item => item['compose_name'] === 'trident')['compose_objs'].map(item => item['fund_id'])
@@ -535,6 +551,12 @@ watch([zskbObjs, wideIdxOnly, topicIdxOnly, indusIdxOnly, qdiiIdxOnly, mzIdxOnly
       if (_ovtree_fund_ids.indexOf(elem['fund_id']) != -1) {
         elem['compose_plan'] = 'ovtree'
         elem['compose_obj'] = _ovtree_fund_objs.find(_obj => _obj['fund_id'] === elem['fund_id'])
+      } else if (_flyhorse_fund_ids.indexOf(elem['fund_id']) != -1) {
+        elem['compose_plan'] = 'flyhorse'
+        elem['compose_obj'] = _flyhorse_fund_objs.find(_obj => _obj['fund_id'] === elem['fund_id'])
+      } else if (_medusa_fund_ids.indexOf(elem['fund_id']) != -1) {
+        elem['compose_plan'] = 'medusa'
+        elem['compose_obj'] = _medusa_fund_objs.find(_obj => _obj['fund_id'] === elem['fund_id'])
       } else if (_dolphin_fund_ids.indexOf(elem['fund_id']) != -1) {
         elem['compose_plan'] = 'dolphin'
         elem['compose_obj'] = _dolphin_fund_objs.find(_obj => _obj['fund_id'] === elem['fund_id'])
@@ -760,17 +782,17 @@ function sortByField(_field) {
     if (sortFieldFlag.value) {
       zskbViewObjs.value.sort((a, b) => {
         let _a_compose = a['compose_plan']
-        let _a_val = (_a_compose === 'noplan') ? 100 : (_a_compose === 'ovtree') ? 0 : (_a_compose === 'dolphin') ? 1 : (_a_compose === 'trident') ? 2 : (_a_compose === 'gdngoat') ? 3 : 4
+        let _a_val = (_a_compose === 'noplan') ? 100 : (_a_compose === 'ovtree') ? 0 : (_a_compose === 'dolphin') ? 1 : (_a_compose === 'trident') ? 2 : (_a_compose === 'gdngoat') ? 3 : (_a_compose === 'flyhorse') ? 4 : (_a_compose === 'medusa') ? 5 : 6
         let _b_compose = b['compose_plan']
-        let _b_val = (_b_compose === 'noplan') ? 100 : (_b_compose === 'ovtree') ? 0 : (_b_compose === 'dolphin') ? 1 : (_b_compose === 'trident') ? 2 : (_b_compose === 'gdngoat') ? 3 : 4
+        let _b_val = (_b_compose === 'noplan') ? 100 : (_b_compose === 'ovtree') ? 0 : (_b_compose === 'dolphin') ? 1 : (_b_compose === 'trident') ? 2 : (_b_compose === 'gdngoat') ? 3 : (_a_compose === 'flyhorse') ? 4 : (_a_compose === 'medusa') ? 5 : 6
         return _a_val - _b_val
       });
     } else {
       zskbViewObjs.value.sort((a, b) => {
         let _a_compose = a['compose_plan']
-        let _a_val = (_a_compose === 'noplan') ? 100 : (_a_compose === 'ovtree') ? 0 : (_a_compose === 'dolphin') ? 1 : (_a_compose === 'trident') ? 2 : (_a_compose === 'gdngoat') ? 3 : 4
+        let _a_val = (_a_compose === 'noplan') ? 100 : (_a_compose === 'ovtree') ? 0 : (_a_compose === 'dolphin') ? 1 : (_a_compose === 'trident') ? 2 : (_a_compose === 'gdngoat') ? 3 : (_a_compose === 'flyhorse') ? 4 : (_a_compose === 'medusa') ? 5 : 6
         let _b_compose = b['compose_plan']
-        let _b_val = (_b_compose === 'noplan') ? 100 : (_b_compose === 'ovtree') ? 0 : (_b_compose === 'dolphin') ? 1 : (_b_compose === 'trident') ? 2 : (_b_compose === 'gdngoat') ? 3 : 4
+        let _b_val = (_b_compose === 'noplan') ? 100 : (_b_compose === 'ovtree') ? 0 : (_b_compose === 'dolphin') ? 1 : (_b_compose === 'trident') ? 2 : (_b_compose === 'gdngoat') ? 3 : (_a_compose === 'flyhorse') ? 4 : (_a_compose === 'medusa') ? 5 : 6
         return _b_val - _a_val
       });
     }
@@ -801,11 +823,15 @@ function scrollViewBySelection() {
       let _idx = zskbViewObjs.value.findIndex(func)
       if (_idx != -1) {
         let _rowObj = zskbViewObjs.value[_idx]
-        rowElements.value[_rowObj['fund_id']].scrollIntoView({block: "center", behavior: "smooth"})
+        if (rowElements.value[_rowObj['fund_id']]) {
+            rowElements.value[_rowObj['fund_id']].scrollIntoView({block: "center", behavior: "smooth"})
+        }
       }
     } else {
       let _fund_id = zskbViewObjs.value[0]['fund_id']
-      rowElements.value[_fund_id].scrollIntoView({block: "center", behavior: "smooth"})
+      if (rowElements.value[_fund_id]) {
+          rowElements.value[_fund_id].scrollIntoView({block: "center", behavior: "smooth"})
+      }
     }
   })
 }
@@ -820,27 +846,44 @@ function searchByCond() {
     return
   }
   let _foundCnt = 0
-  let arr = searchCond.value.trim().split(" ")
-  zskbViewObjs.value.forEach((elem) => {
-    if (arr.length === 1) {
-      let _cond_1 = arr[0].trim()
-      if (elem['fund_name'].indexOf(_cond_1) !== -1) {
+  let _checkStrBackup = searchCond.value
+  let _testStr = _checkStrBackup.replace(/[0-9]/g, "")
+  let _pureStr = _testStr.trim()
+  if (_pureStr.length === 0 && searchCond.value.length === 6) {
+    // fund id
+    let _fundId = searchCond.value.trim()
+    zskbViewObjs.value.forEach((elem) => {
+      if (elem['fund_id'] === _fundId) {
         elem['currSelected'] = true
         _foundCnt += 1
       }
-    } else if (arr.length === 2) {
-      let _cond_1 = arr[0].trim()
-      let _cond_2 = arr[1].trim()
-      if (elem['fund_name'].indexOf(_cond_1) !== -1 && elem['fund_name'].indexOf(_cond_2) !== -1) {
-        elem['currSelected'] = true
-        _foundCnt += 1
+    })
+  } else {
+    // fund name
+    let arr = searchCond.value.trim().split(" ")
+    zskbViewObjs.value.forEach((elem) => {
+      if (arr.length === 1) {
+        let _cond_1 = arr[0].trim()
+        if (elem['fund_name'].indexOf(_cond_1) !== -1) {
+          elem['currSelected'] = true
+          _foundCnt += 1
+        }
+      } else if (arr.length === 2) {
+        let _cond_1 = arr[0].trim()
+        let _cond_2 = arr[1].trim()
+        if (elem['fund_name'].indexOf(_cond_1) !== -1 && elem['fund_name'].indexOf(_cond_2) !== -1) {
+          elem['currSelected'] = true
+          _foundCnt += 1
+        }
       }
-    }
-  })
+    })  
+  }  
+
   if (_foundCnt > 0) {
     sortByField('selected')
   } else {
     searchCond.value = ""
+    alert("根据id和名称都没有找到");
   }
 }
 

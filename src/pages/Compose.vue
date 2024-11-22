@@ -215,6 +215,16 @@
                       橄榄树
                     </span>
                   </template>
+                  <template v-else-if="oneRow['compose_name'] === 'flyhorse'">
+                    <span class="badge bg-secondary text-bg-success big_badge">
+                      飞马
+                    </span>
+                  </template>
+                  <template v-else-if="oneRow['compose_name'] === 'medusa'">
+                    <span class="badge bg-warning text-bg-success big_badge">
+                      美杜莎
+                    </span>
+                  </template>                   
                   <template v-else-if="oneRow['compose_name'] === 'dolphin'">
                     <span class="badge bg-info text-bg-success big_badge">
                       海豚
@@ -396,7 +406,8 @@
                       {{ option.source_name }}
                     </option>
                   </select>
-                </div>                
+                </div>
+                <div style="height:0.5rem;"></div>                
                 <div>
                   当前:&nbsp;
                   <input type="number" style="width: 4rem; border-radius: 5px;" v-model="oneRow['money']" @click.stop>
@@ -587,6 +598,16 @@
                       橄榄树
                     </span>
                   </template>
+                  <template v-else-if="oneRow['compose_name'] === 'flyhorse'">
+                    <span class="badge bg-secondary text-bg-success big_badge">
+                      飞马
+                    </span>
+                  </template>
+                  <template v-else-if="oneRow['compose_name'] === 'medusa'">
+                    <span class="badge bg-warning text-bg-success big_badge">
+                      美杜莎
+                    </span>
+                  </template>                   
                   <template v-else-if="oneRow['compose_name'] === 'dolphin'">
                     <span class="badge bg-info text-bg-success big_badge">
                       海豚
@@ -676,7 +697,7 @@
                   </template>
                 </div>
               </td>
-              <td v-bind:class="{ sel_row: oneRow['currSelected'] }">
+              <td v-bind:class="{ sel_row: oneRow['currSelected'] }" style="line-height:1.1;">
                 <div>
                   {{ oneRow?.kbObj?.statistics?.min_earn_str }}
                 </div>
@@ -689,25 +710,45 @@
                 <template v-if="oneRow.hasOwnProperty('quant_obj') && oneRow['quant_obj'] != null &&
                  oneRow['quant_obj'].hasOwnProperty('histo') && oneRow['quant_obj']['histo'] != null">
                   <div style="height: 1px; border-top:solid 1px darkgray; margin: 5px 0 5px 0;"></div>
-                  <div style="height: 4rem;position:relative;--tooltip-left:-3rem;--tooltip-top:-2rem;"
+                  <div style="height:5rem;line-height:1.1;position:relative;--tooltip-left:-3rem;--tooltip-top:-2rem;"
                   data-title="短时行情波动情况" data-float-no-pos="">
                     <div style="font-weight: bold; color: red;font-size: 0.9rem;">
                       启{{ oneRow['quant_obj']['histo']['max_hitted_times'] }}
                     </div>
-                    <div style="font-weight: bold; color: darkgreen;font-size: 0.9rem;">
+                    <div style="font-weight: bold; color: darkgreen;font-size: 0.9rem;margin-top:0.1rem;">
                       停{{ oneRow['quant_obj']['histo']['min_hitted_times'] }}
                     </div>
+                    <template v-if="latest_sold_stat_obj && latest_sold_stat_obj[oneRow['fund_id']]">
+                      <div style="letter-spacing:-1;margin-top:0.5rem;font-size:0.9rem;text-wrap:nowrap;">
+                        卖{{latest_sold_stat_obj[oneRow['fund_id']]['days_from_last_sold']}}日
+                      </div>
+                      <div :style="{
+                      'color': latest_sold_stat_obj[oneRow['fund_id']]['rate_from_last_sold'] >= 0? 'red': 'darkgreen',
+                      'font-weight': 'bold'}">
+                        {{latest_sold_stat_obj[oneRow['fund_id']]['rate_from_last_sold_str']}}
+                      </div>
+                    </template>
                   </div>                 
                 </template>
                 <template v-else>
                   <div style="height: 1px; border-top:solid 1px darkgray; margin: 5px 0 5px 0;"></div>
-                  <div style="height: 4rem;">
+                  <div style="height: 5rem;">
                     <div style="font-weight: bold; color: darkgreen;font-size: 0.9rem;">&nbsp;</div>
                     <div style="font-weight: bold; color: darkgreen;font-size: 0.9rem;">&nbsp;</div>
+                    <template v-if="latest_sold_stat_obj[oneRow['fund_id']]">
+                      <div style="letter-spacing:-1;margin-top:0.5rem;font-size:0.9rem;text-wrap:nowrap;">
+                        卖{{latest_sold_stat_obj[oneRow['fund_id']]['days_from_last_sold']}}日
+                      </div>
+                      <div :style="{
+                      'color': latest_sold_stat_obj[oneRow['fund_id']]['rate_from_last_sold'] >= 0? 'red': 'darkgreen',
+                      'font-weight': 'bold'}">
+                        {{latest_sold_stat_obj[oneRow['fund_id']]['rate_from_last_sold_str']}}
+                      </div>
+                    </template>
                   </div>
                 </template>
               </td>
-              <td v-bind:class="{ sel_row: oneRow['currSelected'] }">
+              <td v-bind:class="{ sel_row: oneRow['currSelected'] }" style="line-height:1.1;">
                 <div>
                   {{ oneRow?.kbObj?.statistics?.avg_earn_str }}
                 </div>
@@ -724,7 +765,7 @@
                  oneRow['quant_obj']['histo']['latest_hitted_obj']['max_hitted'] && 
                  !oneRow['quant_obj']['histo']['latest_hitted_obj']['same_as_today']">        
                   <div style="height: 1px; border-top:solid 1px darkgray; margin: 5px 0 5px 0;"></div>
-                  <div style="height: 4rem;">
+                  <div style="height: 5rem;">
                     <a v-bind:href="baseUrl4ProbeNav + oneRow['fund_id'] + '&cust_fund_name=' + oneRow['fund_name'] + '&cust_buyin_type=' + 'fixed_buyin_append'" 
                       target="_blank" style="cursor: pointer; text-decoration: none;">
                       <div style="position: relative; text-align: center; color: darkgreen; height: 1.2rem;--tooltip-left:-3rem;--tooltip-top:-2rem;"
@@ -764,7 +805,7 @@
                  oneRow['quant_obj']['histo']['latest_hitted_obj']['min_hitted'] &&
                  !oneRow['quant_obj']['histo']['latest_hitted_obj']['same_as_today']">
                   <div style="height: 1px; border-top:solid 1px darkgray; margin: 5px 0 5px 0;"></div>
-                  <div style="height: 4rem;">
+                  <div style="height: 5rem;">
                     <div style="position: relative; text-align: center; color: darkgreen; height: 1.2rem;--tooltip-left:-3rem;--tooltip-top:-2rem;"
                     data-title="若低点明显则不应减少" data-float-no-pos="">
                       <span class="icon_pos_left" style="color: darkgreen; top:-5px; left:1rem;">
@@ -796,13 +837,13 @@
                 </template>
                 <template v-else>
                   <div style="height: 1px; border-top:solid 1px darkgray; margin: 5px 0 5px 0;"></div>
-                  <div style="height: 4rem;">
+                  <div style="height: 5rem;">
                     <div style="font-weight: bold; color: darkgreen;font-size: 0.9rem;">&nbsp;</div>
                     <div style="font-weight: bold; color: darkgreen;font-size: 0.9rem;">&nbsp;</div>
                   </div>
                 </template>
               </td>
-              <td v-bind:class="{ sel_row: oneRow['currSelected'] }">
+              <td v-bind:class="{ sel_row: oneRow['currSelected'] }" style="line-height:1.1;">
                 <div>
                   {{ oneRow?.kbObj?.statistics?.max_earn_str }}
                 </div>
@@ -814,7 +855,7 @@
                 </div>
                 <template v-if="true">
                   <div style="height: 1px; border-top:solid 1px darkgray; margin: 5px 0 5px 0;"></div>
-                  <div style="height: 4rem;">
+                  <div style="height: 5rem;">
                     <div style="font-weight: bold; color: darkgreen;font-size: 0.9rem;">&nbsp;</div>
                     <div style="font-weight: bold; color: darkgreen;font-size: 0.9rem;">&nbsp;</div>
                   </div>
@@ -1496,6 +1537,7 @@ import { useComposeStore } from "../store/composeStore.js";
 import { useZskbStore } from "../store/zskbStore.js"
 import { Modal } from "bootstrap";
 import { useBuyInOutStore } from "../store/buyInOutStore.js";
+import { useReportStore } from "../store/reportStore.js";
 import { useRoute } from 'vue-router'
 
 const route = useRoute()
@@ -1503,14 +1545,18 @@ const composeStore = useComposeStore()
 const { composeObjs, fixedHoldObjs, totMoney, totPositiveNum, totPoleNum, totEarnMoney, totEarnRate, totSetBuy, totPlanBuy, diffBuySet, noteObjs } = storeToRefs(composeStore)
 const { getAllCompose, setComposeProperty, setComposeSoldDate, getComposeFixedHold, addOrRemoveCompose, getFundNotes4Edit, updateFundNotes, removeFundNotes } = composeStore
 const buyInOutStore = useBuyInOutStore()
-const { buyoutRecords, wav_reports, buyout_future_objs, contStartStopObj, buyOrSoldObj} = storeToRefs(buyInOutStore)
+const { buyoutRecords, wav_reports, buyout_future_objs, contStartStopObj, buyOrSoldObj, fund_buy_ratio_config} = storeToRefs(buyInOutStore)
 const { getAllBuyoutRecords, soldComposeFixedHold, buyOutFixedFund, calculatePlanMoney, buyOutFixedFundOfToday, getAllBuyoutFutureRecords, addBuyOrSoldNote, getBuyOrSoldNote } = buyInOutStore
 const zskbStore = useZskbStore()
 const { zskbObjs } = storeToRefs(zskbStore)
+const reportStore = useReportStore()
+const { latest_sold_stat_obj } = storeToRefs(reportStore)
 
 const buy_in_from_plan = [
   { 'source_name': '全部', 'source_val': 'all' },
   { 'source_name': '橄榄树', 'source_val': 'ovtree' },
+  { 'source_name': '飞马', 'source_val': 'flyhorse' },
+  { 'source_name': '美杜莎', 'source_val': 'medusa' },    
   { 'source_name': '海豚', 'source_val': 'dolphin' },
   { 'source_name': '三叉戟', 'source_val': 'trident' },
   { 'source_name': '金毛羊', 'source_val': 'gdngoat' }
@@ -1767,6 +1813,33 @@ watch([composeObjs, compose_name, fixedHoldObjs, buyoutRecords, noteObjs, show4S
     if (totSetBuy.value != 0) {
       diffBuySet.value = (totPlanBuy.value - totSetBuy.value) / totSetBuy.value
     }
+
+    // 金毛羊特殊处理 --- 引入情绪周期
+    let _tot_plan_money_gdngoat = 0;
+    composeViewObjs.value.forEach(elem => {
+      if (elem['compose_name'] === 'gdngoat') {
+        if (!elem.hasOwnProperty('plan_buyin_money')) {
+          console.error("elem in gdngoat has no plan_buyin_money: ", elem['fund_id']);
+        } else if (elem['money'] > -2) {
+          _tot_plan_money_gdngoat += elem['plan_buyin_money']
+        }
+      }
+    })
+
+    composeViewObjs.value.forEach(elem => {
+      if (elem['compose_name'] === 'gdngoat') {
+        if (!elem.hasOwnProperty('plan_buyin_money')) {
+          console.error("elem in gdngoat has no plan_buyin_money: ", elem['fund_id']);
+        } else if (elem['money'] > -2) {
+          elem['plan_buyin_money'] = parseInt(elem['plan_buyin_money'] / _tot_plan_money_gdngoat * fund_buy_ratio_config.value['money_probe_buy'])
+          if (elem['plan_buyin_money'] < 10) {
+            elem['plan_buyin_money'] = 10
+          }
+        } else {
+          elem['plan_buyin_money'] = 0
+        }
+      }
+    })
   }
 
   scrollViewBySelection()
@@ -1838,7 +1911,7 @@ onMounted(() => {
 
 onActivated( () => {
   if (route.query.hasOwnProperty('dt_compose') && route.query['dt_compose']) {
-    if (['ovtree', 'dolphin', 'trident', 'gdngoat'].indexOf(route.query['dt_compose'].trim()) !== -1) {
+    if (['ovtree', 'dolphin', 'trident', 'gdngoat', 'flyhorse', 'medusa'].indexOf(route.query['dt_compose'].trim()) !== -1) {
       compose_name.value = route.query['dt_compose'].trim();
     } else {
       console.error("Internal error as query string can not find: ", route.query['dt_compose'])
@@ -2335,11 +2408,15 @@ function scrollViewBySelection() {
       let _idx = composeViewObjs.value.findIndex(func)
       if (_idx != -1) {
         let _rowObj = composeViewObjs.value[_idx]
-        rowElements.value[_rowObj['fund_id']].scrollIntoView({ block: "center", behavior: "smooth" })
+        if (rowElements.value[_rowObj['fund_id']]) {
+            rowElements.value[_rowObj['fund_id']].scrollIntoView({ block: "center", behavior: "smooth" })
+        }
       }
     } else if (composeViewObjs.value.length > 0) {
       let _fund_id = composeViewObjs.value[0]['fund_id']
-      rowElements.value[_fund_id].scrollIntoView({ block: "center", behavior: "smooth" })
+      if (rowElements.value[_fund_id]) {
+          rowElements.value[_fund_id].scrollIntoView({ block: "center", behavior: "smooth" })
+      }
     }
   })
 }
@@ -2489,6 +2566,7 @@ function searchByCond() {
     } else {
       searchCond.value = ""
     }
+    alert("根据id和名称都没有找到");
   }
 }
 
@@ -2625,6 +2703,34 @@ function suggestComposeLogic() {
         "sugg_key": "短时波动下行",
         "sugg_val": "可以停止，减额"
       })
+    }
+  }
+
+  if (latest_sold_stat_obj.value && latest_sold_stat_obj.value[oneRowObj['fund_id']]) {
+    if (oneRowObj['kbObj'] && oneRowObj['kbObj']['statistics']) {
+      let _min_earn = oneRowObj['kbObj']['statistics']['min_earn'];
+      let _rate_from_last_sold = latest_sold_stat_obj.value[oneRowObj['fund_id']]['rate_from_last_sold'] * 100
+      if (_rate_from_last_sold < 0 && _min_earn < 0) {
+          if (_rate_from_last_sold <= _min_earn * 0.6) {
+              totSuggObjs.value.push({
+                "sugg_key": "自卖出已下降" + latest_sold_stat_obj.value[oneRowObj['fund_id']]['rate_from_last_sold_str'],
+                "sugg_val": "建议可启动"
+              })
+          }
+      } else if (_rate_from_last_sold <= 0 && _min_earn >= 0) {
+          totSuggObjs.value.push({
+            "sugg_key": "自卖出已下降" + latest_sold_stat_obj.value[oneRowObj['fund_id']]['rate_from_last_sold_str'],
+            "sugg_val": "建议可启动"
+          })                   
+      } else if (_rate_from_last_sold >= 0 && _min_earn <= 0) {                        
+      } else if (_rate_from_last_sold > 0 && _min_earn > 0) {
+          if (_rate_from_last_sold <= _min_earn * 0.4) {
+              totSuggObjs.value.push({
+                "sugg_key": "自卖出已上升" + latest_sold_stat_obj.value[oneRowObj['fund_id']]['rate_from_last_sold_str'],
+                "sugg_val": "建议可启动"
+              })                           
+          }
+      }       
     }
   }
 

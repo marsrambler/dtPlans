@@ -1,6 +1,6 @@
 import {defineStore} from 'pinia'
 import {axiosInst} from "../lib/api.js";
-import {ref, watch} from 'vue'
+import {ref, watch, toRaw} from 'vue'
 import { useApiStore } from './apiStore.js';
 import {useComposeStore} from "./composeStore.js";
 import {storeToRefs} from 'pinia'
@@ -13,6 +13,7 @@ export const useReportStore = defineStore('report-store', () => {
     const dynRecordObjs_latest = ref([])
     const onlyShowLatest = ref(false)
     const report_select = ref('all')
+    const reportObjsReloaded = ref(false)    
     const retroFundObj = ref(null)
     const fixedFundObjs = ref([])
     const fixedHoldObjs = ref([])
@@ -22,6 +23,9 @@ export const useReportStore = defineStore('report-store', () => {
 
     const composeStore = useComposeStore()
     const {composeObjs} = storeToRefs(composeStore)
+
+    const sync_in_progress = ref(false)
+    const latest_sold_stat_obj = ref(null)
 
     // action
     async function requireDynValues(_fund_ids) {
@@ -42,16 +46,235 @@ export const useReportStore = defineStore('report-store', () => {
         }
     }
 
-    async function getRecordsAndRates(_refresh) {
-        try {
-            dynRecordObjs_full.value = []
-            dynRecordObjs_latest.value = []
+    async function syncServerData() {
+        if (sync_in_progress.value) {
+            useApiStore().push_error_msg("浏览器数据", " 正在清除中，请等待一会儿再试")
+            return;
+        }
+        sync_in_progress.value = true;
+        // clean indexedDB
+        useApiStore().clean_today_data("fixed-hold-buyin", function(_ret_flag, _db) {
+            _db.close();
+            if (_ret_flag) {
+                console.log("clean fixed-hold-buyin successfully");
+            }
+            useApiStore().clean_today_data("subs-good-funds", function(_ret_flag, _db) {
+                _db.close();
+                if (_ret_flag) {
+                    console.log("clean subs-good-funds successfully");
+                }
+                useApiStore().clean_today_data("fund-report-objs", function(_ret_flag, _db) {
+                    _db.close();
+                    if (_ret_flag) {
+                        console.log("clean fund-report-objs successfully");
+                    }
+                });            
+            });            
+        });
+        alert("后台开始加载数据，需要等待一段时间")
+        await getRecordsAndRates('refresh');
+        sync_in_progress.value = false;
+        useApiStore().pop_alert_msg("请手动刷新浏览器，获取更新数据");    
+    }
 
-            const response = await axiosInst.get("dt-plans/api/get-fund-records-rate/" + _refresh)
+    function get_today_str() {
+        Date.prototype.Format = function(fmt) {
+            var o = {
+                "M+": this.getMonth() + 1,
+                "d+": this.getDate(),
+                "h+": this.getHours(),
+                "m+": this.getMinutes(),
+                "s+": this.getSeconds(),
+                "q+": Math.floor((this.getMonth() + 3) / 3),
+                "S": this.getMilliseconds()
+            };
+            if (/(y+)/.test(fmt)) fmt = fmt.replace(RegExp.$1, (this.getFullYear() + "").substr(4 - RegExp.$1.length));
+            for (var k in o)
+                if (new RegExp("(" + k + ")").test(fmt)) fmt = fmt.replace(RegExp.$1, (RegExp.$1.length == 1) ? (o[k]) : (("00" + o[k]).substr(("" + o[k]).length)));
+            return fmt;
+        }
+        return new Date().Format("yyyy-MM-dd");
+    }
+
+    function insert_raw_date(_index_db, objectStore, _item_data, _storage_name) {
+        var request = objectStore.add(_item_data);
+        request.onsuccess = function(event) {
+            console.log("insert ", _storage_name, " storage successfully");
+            _index_db.close();
+            //postMessage("new");
+        };
+        request.onerror = function(event) {
+            console.error("insert ", _storage_name, " storage failed");
+        };        
+    }
+
+    function insert_in_db_force(_index_db, _item_data, _storage_name) {
+        var transaction = _index_db.transaction([_storage_name], "readwrite");
+        var objectStore = transaction.objectStore(_storage_name);
+        var _date_str = get_today_str();
+        var _req_qry = objectStore.get(_date_str);
+        _req_qry.onsuccess = function (event) {
+            var _req_cln = objectStore.delete(_date_str);
+            _req_cln.onsuccess = function (event) {
+                console.log("reportStore insert_in_db_force, successfully delete key: ", _date_str);
+                insert_raw_date(_index_db, objectStore, _item_data, _storage_name);
+            }
+            _req_cln.onerror = function (event) {
+                console.warn("reportStore insert_in_db_force, failed delete key: ", _date_str);
+                insert_raw_date(_index_db, objectStore, _item_data, _storage_name);
+            }
+        }
+        _req_qry.onerror = function (event) {
+            console.warn("reportStore insert_in_db_force, query old key failed: ", _date_str);
+            insert_raw_date(_index_db, objectStore, _item_data, _storage_name);
+        }
+    }
+
+    function add_in_db(_raw_data, _storage_name) {
+        var db;
+        const request = indexedDB.open(_storage_name, 1);
+        request.onsuccess = function(event) {
+            db = event.target.result;
+            console.log("open data base successfully: ", _storage_name);
+    
+            var _date_str = get_today_str();
+            var _item_data = {
+                'date_str': _date_str,
+                'content': _raw_data
+            }
+            insert_in_db_force(db, _item_data, _storage_name);
+        };
+        request.onerror = function(event) {
+            console.error("open data base failed: ", _storage_name);
+        };
+        request.onupgradeneeded = function(event) {
+            console.log("onupgradeneeded: ", _storage_name);
+            db = event.target.result;
+            var objectStore;
+            objectStore = db.createObjectStore(_storage_name, {
+                keyPath: 'date_str'
+            });
+        };
+    };
+
+    // TODO: compare to get index
+    // remove old index, insert at this index
+    // insert into indexDB (ref: fetch-big-data.js)
+    // add_in_db(_ret_objs, "fund-report-objs");
+    async function getRecordsAndRates(_refresh_or_fund_id) {
+        try {
+            //dynRecordObjs_full.value = []
+            //dynRecordObjs_latest.value = []
+
+            const response = await axiosInst.get("dt-plans/api/get-fund-records-rate/" + _refresh_or_fund_id)
             if (response.status === 200) {
                 const _response = await response.data
-                dynRecordObjs_full.value = _response['full']
-                dynRecordObjs_latest.value = _response['latest']
+                if (typeof _refresh_or_fund_id !== 'undefined' && _refresh_or_fund_id != null
+                    && _refresh_or_fund_id.length === 6 && _response['full'].length === 1) {
+                    let _single_full = _response['full']
+                    let _single_latest = _response['latest']
+                    _single_full.forEach(elem => {
+                        if (elem['soldHistoryWrapper'] && elem['soldHistoryWrapper'].length > 0) {
+                            let _soldHistoryWrapper = [...elem['soldHistoryWrapper']] //JSON.parse(JSON.stringify(elem['soldHistoryWrapper']))
+                            elem['soldHistoryWrapper_reverse'] = _soldHistoryWrapper.reverse()
+                        } else {
+                            elem['soldHistoryWrapper_reverse'] = []
+                        }
+                    })
+                    _single_latest.forEach(elem => {
+                        if (elem['soldHistoryWrapper'] && elem['soldHistoryWrapper'].length > 0) {
+                            let _soldHistoryWrapper = [...elem['soldHistoryWrapper']] //JSON.parse(JSON.stringify(elem['soldHistoryWrapper']))
+                            elem['soldHistoryWrapper_reverse'] = _soldHistoryWrapper.reverse()
+                        } else {
+                            elem['soldHistoryWrapper_reverse'] = []
+                        }
+                    })
+                    let _single_full_one = _single_full[0]
+                    let _single_latest_one = _single_latest[0]
+
+                    let _temp_full_objs = dynRecordObjs_full.value
+                    let _idx_full = _temp_full_objs.findIndex(elem => elem['fund_id'] === _single_full_one['fund_id'])
+                    if (_idx_full === -1) {
+                        console.error("Internal error findIndex single_full: ", _single_full_one['fund_id']);
+                    } else {
+                        _temp_full_objs.splice(_idx_full, 1, _single_full_one )
+                    }
+
+                    let _temp_latest_objs = dynRecordObjs_latest.value
+                    let _idx_latest = _temp_latest_objs.findIndex(elem => elem['fund_id'] === _single_latest_one['fund_id'])
+                    if (_idx_latest === -1) {
+                        console.error("Internal error findIndex single_latest: ", _single_latest_one['fund_id']);
+                    } else {
+                        _temp_latest_objs.splice(_idx_latest, 1, _single_latest_one)
+                    }
+
+                    dynRecordObjs_full.value = _temp_full_objs
+                    dynRecordObjs_latest.value = _temp_latest_objs
+
+                    let _storage_name = "fund-report-objs"
+                    let _ret_objs = {
+                        'full': dynRecordObjs_full.value,
+                        'latest': dynRecordObjs_latest.value
+                    }
+                    let _raw_objs = JSON.parse(JSON.stringify(_ret_objs));
+                    add_in_db(_raw_objs, _storage_name);
+                } else {
+                    dynRecordObjs_full.value = _response['full']
+                    dynRecordObjs_latest.value = _response['latest']
+                    if (dynRecordObjs_full.value.length > 0) {
+                        dynRecordObjs_full.value.forEach(elem => {
+                            if (elem['soldHistoryWrapper'] && elem['soldHistoryWrapper'].length > 0) {
+                                let _soldHistoryWrapper = [...elem['soldHistoryWrapper']] //JSON.parse(JSON.stringify(elem['soldHistoryWrapper']))
+                                elem['soldHistoryWrapper_reverse'] = _soldHistoryWrapper.reverse()
+                            } else {
+                                elem['soldHistoryWrapper_reverse'] = []
+                            }
+                        })
+                    }
+                    if (dynRecordObjs_latest.value.length > 0) {
+                        dynRecordObjs_latest.value.forEach(elem => {
+                            if (elem['soldHistoryWrapper'] && elem['soldHistoryWrapper'].length > 0) {
+                                let _soldHistoryWrapper = [...elem['soldHistoryWrapper']] //JSON.parse(JSON.stringify(elem['soldHistoryWrapper']))
+                                elem['soldHistoryWrapper_reverse'] = _soldHistoryWrapper.reverse()
+                            } else {
+                                elem['soldHistoryWrapper_reverse'] = []
+                            }
+                        })
+                    }
+                }
+            } else {
+                console.error("axios get records and rates failed: ", response)
+                dynRecordObjs_full.value = []
+                dynRecordObjs_latest.value = []
+            }
+        } catch (error) {
+            console.log("axios get records and rates failed: ", error)
+            dynRecordObjs_full.value = []
+            dynRecordObjs_latest.value = []
+        }
+    }
+
+    function getRecordsAndRatesFromWorker() {
+        dynRecordObjs_full.value = []
+        dynRecordObjs_latest.value = []
+        
+        let db;
+        let _storage_name = 'fund-report-objs';
+        const request = indexedDB.open(_storage_name, 1);
+        request.onsuccess = function(event) {
+            db = event.target.result;
+            console.log("open data base successfully: ", _storage_name);
+            let transaction = db.transaction([_storage_name], "readwrite");
+            let objectStore = transaction.objectStore(_storage_name);
+            let _date_str = getTodayStr();
+            let _req_qry = objectStore.get(_date_str);
+            _req_qry.onsuccess = function (event) {
+                let _data_objs = event.target.result.content;
+                db.close();
+                console.log("*** reportStore ***, query success: ", _data_objs)
+
+                dynRecordObjs_full.value = _data_objs['full']
+                dynRecordObjs_latest.value = _data_objs['latest']
 
                 dynRecordObjs_full.value.forEach(elem => {
                     if (elem['soldHistoryWrapper'] && elem['soldHistoryWrapper'].length > 0) {
@@ -69,22 +292,33 @@ export const useReportStore = defineStore('report-store', () => {
                         elem['soldHistoryWrapper_reverse'] = []
                     }
                 })
-            } else {
-                console.error("axios get records and rates failed: ", response)
-                dynRecordObjs_full.value = []
-                dynRecordObjs_latest.value = []
-            }
-        } catch (error) {
-            console.log("axios get records and rates failed: ", error)
-            dynRecordObjs_full.value = []
-            dynRecordObjs_latest.value = []
-        }
 
-        // if (onlyShowLatest.value) {
-        //     dynRecordObjs.value = dynRecordObjs_latest.value
-        // } else {
-        //     dynRecordObjs.value = dynRecordObjs_full.value
-        // }
+                let _latest_sold_stat_obj = new Object
+                for (var _idx = 0; _idx < dynRecordObjs_full.value.length; _idx++) {
+                    var _obj = dynRecordObjs_full.value[_idx];
+                    var _fund_id = _obj['fund_id']
+                    if (!_obj['soldList4draw'] || _obj['soldList4draw'].length === 0) {
+                    } else {
+                        _latest_sold_stat_obj[_fund_id] = {
+                            'days_from_last_sold': _obj['statistics']['days_from_last_sold'],
+                            'rate_from_last_sold': _obj['statistics']['rate_from_last_sold'],
+                            'rate_from_last_sold_str': _obj['statistics']['rate_from_last_sold_str']
+                        }
+                    }
+                }
+                latest_sold_stat_obj.value = _latest_sold_stat_obj                
+            }
+            _req_qry.onerror = function (event) {
+                console.error("*** reportStore *** query data base failed: ", _storage_name, event);
+                db.close();
+            }
+        };
+        request.onerror = function(event) {
+            console.error("*** reportStore *** open data base failed: ", _storage_name, event);
+        };
+        request.onupgradeneeded = function(event) {
+            console.error("*** reportStore *** onupgradeneeded: ", _storage_name, event);
+        };
     }
 
     async function getRetroFunds() {
@@ -194,12 +428,13 @@ export const useReportStore = defineStore('report-store', () => {
         }
     }
 
+    // this function is useless now...
     async function removeLocalDynvalue(_fund_id, _fund_name) {
         try {
             const response = await axiosInst.post("dt-plans/api/remove-dynValues/" + _fund_id)
             if (response.status === 200) {
                 useApiStore().pop_alert_msg("删除报告成功: " + _fund_name)
-                await getRecordsAndRates('refresh')
+                //await getRecordsAndRates('refresh')
             } else {
                 console.error("axios remove local dyn values failed: ", response)
             }
@@ -218,7 +453,7 @@ export const useReportStore = defineStore('report-store', () => {
             })
             if (response.status === 200) {
                 useApiStore().pop_alert_msg("删除指定日期成功: " + oneRow['fund_name'])
-                await getRecordsAndRates('no')
+                await getRecordsAndRates(oneRow['fund_id'])
             } else {
                 console.error("axios remove date for report failed: ", response)
             }
@@ -305,7 +540,80 @@ export const useReportStore = defineStore('report-store', () => {
                     elem['soldList4draw'].length > 0);
                 dynRecordObjs.value = _filterObjs
             }
+        } else if (report_select.value === 'only_ovtree') {
+            if (onlyShowLatest.value) {
+                let _filterObjs = dynRecordObjs_latest.value.filter((elem) => elem['tranStateObj'] && 
+                    elem['tranStateObj'].hasOwnProperty('compose_plan') && 
+                    elem['tranStateObj']['compose_plan'] === 'ovtree');
+                dynRecordObjs.value = _filterObjs
+            } else {
+                let _filterObjs = dynRecordObjs_full.value.filter((elem) => elem['tranStateObj'] && 
+                    elem['tranStateObj'].hasOwnProperty('compose_plan') && 
+                    elem['tranStateObj']['compose_plan'] === 'ovtree');
+                dynRecordObjs.value = _filterObjs
+            }
+        } else if (report_select.value === 'only_flyhorse') {
+            if (onlyShowLatest.value) {
+                let _filterObjs = dynRecordObjs_latest.value.filter((elem) => elem['tranStateObj'] && 
+                    elem['tranStateObj'].hasOwnProperty('compose_plan') && 
+                    elem['tranStateObj']['compose_plan'] === 'flyhorse');
+                dynRecordObjs.value = _filterObjs
+            } else {
+                let _filterObjs = dynRecordObjs_full.value.filter((elem) => elem['tranStateObj'] && 
+                    elem['tranStateObj'].hasOwnProperty('compose_plan') && 
+                    elem['tranStateObj']['compose_plan'] === 'flyhorse');
+                dynRecordObjs.value = _filterObjs
+            }
+        } else if (report_select.value === 'only_medusa') {
+            if (onlyShowLatest.value) {
+                let _filterObjs = dynRecordObjs_latest.value.filter((elem) => elem['tranStateObj'] && 
+                    elem['tranStateObj'].hasOwnProperty('compose_plan') && 
+                    elem['tranStateObj']['compose_plan'] === 'medusa');
+                dynRecordObjs.value = _filterObjs
+            } else {
+                let _filterObjs = dynRecordObjs_full.value.filter((elem) => elem['tranStateObj'] && 
+                    elem['tranStateObj'].hasOwnProperty('compose_plan') && 
+                    elem['tranStateObj']['compose_plan'] === 'medusa');
+                dynRecordObjs.value = _filterObjs
+            }
+        } else if (report_select.value === 'only_dolphin') {
+            if (onlyShowLatest.value) {
+                let _filterObjs = dynRecordObjs_latest.value.filter((elem) => elem['tranStateObj'] && 
+                    elem['tranStateObj'].hasOwnProperty('compose_plan') && 
+                    elem['tranStateObj']['compose_plan'] === 'dolphin');
+                dynRecordObjs.value = _filterObjs
+            } else {
+                let _filterObjs = dynRecordObjs_full.value.filter((elem) => elem['tranStateObj'] && 
+                    elem['tranStateObj'].hasOwnProperty('compose_plan') && 
+                    elem['tranStateObj']['compose_plan'] === 'dolphin');
+                dynRecordObjs.value = _filterObjs
+            }
+        } else if (report_select.value === 'only_trident') {
+            if (onlyShowLatest.value) {
+                let _filterObjs = dynRecordObjs_latest.value.filter((elem) => elem['tranStateObj'] && 
+                    elem['tranStateObj'].hasOwnProperty('compose_plan') && 
+                    elem['tranStateObj']['compose_plan'] === 'trident');
+                dynRecordObjs.value = _filterObjs
+            } else {
+                let _filterObjs = dynRecordObjs_full.value.filter((elem) => elem['tranStateObj'] && 
+                    elem['tranStateObj'].hasOwnProperty('compose_plan') && 
+                    elem['tranStateObj']['compose_plan'] === 'trident');
+                dynRecordObjs.value = _filterObjs
+            }
+        } else if (report_select.value === 'only_gdngoat') {
+            if (onlyShowLatest.value) {
+                let _filterObjs = dynRecordObjs_latest.value.filter((elem) => elem['tranStateObj'] && 
+                    elem['tranStateObj'].hasOwnProperty('compose_plan') && 
+                    elem['tranStateObj']['compose_plan'] === 'gdngoat');
+                dynRecordObjs.value = _filterObjs
+            } else {
+                let _filterObjs = dynRecordObjs_full.value.filter((elem) => elem['tranStateObj'] && 
+                    elem['tranStateObj'].hasOwnProperty('compose_plan') && 
+                    elem['tranStateObj']['compose_plan'] === 'gdngoat');
+                dynRecordObjs.value = _filterObjs
+            }
         }
+        reportObjsReloaded.value = true;
     })
 
     watch([dynRecordObjs, retroFundObj, fixedFundObjs, composeObjs, fixedHoldObjs, fixed_status_data_obj, indexRtRateObjs, removedDateObjs], () => {
@@ -335,14 +643,14 @@ export const useReportStore = defineStore('report-store', () => {
             console.warn("*** reportStore *** bypass as removedDateObjs is null")
             return
         }
-        console.log("*** reportStore *** dynRecordObjs: ", dynRecordObjs.value)
-        console.log("*** reportStore *** retroFundObj: ", retroFundObj.value)
-        console.log("*** reportStore *** fixedFundObjs: ", fixedFundObjs.value)
-        console.log("*** reportStore *** composeObjs: ", composeObjs.value)
-        console.log("*** reportStore *** fixedHoldObjs: ", fixedHoldObjs.value)
-        console.log("*** reportStore *** fixed_status_data_obj: ", fixed_status_data_obj.value)
-        console.log("*** reportStore *** indexRtRateObjs: ", indexRtRateObjs.value)
-        console.log("*** reportStore *** removedDateObjs: ", removedDateObjs.value)
+        //console.log("*** reportStore *** dynRecordObjs: ", dynRecordObjs.value)
+        //console.log("*** reportStore *** retroFundObj: ", retroFundObj.value)
+        //console.log("*** reportStore *** fixedFundObjs: ", fixedFundObjs.value)
+        //console.log("*** reportStore *** composeObjs: ", composeObjs.value)
+        //console.log("*** reportStore *** fixedHoldObjs: ", fixedHoldObjs.value)
+        //console.log("*** reportStore *** fixed_status_data_obj: ", fixed_status_data_obj.value)
+        //console.log("*** reportStore *** indexRtRateObjs: ", indexRtRateObjs.value)
+        //console.log("*** reportStore *** removedDateObjs: ", removedDateObjs.value)
 
         dynRecordObjs.value.forEach(elem => {
             elem['show_summ_tip'] = false;
@@ -425,6 +733,7 @@ export const useReportStore = defineStore('report-store', () => {
         dynRecordObjs_latest,
         onlyShowLatest,
         report_select,
+        reportObjsReloaded,        
         retroFundObj,
         fixedFundObjs,
         fixedHoldObjs,
@@ -432,7 +741,9 @@ export const useReportStore = defineStore('report-store', () => {
         indexRtRateObjs,
         removedDateObjs,
         requireDynValues,
+        latest_sold_stat_obj,
         getRecordsAndRates,
+        getRecordsAndRatesFromWorker,
         getRetroFunds,
         getFixedFunds,
         getAllComposeFixedHold,
@@ -440,6 +751,7 @@ export const useReportStore = defineStore('report-store', () => {
         getIndexRtRate,
         removeLocalDynvalue,
         removeDate4Report,
-        getRemovedDate4Report
+        getRemovedDate4Report,
+        syncServerData
     }
 });

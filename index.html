@@ -3,6 +3,7 @@
   <head>
     <meta charset="UTF-8" />
     <link rel="icon" type="image/svg+xml" href="/images/poseidon.png" />
+    <link rel="stylesheet" href="../custAlert.css">
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Poseidon</title>
   </head>
@@ -10,7 +11,26 @@
     <div id="app"></div>
     <script type="module" src="/src/main.js"></script>
   </body>
+  <script type="text/javascript" src="../big-data-worker.js"></script>
+  <script type="text/javascript" src="../big-data-query.js"></script>  
+
   <script type="text/javascript" src="../web_plugin.js"></script>
   <script type="text/javascript" src="../fetch-big-data.js"></script>
   <script type="text/javascript" src="../quant-data-query.js"></script>
+  <script type="text/javascript" src="../custAlert.js"></script>
+  <script type="text/javascript">
+    startWorker(function(event) {
+    console.log("worker finished event: ", event);
+      if (event == "get-fixed-hold-buyin") {
+          console.log("**** get-fixed-hold-buyin data queried result: ", event);
+          postMessage("dtPlan_fixed-hold-buyin")
+      } else if (event == "subs-good-funds") {
+          console.log("**** subs-good-funds data queried result: ", event);
+          postMessage("dtPlan_subs-good-funds")
+      } else if (event == "fund-report-objs") {
+          console.log("**** fund-report-objs data queried result: ", event);
+          postMessage("dtPlan_fund-report-objs")
+      }
+    });
+  </script>
 </html>

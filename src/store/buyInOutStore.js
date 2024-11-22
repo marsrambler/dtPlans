@@ -14,6 +14,7 @@ export const useBuyInOutStore = defineStore('buyInOut-store', () => {
     const buyout_future_objs = ref({})
     const contStartStopObj = ref({})
     const buyOrSoldObj = ref({})
+    const fund_buy_ratio_config = ref({})
 
     // action
     async function getAllBuyoutRecords() {
@@ -276,7 +277,12 @@ export const useBuyInOutStore = defineStore('buyInOut-store', () => {
             elem['plan_buyin_money'] = parseInt(elem['plan_buyin_money']);
 
         } else if (_page_type === 'aggressive') {
-            elem['plan_buyin_money'] = 40
+            if (!fund_buy_ratio_config.value || !fund_buy_ratio_config.value.hasOwnProperty('feeling_factor')) {
+                elem['plan_buyin_money'] = 40
+            } else {
+                let _factor = fund_buy_ratio_config.value['feeling_factor'];
+                elem['plan_buyin_money'] = parseInt(150 * _factor)
+            }            
             if (elem.hasOwnProperty('compose_obj') && elem['compose_obj'] && elem['compose_obj']['quant_obj'] && elem['compose_obj']['quant_obj']['histo']) {
                 let _max_hitted_times = elem['compose_obj']['quant_obj']['histo']['max_hitted_times']
                 let _min_hitted_times = elem['compose_obj']['quant_obj']['histo']['min_hitted_times']
@@ -468,7 +474,7 @@ export const useBuyInOutStore = defineStore('buyInOut-store', () => {
                 }
                 elem['plan_buyin_money'] = parseInt(elem['plan_buyin_money']);
 
-            } else if (elem['compose_name'] === 'ovtree' || elem['compose_name'] === 'trident') {
+            } else if (elem['compose_name'] === 'ovtree' || elem['compose_name'] === 'flyhorse' || elem['compose_name'] === 'medusa') {
                 elem['plan_buyin_money'] = 60
                 if (elem['quant_obj'] && elem['quant_obj']['histo']) {
                     let _max_hitted_times = elem['quant_obj']['histo']['max_hitted_times']
@@ -497,10 +503,10 @@ export const useBuyInOutStore = defineStore('buyInOut-store', () => {
                             elem['plan_buyin_money'] = elem['plan_buyin_money'] * 0.8
                         }
                     } else {
-                        console.error("compose page/ovtree has no statistics/min_sort_tot_earn for elem: ", elem);
+                        console.error("compose page/ovtree/trident/flyhorse/medusa has no statistics/min_sort_tot_earn for elem: ", elem);
                     }
                 } else {
-                    console.error("compose page/ovtree has no statistics/min_sort_tot_earn for elem: ", elem);
+                    console.error("compose page/ovtree/trident/flyhorse/medusa has no statistics/min_sort_tot_earn for elem: ", elem);
                 }
 
                 if (elem['kbObj'] && elem['kbObj']['statistics']['fund_perc_len'] && elem['kbObj']['statistics']['fund_perc_len'] < 1100) {
@@ -526,7 +532,7 @@ export const useBuyInOutStore = defineStore('buyInOut-store', () => {
                 }
                 elem['plan_buyin_money'] = parseInt(elem['plan_buyin_money']);
 
-            } else if (elem['compose_name'] === 'dolphin') {
+            } else if (elem['compose_name'] === 'dolphin' || elem['compose_name'] === 'trident') {
                 elem['plan_buyin_money'] = 40
                 if (elem['quant_obj'] && elem['quant_obj']['histo']) {
                     let _max_hitted_times = elem['quant_obj']['histo']['max_hitted_times']
@@ -631,6 +637,10 @@ export const useBuyInOutStore = defineStore('buyInOut-store', () => {
         var compose_name = '';
         if (_compose_name == 'ovtree') {
             compose_name = '橄榄树';
+        } else if (_compose_name == 'flyhorse') {
+            compose_name = '飞马';
+        } else if (_compose_name == 'medusa') {
+            compose_name = '美杜莎';
         } else if (_compose_name == 'dolphin') {
             compose_name = '海豚';
         } else if (_compose_name == 'trident') {
@@ -691,6 +701,20 @@ export const useBuyInOutStore = defineStore('buyInOut-store', () => {
         }
     }
 
+    async function getFundAndBuyRatioConfig() {
+        fund_buy_ratio_config.value = {}
+        try {
+            const response = await axiosInst.get("api/fund-and-buy-ratio")
+            if (response.status == 200) {
+                fund_buy_ratio_config.value = await response.data;
+            } else {
+                console.error("axios getFundAndBuyRatioConfig failed: ", response)
+            }
+        } catch (error) {
+            console.log("axios getFundAndBuyRatioConfig error: ", error)
+        }
+    }
+
     return {
         buyoutRecords,
         buyin_records,
@@ -699,6 +723,7 @@ export const useBuyInOutStore = defineStore('buyInOut-store', () => {
         buyout_future_objs,
         contStartStopObj,
         buyOrSoldObj,
+        fund_buy_ratio_config,
         getAllBuyoutRecords,
         fundCanBeBuyOut,
         soldComposeFixedHold,
@@ -711,7 +736,8 @@ export const useBuyInOutStore = defineStore('buyInOut-store', () => {
         getAllBuyoutFutureRecords,
         getContStartStop,
         addBuyOrSoldNote,
-        getBuyOrSoldNote
+        getBuyOrSoldNote,
+        getFundAndBuyRatioConfig
     }
 
 });

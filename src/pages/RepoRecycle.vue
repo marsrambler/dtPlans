@@ -357,11 +357,15 @@ function scrollViewBySelection() {
       let _idx = recycleViewObjs.value.findIndex(func)
       if (_idx != -1) {
         let _rowObj = recycleViewObjs.value[_idx]
-        rowElements.value[_rowObj['fund_id']].scrollIntoView({block: "center", behavior: "smooth"})
+        if (rowElements.value[_rowObj['fund_id']]) {
+            rowElements.value[_rowObj['fund_id']].scrollIntoView({block: "center", behavior: "smooth"})
+        }
       }
     } else {
       let _fund_id = recycleViewObjs.value[0]['fund_id']
-      rowElements.value[_fund_id].scrollIntoView({block: "center", behavior: "smooth"})
+      if (rowElements.value[_fund_id]) {
+          rowElements.value[_fund_id].scrollIntoView({block: "center", behavior: "smooth"})
+      }
     }
   })
 }
@@ -389,31 +393,50 @@ function searchByCond(_search_val) {
     return
   }
   let _foundCnt = 0
-  let arr = _search_val.trim().split(" ")
-  recycleViewObjs.value.forEach((elem) => {
-    if (arr.length === 1) {
-      let _cond_1 = arr[0].trim()
-      if (elem['fund_name'].indexOf(_cond_1) !== -1) {
+  let _checkStrBackup = _search_val
+  let _testStr = _checkStrBackup.replace(/[0-9]/g, "")
+  let _pureStr = _testStr.trim()
+  if (_pureStr.length === 0 && _search_val.length === 6) {
+    // fund id
+    let _fundId = _search_val.trim()
+    recycleViewObjs.value.forEach((elem) => {
+      if (elem['fund_id'] === _fundId) {
         elem['currSelected'] = true
         if (!elem['hide_repo']) {
           _foundCnt += 1
+        }        
+      }
+    })
+  } else {
+    // fund name
+    let arr = _search_val.trim().split(" ")
+    recycleViewObjs.value.forEach((elem) => {
+      if (arr.length === 1) {
+        let _cond_1 = arr[0].trim()
+        if (elem['fund_name'].indexOf(_cond_1) !== -1) {
+          elem['currSelected'] = true
+          if (!elem['hide_repo']) {
+            _foundCnt += 1
+          }
+        }
+      } else if (arr.length === 2) {
+        let _cond_1 = arr[0].trim()
+        let _cond_2 = arr[1].trim()
+        if (elem['fund_name'].indexOf(_cond_1) !== -1 && elem['fund_name'].indexOf(_cond_2) !== -1) {
+          elem['currSelected'] = true
+          if (!elem['hide_repo']) {
+            _foundCnt += 1
+          }
         }
       }
-    } else if (arr.length === 2) {
-      let _cond_1 = arr[0].trim()
-      let _cond_2 = arr[1].trim()
-      if (elem['fund_name'].indexOf(_cond_1) !== -1 && elem['fund_name'].indexOf(_cond_2) !== -1) {
-        elem['currSelected'] = true
-        if (!elem['hide_repo']) {
-          _foundCnt += 1
-        }
-      }
-    }
-  })
+    })  
+  }  
+
   if (_foundCnt > 0) {
     sortByField('selected')
   } else {
     search_input.value.value = ""
+    alert("根据id和名称都没有找到");
   }
 }
 

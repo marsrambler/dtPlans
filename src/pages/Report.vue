@@ -1,13 +1,13 @@
 <template>
   <div :style="topSecClass">
     <div id="op_pane" :style="{ 'height': opPaneHeight + 'rem' }" class="grid_pane_c8">
-      <div style="display: flex; flex-wrap: nowrap; align-items: center;">
-        <select class="form-select" style="width: 5.5rem;" v-model="report_select">
+      <div style="display:flex;flex-wrap:nowrap;align-items:center;">
+        <select class="form-select" style="width:6.2rem;font-size:0.95rem;" v-model="report_select">
           <option v-for="option in report_select_option" v-bind:value="option.source_val">
             {{ option.source_name }}
           </option>
         </select>
-        <div style="display: inline-block;margin-left: 0.3rem; font-size:0.95rem; text-wrap: nowrap;">({{dynRecordObjs.length}})</div>
+        <div style="display:inline-block;margin-left:2px;font-size:0.95rem;text-wrap:nowrap;">({{dynRecordObjs.length}})</div>
       </div>
       <!--
       <div style="grid-column: 2 / span 3; display: flex; flex-wrap: nowrap; column-gap: 0.5rem; align-items: center;">
@@ -24,7 +24,7 @@
       <input type="text" v-model="searchFundNameOrFundId" class="form-control-plaintext search_box"
              style="padding-left: 0.2rem;" @keyup.enter="excuteSearchFund()">
       <input class="btn btn-primary btn-sm" type="button" value="查找" @click="excuteSearchFund();">
-      <input class="btn btn-warning btn-sm" type="button" value="刷新" @click="getRecordsAndRates('refresh');">
+      <input class="btn btn-warning btn-sm" type="button" value="清除浏览器数据" @click="syncServerData()">
       <div class="form-check form_check_cust" style="margin-left: 1rem;">
         <input class="form-check-input" type="checkbox" id="inc_perc" v-model="inc_earn_perc">
         <label class="form-check-label" for="inc_perc">盈利曲线</label>
@@ -225,13 +225,17 @@
                   </template>
                 </template>
               </div>
-              <template v-if="oneRow.statistics && oneRow.statistics.rate_from_last_sold">
+              <template v-if="!oneRow['soldList4draw'] || oneRow['soldList4draw'].length === 0">
+              </template>
+              <template v-else>
+              <!-- template v-if="oneRow.statistics && oneRow.statistics.rate_from_last_sold" -->
                 <div style="border-top: solid 1px gray; margin-top: 0.5rem; padding-top: 0.5rem; text-align: center;">
-                  <span v-if="oneRow.statistics.rate_from_last_sold >= 0" class="text-bg-danger">
-                    &nbsp;计:&nbsp;{{oneRow.statistics.rate_from_last_sold_str}}&nbsp;
+                  <span v-if="oneRow.statistics && oneRow.statistics.rate_from_last_sold != null 
+                  && oneRow.statistics.rate_from_last_sold >= 0" class="text-bg-danger">
+                    &nbsp;计:&nbsp;{{oneRow?.statistics?.rate_from_last_sold_str}}&nbsp;
                   </span>
                   <span v-else style="color: white; background-color: darkgreen;">
-                    &nbsp;计:&nbsp;{{oneRow.statistics.rate_from_last_sold_str}}&nbsp;
+                    &nbsp;计:&nbsp;{{oneRow?.statistics?.rate_from_last_sold_str}}&nbsp;
                   </span>
                 </div>
               </template>
@@ -443,6 +447,16 @@
                           橄榄树
                         </span>
                       </template>
+                      <template v-else-if="oneRow['tranStateObj']['compose_plan'] === 'flyhorse'">
+                        <span class="badge bg-secondary text-bg-success big_badge stack_2_info">
+                          飞马
+                        </span>
+                      </template>
+                      <template v-else-if="oneRow['tranStateObj']['compose_plan'] === 'medusa'">
+                        <span class="badge bg-warning text-bg-success big_badge stack_2_info">
+                          美杜莎
+                        </span>
+                      </template>                                            
                       <template v-else-if="oneRow['tranStateObj']['compose_plan'] === 'dolphin'">
                           <span class="badge bg-info text-bg-success big_badge stack_2_info">
                             海豚
@@ -577,8 +591,8 @@ const zskbStore = useZskbStore()
 const { zskbObjs } = storeToRefs(zskbStore)
 
 const reportStore = useReportStore()
-const { dynRecordObjs_full, dynRecordObjs_latest, dynRecordObjs, onlyShowLatest, report_select } = storeToRefs(reportStore)
-const { requireDynValues, getRecordsAndRates, removeLocalDynvalue, getBigPoolFixedHold, getIndexRtRate, removeDate4Report } = reportStore
+const { dynRecordObjs_full, dynRecordObjs_latest, dynRecordObjs, onlyShowLatest, report_select, reportObjsReloaded } = storeToRefs(reportStore)
+const { requireDynValues, getRecordsAndRates, removeLocalDynvalue, getBigPoolFixedHold, getIndexRtRate, removeDate4Report, syncServerData } = reportStore
 
 const composeStore = useComposeStore()
 const {noteObjs, noteReportObjs} = storeToRefs(composeStore)
@@ -604,11 +618,16 @@ const report_select_option = [
   { 'source_name': '卖出', 'source_val': 'only_sold' },
   { 'source_name': '非卖', 'source_val': 'only_non_sold' },
   { 'source_name': '上涨', 'source_val': 'only_asc' },
-  { 'source_name': '下跌', 'source_val': 'only_dsc' }
+  { 'source_name': '下跌', 'source_val': 'only_dsc' },
+  { 'source_name': '橄榄树', 'source_val': 'only_ovtree' },
+  { 'source_name': '飞马', 'source_val': 'only_flyhorse' },
+  { 'source_name': '美杜莎', 'source_val': 'only_medusa' },
+  { 'source_name': '海豚', 'source_val': 'only_dolphin' },
+  { 'source_name': '三叉戟', 'source_val': 'only_trident' },
+  { 'source_name': '金毛羊', 'source_val': 'only_gdngoat' }
 ]
 
-// getRecordsAndRates('no')
-getBigPoolFixedHold()
+// getBigPoolFixedHold()
 getIndexRtRate()
 
 const zskbViewObjs = ref({})
@@ -702,21 +721,27 @@ watch(requireFundIds, () => {
 })
 
 const backup_fund_id = ref(null)
-watch(dynRecordObjs, () => {
-    if (!dynRecordObjs.value || dynRecordObjs.value.length === 0 || !backup_fund_id.value) {
+watch([dynRecordObjs, reportObjsReloaded], () => {
+    if (!dynRecordObjs.value || dynRecordObjs.value.length === 0) {
       return
     }
-    const fund_match = (elem) => elem['fund_id'] === backup_fund_id.value
-    let _idx = dynRecordObjs.value.findIndex(fund_match)
-    if (_idx === -1) {
-      console.error("Internal error, find dynRecordObjs failed by fund id: ", backup_fund_id.value)
-    } else {
-      console.log("**** restore report dyn record obj successfully, fund id: ", backup_fund_id.value)
-      dynRecordObjs.value[_idx]['currSelected'] = true
-      currDynValue.value = dynRecordObjs.value[_idx]
-      scrollViewBySelection()
+    if (backup_fund_id.value) {
+      const fund_match = (elem) => elem['fund_id'] === backup_fund_id.value
+      let _idx = dynRecordObjs.value.findIndex(fund_match)
+      if (_idx === -1) {
+        console.error("Internal error, find dynRecordObjs failed by fund id: ", backup_fund_id.value)
+      } else {
+        console.log("**** restore report dyn record obj successfully, fund id: ", backup_fund_id.value)
+        dynRecordObjs.value[_idx]['currSelected'] = true
+        currDynValue.value = dynRecordObjs.value[_idx]
+        scrollViewBySelection()
+      }
+      //backup_fund_id.value = null
     }
-    backup_fund_id.value = null
+    if (reportObjsReloaded.value) {
+      sortByField(sortFieldName.value, false);
+      reportObjsReloaded.value = false;
+    }
 })
 
 function requireDynValues4ui() {
@@ -836,6 +861,7 @@ function excuteSearchFund() {
     } else {
       searchFundNameOrFundId.value = ""
     }
+    alert("根据id和名称都没有找到");
   }
 }
 
@@ -865,22 +891,26 @@ const chartOptions = ref({
   },
 
   yAxis: {
-    title: {
-      text: '指数走势'
-    },
-    labels: {
-      enabled: false
-    }
+      title: {
+        text: '指数走势'
+      },
+      labels: {
+        enabled: false
+        //format: '{value}'
+      }
   },
 
   series: [
     {
+      // 0
       name: '指数净值',
       data: [], //priceData4draw.value,//priceData4draw.value,
       id: 'dataseries'
       // the event marker flags
+      //yAxis: 0
     },
     {
+      // 1
       name: '买入点',
       data: [],
       id: 'dataseries1',
@@ -901,8 +931,10 @@ const chartOptions = ref({
           fillInBuyDate(_date_str)
         }
       }
+      //yAxis: 0
     },
     {
+      // 2
       name: '卖出点',
       data: [],
       id: 'dataseries2',
@@ -923,8 +955,10 @@ const chartOptions = ref({
           fillInSoldDate(_date_str)
         }
       }
+      //yAxis: 0
     },
     {
+      // 3
       // asc money flag points
       name: '增加点',
       type: 'flags',
@@ -946,8 +980,10 @@ const chartOptions = ref({
           fillInAscDate(_date_str)
         }
       }
+      //yAxis: 0
     },
     {
+      // 4
       // desc money flag points
       name: '减少点',
       type: 'flags',
@@ -971,8 +1007,10 @@ const chartOptions = ref({
           fillInDescDate(_date_str)
         }
       }
+      //yAxis: 0
     },
     {
+      // 5
       // buy flag points
       name: '买入标',
       type: 'flags',
@@ -991,8 +1029,10 @@ const chartOptions = ref({
           console.log("buy flags series click: ", e)
         }
       }
+      //yAxis: 0
     },
     {
+      // 6
       // sold flag points
       name: '卖出标',
       type: 'flags',
@@ -1013,8 +1053,10 @@ const chartOptions = ref({
           fillInSoldDate(_date_str)
         }
       }
+      //yAxis: 0
     },
     {
+      // 7
       // append flag points
       name: '追加标',
       type: 'flags',
@@ -1035,8 +1077,10 @@ const chartOptions = ref({
           // fillInSoldDate(_date_str)
         }
       }
+      //yAxis: 0
     },
     {
+      // 8
       // write notes earn (positive, red) --- changed!!!
       // earn rate loop
       // width: 35,
@@ -1056,10 +1100,12 @@ const chartOptions = ref({
       //   click: function (e) {
       //   }
       // }
+      //yAxis: 1,
       name: '盈利曲线',
       data: []
     },
     {
+      // 9
       // write notes earn (negative, red)
       // width: 35,
       // height: 35,
@@ -1080,8 +1126,10 @@ const chartOptions = ref({
       // }
       name: '未使用曲线',
       data: []
+      //yAxis: 0
     },
     {
+      // 10
       // write notes - show notes
       // width: 100,
       // height: 16,
@@ -1100,6 +1148,7 @@ const chartOptions = ref({
         click: function (e) {
         }
       }
+      //yAxis: 0
     }
   ]
 });
@@ -1576,12 +1625,15 @@ function cutBuyDate_right(oneRow) {
 
 const sortFieldName = ref('')
 const sortFieldFlag = ref(true)
-function sortByField(_field) {
-  if (sortFieldName.value === _field) {
-    sortFieldFlag.value = !sortFieldFlag.value
-  } else {
-    sortFieldName.value = _field
-    sortFieldFlag.value = true
+
+function sortByField(_field, _new_sort=true) {
+  if (_new_sort) {
+    if (sortFieldName.value === _field) {
+      sortFieldFlag.value = !sortFieldFlag.value
+    } else {
+      sortFieldName.value = _field
+      sortFieldFlag.value = true
+    }
   }
   if (_field === 'update_date') {
     if (sortFieldFlag.value) {
@@ -1804,7 +1856,11 @@ function scrollViewBySelection() {
     let _idx = dynRecordObjs.value.findIndex(func)
     if (_idx != -1) {
       let _rowObj = dynRecordObjs.value[_idx]
-      rowElements.value[_rowObj['fund_id']].scrollIntoView({block: "center", behavior: "smooth"})
+      if (rowElements.value[_rowObj['fund_id']]) {
+          if (rowElements.value[_rowObj['fund_id']]) {
+              rowElements.value[_rowObj['fund_id']].scrollIntoView({block: "center", behavior: "smooth"})
+          }
+      }
     }
   })
 }
@@ -1839,11 +1895,11 @@ const picHeightAdjVal = ref(400)
 watch([yAxisTopAdjTimes, yAxisBtmAdjTimes, picHeightAdjVal], () => {
   chartOptions.value['chart']['height'] = picHeightAdjVal.value
 
-  chartOptions.value.yAxis.max = maxPriceVal.value + priceDistance.value * 0.5 * yAxisTopAdjTimes.value
-  chartOptions.value.yAxis.softMax += maxPriceVal.value + priceDistance.value * 0.5 * yAxisTopAdjTimes.value
+  chartOptions.value.yAxis.max = (maxPriceVal.value + priceDistance.value * 0.5 * yAxisTopAdjTimes.value) * 1.2
+  chartOptions.value.yAxis.softMax = (maxPriceVal.value + priceDistance.value * 0.5 * yAxisTopAdjTimes.value) * 1.2
 
-  chartOptions.value.yAxis.min = minPriceVal.value - priceDistance.value * 0.5 * yAxisBtmAdjTimes.value
-  chartOptions.value.yAxis.softMin = minPriceVal.value - priceDistance.value * 0.5 * yAxisBtmAdjTimes.value
+  chartOptions.value.yAxis.min = (minPriceVal.value - priceDistance.value * 0.5 * yAxisBtmAdjTimes.value) * 0.8
+  chartOptions.value.yAxis.softMin = (minPriceVal.value - priceDistance.value * 0.5 * yAxisBtmAdjTimes.value)
 })
 
 function transDate(_date_str) {
