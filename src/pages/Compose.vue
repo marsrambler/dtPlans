@@ -1057,7 +1057,10 @@
                     style="height: 1.8rem;">
                     初始:&nbsp;&nbsp;{{ oneRow['plan_buyin_money'] }}
                   </div>
-                  </template>
+                </template>
+                <template v-else>
+                  <div style="height:0.5rem;"></div>  
+                </template>
                 <div style="height: 1.8rem;">
                   当前:&nbsp;
                   <input type="number" style="width: 4rem; border-radius: 5px;" v-model="oneRow['money']" @click.stop>
@@ -1531,7 +1534,7 @@ import {
   getHitStyle,
   get_suggestion_by_wav, getTodayStr
 } from "../lib/commonUtils.js"
-import {onMounted, computed, ref, watch, nextTick, onUnmounted, onActivated} from "vue";
+import {onMounted, computed, ref, watch, nextTick, onUnmounted, onActivated, onDeactivated} from "vue";
 import { storeToRefs } from 'pinia'
 import { useComposeStore } from "../store/composeStore.js";
 import { useZskbStore } from "../store/zskbStore.js"
@@ -1614,6 +1617,24 @@ const tot4SoldNum = ref(0)
 const totPauseNum = ref(0)
 const totAdjustNum = ref(0)
 const totNoteNum = ref(0)
+
+const tot_plan_money_gdngoat = ref(0)
+const tot_set_money_gdngoat = ref(0)
+const tot_plan_money_ovtree = ref(0)
+const tot_set_money_ovtree = ref(0)
+const tot_plan_money_flyhorse = ref(0)
+const tot_set_money_flyhorse = ref(0)
+const tot_plan_money_medusa = ref(0)
+const tot_set_money_medusa = ref(0)
+const tot_plan_money_dolphin = ref(0)
+const tot_set_money_dolphin = ref(0)
+const tot_plan_money_trident = ref(0)
+const tot_set_money_trident = ref(0)
+const pop_up_warn_timer = ref(null)
+const tot_warning_msg = ref("")
+const pop_up_warn_times = ref(0)
+const pop_up_warn_period = ref(1000)
+const page_is_displayed = ref(true)
 
 watch([composeObjs, compose_name, fixedHoldObjs, buyoutRecords, noteObjs, show4SoldOnly, showPauseOnly, showAdjustOnly, showPoleOnly, showNoteOnly], () => {
   if (composeObjs && composeObjs.value && composeObjs.value.length > 0) {
@@ -1756,6 +1777,18 @@ watch([composeObjs, compose_name, fixedHoldObjs, buyoutRecords, noteObjs, show4S
   totAdjustNum.value = 0
   totPoleNum.value = 0
   totNoteNum.value = 0
+  tot_plan_money_gdngoat.value = 0
+  tot_set_money_gdngoat.value = 0
+  tot_plan_money_ovtree.value = 0
+  tot_set_money_ovtree.value = 0  
+  tot_plan_money_flyhorse.value = 0
+  tot_set_money_flyhorse.value = 0
+  tot_plan_money_medusa.value = 0
+  tot_set_money_medusa.value = 0
+  tot_plan_money_dolphin.value = 0
+  tot_set_money_dolphin.value = 0
+  tot_plan_money_trident.value = 0
+  tot_set_money_trident.value = 0
 
   if (composeViewObjs.value.length > 0) {
 
@@ -1816,12 +1849,48 @@ watch([composeObjs, compose_name, fixedHoldObjs, buyoutRecords, noteObjs, show4S
 
     // 金毛羊特殊处理 --- 引入情绪周期
     let _tot_plan_money_gdngoat = 0;
+    let _tot_plan_money_ovtree = 0;
+    let _tot_plan_money_flyhorse = 0;    
+    let _tot_plan_money_medusa = 0;
+    let _tot_plan_money_dolphin = 0;
+    let _tot_plan_money_trident = 0;
+
     composeViewObjs.value.forEach(elem => {
       if (elem['compose_name'] === 'gdngoat') {
         if (!elem.hasOwnProperty('plan_buyin_money')) {
           console.error("elem in gdngoat has no plan_buyin_money: ", elem['fund_id']);
         } else if (elem['money'] > -2) {
           _tot_plan_money_gdngoat += elem['plan_buyin_money']
+        }
+      } else if (elem['compose_name'] === 'ovtree') {
+        if (!elem.hasOwnProperty('plan_buyin_money')) {
+          console.error("elem in ovtree has no plan_buyin_money: ", elem['fund_id']);
+        } else if (elem['money'] > -2) {
+          _tot_plan_money_ovtree += elem['plan_buyin_money']
+        }
+      } else if (elem['compose_name'] === 'flyhorse') {
+        if (!elem.hasOwnProperty('plan_buyin_money')) {
+          console.error("elem in flyhorse has no plan_buyin_money: ", elem['fund_id']);
+        } else if (elem['money'] > -2) {
+          _tot_plan_money_flyhorse += elem['plan_buyin_money']
+        }
+      } else if (elem['compose_name'] === 'medusa') {
+        if (!elem.hasOwnProperty('plan_buyin_money')) {
+          console.error("elem in medusa has no plan_buyin_money: ", elem['fund_id']);
+        } else if (elem['money'] > -2) {
+          _tot_plan_money_medusa += elem['plan_buyin_money']
+        }
+      } else if (elem['compose_name'] === 'dolphin') {
+        if (!elem.hasOwnProperty('plan_buyin_money')) {
+          console.error("elem in dolphin has no plan_buyin_money: ", elem['fund_id']);
+        } else if (elem['money'] > -2) {
+          _tot_plan_money_dolphin += elem['plan_buyin_money']
+        }
+      } else if (elem['compose_name'] === 'trident') {
+        if (!elem.hasOwnProperty('plan_buyin_money')) {
+          console.error("elem in trident has no plan_buyin_money: ", elem['fund_id']);
+        } else if (elem['money'] > -2) {
+          _tot_plan_money_trident += elem['plan_buyin_money']
         }
       }
     })
@@ -1832,7 +1901,72 @@ watch([composeObjs, compose_name, fixedHoldObjs, buyoutRecords, noteObjs, show4S
           console.error("elem in gdngoat has no plan_buyin_money: ", elem['fund_id']);
         } else if (elem['money'] > -2) {
           elem['plan_buyin_money'] = parseInt(elem['plan_buyin_money'] / _tot_plan_money_gdngoat * fund_buy_ratio_config.value['money_probe_buy'])
-          if (elem['plan_buyin_money'] < 10) {
+          if (elem['plan_buyin_money'] < 10 && elem['plan_buyin_money'] >= 5) {
+            elem['plan_buyin_money'] = 10
+          }
+        } else {
+          elem['plan_buyin_money'] = 0
+        }
+      } else if (elem['compose_name'] === 'ovtree' && fund_buy_ratio_config.value['max_money_for_B_stock'] 
+      && fund_buy_ratio_config.value['trendFactor'] && fund_buy_ratio_config.value['trendFactor'].hasOwnProperty('ovtree') 
+      && fund_buy_ratio_config.value['trendFactor']['ovtree'] != null) {
+        if (!elem.hasOwnProperty('plan_buyin_money')) {
+          console.error("elem in ovtree has no plan_buyin_money: ", elem['fund_id']);
+        } else if (elem['money'] > -2) {
+          elem['plan_buyin_money'] = parseInt(elem['plan_buyin_money'] / _tot_plan_money_ovtree * fund_buy_ratio_config.value['max_money_for_B_stock'] * fund_buy_ratio_config.value['trendFactor']['ovtree'])
+          if (elem['plan_buyin_money'] < 10 && elem['plan_buyin_money'] >= 5) {
+            elem['plan_buyin_money'] = 10
+          }
+        } else {
+          elem['plan_buyin_money'] = 0
+        }
+      } else if (elem['compose_name'] === 'flyhorse' && fund_buy_ratio_config.value['max_money_for_fut'] 
+      && fund_buy_ratio_config.value['trendFactor'] && fund_buy_ratio_config.value['trendFactor'].hasOwnProperty('flyhorse') 
+      && fund_buy_ratio_config.value['trendFactor']['flyhorse'] != null) {
+        if (!elem.hasOwnProperty('plan_buyin_money')) {
+          console.error("elem in flyhorse has no plan_buyin_money: ", elem['fund_id']);
+        } else if (elem['money'] > -2) {
+          elem['plan_buyin_money'] = parseInt(elem['plan_buyin_money'] / _tot_plan_money_flyhorse * fund_buy_ratio_config.value['max_money_for_fut'] * fund_buy_ratio_config.value['trendFactor']['flyhorse'])
+          if (elem['plan_buyin_money'] < 10 && elem['plan_buyin_money'] >= 5) {
+            elem['plan_buyin_money'] = 10
+          }
+        } else {
+          elem['plan_buyin_money'] = 0
+        }
+      } else if (elem['compose_name'] === 'medusa' && fund_buy_ratio_config.value['max_money_for_unknow'] 
+      && fund_buy_ratio_config.value['trendFactor'] && fund_buy_ratio_config.value['trendFactor'].hasOwnProperty('medusa') 
+      && fund_buy_ratio_config.value['trendFactor']['medusa'] != null) {
+        if (!elem.hasOwnProperty('plan_buyin_money')) {
+          console.error("elem in medusa has no plan_buyin_money: ", elem['fund_id']);
+        } else if (elem['money'] > -2) {
+          elem['plan_buyin_money'] = parseInt(elem['plan_buyin_money'] / _tot_plan_money_medusa * fund_buy_ratio_config.value['max_money_for_unknow'] * fund_buy_ratio_config.value['trendFactor']['medusa'])
+          if (elem['plan_buyin_money'] < 10 && elem['plan_buyin_money'] >= 5) {
+            elem['plan_buyin_money'] = 10
+          }
+        } else {
+          elem['plan_buyin_money'] = 0
+        }
+      } else if (elem['compose_name'] === 'dolphin' && fund_buy_ratio_config.value['max_money_for_A_deb'] 
+      && fund_buy_ratio_config.value['trendFactor'] && fund_buy_ratio_config.value['trendFactor'].hasOwnProperty('dolphin') 
+      && fund_buy_ratio_config.value['trendFactor']['dolphin'] != null) {
+        if (!elem.hasOwnProperty('plan_buyin_money')) {
+          console.error("elem in dolphin has no plan_buyin_money: ", elem['fund_id']);
+        } else if (elem['money'] > -2) {
+          elem['plan_buyin_money'] = parseInt(elem['plan_buyin_money'] / _tot_plan_money_dolphin * fund_buy_ratio_config.value['max_money_for_A_deb'] * fund_buy_ratio_config.value['trendFactor']['dolphin'])
+          if (elem['plan_buyin_money'] < 10 && elem['plan_buyin_money'] >= 5) {
+            elem['plan_buyin_money'] = 10
+          }
+        } else {
+          elem['plan_buyin_money'] = 0
+        }
+      } else if (elem['compose_name'] === 'trident' && fund_buy_ratio_config.value['max_money_for_B_deb'] 
+      && fund_buy_ratio_config.value['trendFactor'] && fund_buy_ratio_config.value['trendFactor'].hasOwnProperty('trident') 
+      && fund_buy_ratio_config.value['trendFactor']['trident'] != null) {
+        if (!elem.hasOwnProperty('plan_buyin_money')) {
+          console.error("elem in trident has no plan_buyin_money: ", elem['fund_id']);
+        } else if (elem['money'] > -2) {
+          elem['plan_buyin_money'] = parseInt(elem['plan_buyin_money'] / _tot_plan_money_trident * fund_buy_ratio_config.value['max_money_for_B_deb'] * fund_buy_ratio_config.value['trendFactor']['trident'])
+          if (elem['plan_buyin_money'] < 10 && elem['plan_buyin_money'] >= 5) {
             elem['plan_buyin_money'] = 10
           }
         } else {
@@ -1840,11 +1974,253 @@ watch([composeObjs, compose_name, fixedHoldObjs, buyoutRecords, noteObjs, show4S
         }
       }
     })
+
+    composeViewObjs.value.forEach(elem => {
+      if (elem['compose_name'] === 'gdngoat') {
+        if (!elem.hasOwnProperty('plan_buyin_money')) {
+          console.error("elem in gdngoat has no plan_buyin_money: ", elem['fund_id']);
+        } else if (elem['money'] > -2) {
+          tot_plan_money_gdngoat.value += elem['plan_buyin_money']
+        }
+        if (elem['money'] > 0) {
+          tot_set_money_gdngoat.value += elem['money']
+        }
+      } else if (elem['compose_name'] === 'ovtree' && fund_buy_ratio_config.value['max_money_for_B_stock'] 
+      && fund_buy_ratio_config.value['trendFactor'] && fund_buy_ratio_config.value['trendFactor'].hasOwnProperty('ovtree') 
+      && fund_buy_ratio_config.value['trendFactor']['ovtree'] != null) {
+        if (!elem.hasOwnProperty('plan_buyin_money')) {
+          console.error("elem in ovtree has no plan_buyin_money: ", elem['fund_id']);
+        } else if (elem['money'] > -2) {
+          tot_plan_money_ovtree.value += elem['plan_buyin_money']
+        }
+        if (elem['money'] > 0) {
+          tot_set_money_ovtree.value += elem['money']
+        }        
+      } else if (elem['compose_name'] === 'flyhorse' && fund_buy_ratio_config.value['max_money_for_fut'] 
+      && fund_buy_ratio_config.value['trendFactor'] && fund_buy_ratio_config.value['trendFactor'].hasOwnProperty('flyhorse') 
+      && fund_buy_ratio_config.value['trendFactor']['flyhorse'] != null) {
+        if (!elem.hasOwnProperty('plan_buyin_money')) {
+          console.error("elem in flyhorse has no plan_buyin_money: ", elem['fund_id']);
+        } else if (elem['money'] > -2) {
+          tot_plan_money_flyhorse.value += elem['plan_buyin_money']
+        }
+        if (elem['money'] > 0) {
+          tot_set_money_flyhorse.value += elem['money']
+        }        
+      } else if (elem['compose_name'] === 'medusa' && fund_buy_ratio_config.value['max_money_for_unknow'] 
+      && fund_buy_ratio_config.value['trendFactor'] && fund_buy_ratio_config.value['trendFactor'].hasOwnProperty('medusa') 
+      && fund_buy_ratio_config.value['trendFactor']['medusa'] != null) {
+        if (!elem.hasOwnProperty('plan_buyin_money')) {
+          console.error("elem in medusa has no plan_buyin_money: ", elem['fund_id']);
+        } else if (elem['money'] > -2) {
+          tot_plan_money_medusa.value += elem['plan_buyin_money']
+        }
+        if (elem['money'] > 0) {
+          tot_set_money_medusa.value += elem['money']
+        }        
+      } else if (elem['compose_name'] === 'dolphin' && fund_buy_ratio_config.value['max_money_for_A_deb'] 
+      && fund_buy_ratio_config.value['trendFactor'] && fund_buy_ratio_config.value['trendFactor'].hasOwnProperty('dolphin') 
+      && fund_buy_ratio_config.value['trendFactor']['dolphin'] != null) {
+        if (!elem.hasOwnProperty('plan_buyin_money')) {
+          console.error("elem in dolphin has no plan_buyin_money: ", elem['fund_id']);
+        } else if (elem['money'] > -2) {
+          tot_plan_money_dolphin.value += elem['plan_buyin_money']
+        }
+        if (elem['money'] > 0) {
+          tot_set_money_dolphin.value += elem['money']
+        }        
+      } else if (elem['compose_name'] === 'trident' && fund_buy_ratio_config.value['max_money_for_B_deb'] 
+      && fund_buy_ratio_config.value['trendFactor'] && fund_buy_ratio_config.value['trendFactor'].hasOwnProperty('trident') 
+      && fund_buy_ratio_config.value['trendFactor']['trident'] != null) {
+        if (!elem.hasOwnProperty('plan_buyin_money')) {
+          console.error("elem in trident has no plan_buyin_money: ", elem['fund_id']);
+        } else if (elem['money'] > -2) {
+          tot_plan_money_trident.value += elem['plan_buyin_money']
+        }
+        if (elem['money'] > 0) {
+          tot_set_money_trident.value += elem['money']
+        }        
+      }
+    })
   }
 
-  scrollViewBySelection()
+  scrollViewBySelection();
 
+  let _tot_warning_msg = ""
+  
+  if (tot_plan_money_gdngoat.value > tot_set_money_gdngoat.value) {
+    if ((tot_plan_money_gdngoat.value - tot_set_money_gdngoat.value) / tot_plan_money_gdngoat.value >= 0.1) {
+      _tot_warning_msg += "金毛羊需要增大金额" + parseInt(tot_plan_money_gdngoat.value - tot_set_money_gdngoat.value).toString() + 
+      "元, 预设" + parseInt(tot_plan_money_gdngoat.value).toString() + 
+      "元, 已设" + parseInt(tot_set_money_gdngoat.value).toString() + "元" + "<br>";
+    }
+  } else if (tot_plan_money_gdngoat.value < tot_set_money_gdngoat.value) {
+    if ((tot_set_money_gdngoat.value - tot_plan_money_gdngoat.value) / tot_set_money_gdngoat.value >= 0.1) {
+      _tot_warning_msg += "金毛羊需要缩小金额" + parseInt(tot_set_money_gdngoat.value - tot_plan_money_gdngoat.value).toString() + 
+      "元, 预设" + parseInt(tot_plan_money_gdngoat.value).toString() + 
+      "元, 已设" + parseInt(tot_set_money_gdngoat.value).toString() + "元" + "<br>";
+    }
+  }
+
+  if (fund_buy_ratio_config.value['max_money_for_B_stock'] 
+      && fund_buy_ratio_config.value['trendFactor'] && fund_buy_ratio_config.value['trendFactor'].hasOwnProperty('ovtree') 
+      && fund_buy_ratio_config.value['trendFactor']['ovtree'] != null 
+      && fund_buy_ratio_config.value['fund_limit_setting'] && fund_buy_ratio_config.value['fund_limit_setting']['ovtree_enable']) {
+    if (tot_plan_money_ovtree.value > tot_set_money_ovtree.value) {
+      if ((tot_plan_money_ovtree.value - tot_set_money_ovtree.value) / tot_plan_money_ovtree.value >= 0.1) {
+        _tot_warning_msg += "橄榄树需要增大金额" + parseInt(tot_plan_money_ovtree.value - tot_set_money_ovtree.value).toString() 
+        + "元, 预设" + parseInt(tot_plan_money_ovtree.value).toString() + "元, 已设" 
+        + parseInt(tot_set_money_ovtree.value).toString() + "元" + "<br>";
+      }
+    } else if (tot_plan_money_ovtree.value < tot_set_money_ovtree.value) {
+      if ((tot_set_money_ovtree.value - tot_plan_money_ovtree.value) / tot_set_money_ovtree.value >= 0.1) {
+        _tot_warning_msg += "橄榄树需要缩小金额" + parseInt(tot_set_money_ovtree.value - tot_plan_money_ovtree.value).toString() 
+        + "元, 预设" + parseInt(tot_plan_money_ovtree.value).toString() + "元, 已设" 
+        + parseInt(tot_set_money_ovtree.value).toString() + "元" + "<br>";
+      }
+    }
+  } 
+  
+  if (fund_buy_ratio_config.value['max_money_for_fut'] 
+      && fund_buy_ratio_config.value['trendFactor'] && fund_buy_ratio_config.value['trendFactor'].hasOwnProperty('flyhorse') 
+      && fund_buy_ratio_config.value['trendFactor']['flyhorse'] != null
+      && fund_buy_ratio_config.value['fund_limit_setting'] && fund_buy_ratio_config.value['fund_limit_setting']['flyhorse_enable']) {
+    if (tot_plan_money_flyhorse.value > tot_set_money_flyhorse.value) {
+      if ((tot_plan_money_flyhorse.value - tot_set_money_flyhorse.value) / tot_plan_money_flyhorse.value >= 0.1) {
+        _tot_warning_msg += "飞马需要增大金额" + parseInt(tot_plan_money_flyhorse.value - tot_set_money_flyhorse.value).toString() 
+        + "元, 预设" + parseInt(tot_plan_money_flyhorse.value).toString() + "元, 已设" 
+        + parseInt(tot_set_money_flyhorse.value).toString() + "元" + "<br>";
+      }
+    } else if (tot_plan_money_flyhorse.value < tot_set_money_flyhorse.value) {
+      if ((tot_set_money_flyhorse.value - tot_plan_money_flyhorse.value) / tot_set_money_flyhorse.value >= 0.1) {
+        _tot_warning_msg += "飞马需要缩小金额" + parseInt(tot_set_money_flyhorse.value - tot_plan_money_flyhorse.value).toString() 
+        + "元, 预设" + parseInt(tot_plan_money_flyhorse.value).toString() + "元, 已设" 
+        + parseInt(tot_set_money_flyhorse.value).toString() + "元" + "<br>";
+      }
+    }
+  }
+  
+  if (fund_buy_ratio_config.value['max_money_for_unknow'] 
+      && fund_buy_ratio_config.value['trendFactor'] && fund_buy_ratio_config.value['trendFactor'].hasOwnProperty('medusa') 
+      && fund_buy_ratio_config.value['trendFactor']['medusa'] != null
+      && fund_buy_ratio_config.value['fund_limit_setting'] && fund_buy_ratio_config.value['fund_limit_setting']['medusa_enable']) {
+    if (tot_plan_money_medusa.value > tot_set_money_medusa.value) {
+      if ((tot_plan_money_medusa.value - tot_set_money_medusa.value) / tot_plan_money_medusa.value >= 0.1) {
+        _tot_warning_msg += "美杜莎需要增大金额" + parseInt(tot_plan_money_medusa.value - tot_set_money_medusa.value).toString() 
+        + "元, 预设" + parseInt(tot_plan_money_medusa.value).toString() + "元, 已设" 
+        + parseInt(tot_set_money_medusa.value).toString() + "元" + "<br>";
+      }
+    } else if (tot_plan_money_medusa.value < tot_set_money_medusa.value) {
+      if ((tot_set_money_medusa.value - tot_plan_money_medusa.value) / tot_set_money_medusa.value >= 0.1) {
+        _tot_warning_msg += "美杜莎需要缩小金额" + parseInt(tot_set_money_medusa.value - tot_plan_money_medusa.value).toString() 
+        + "元, 预设" + parseInt(tot_plan_money_medusa.value).toString() + "元, 已设" 
+        + parseInt(tot_set_money_medusa.value).toString() + "元" + "<br>";
+      }
+    }
+  }
+  
+  if (fund_buy_ratio_config.value['max_money_for_A_deb'] 
+      && fund_buy_ratio_config.value['trendFactor'] && fund_buy_ratio_config.value['trendFactor'].hasOwnProperty('dolphin') 
+      && fund_buy_ratio_config.value['trendFactor']['dolphin'] != null
+      && fund_buy_ratio_config.value['fund_limit_setting'] && fund_buy_ratio_config.value['fund_limit_setting']['dolphin_enable']) {
+    if (tot_plan_money_dolphin.value > tot_set_money_dolphin.value) {
+      if ((tot_plan_money_dolphin.value - tot_set_money_dolphin.value) / tot_plan_money_dolphin.value >= 0.1) {
+        _tot_warning_msg += "海豚需要增大金额" + parseInt(tot_plan_money_dolphin.value - tot_set_money_dolphin.value).toString() 
+        + "元, 预设" + parseInt(tot_plan_money_dolphin.value).toString() + "元, 已设" 
+        + parseInt(tot_set_money_dolphin.value).toString() + "元" + "<br>";
+      }
+    } else if (tot_plan_money_dolphin.value < tot_set_money_dolphin.value) {
+      if ((tot_set_money_dolphin.value - tot_plan_money_dolphin.value) / tot_set_money_dolphin.value >= 0.1) {
+        _tot_warning_msg += "海豚需要缩小金额" + parseInt(tot_set_money_dolphin.value - tot_plan_money_dolphin.value).toString() 
+        + "元, 预设" + parseInt(tot_plan_money_dolphin.value).toString() + "元, 已设" 
+        + parseInt(tot_set_money_dolphin.value).toString() + "元" + "<br>";
+      }
+    }
+  }
+  
+  if (fund_buy_ratio_config.value['max_money_for_B_deb'] 
+      && fund_buy_ratio_config.value['trendFactor'] && fund_buy_ratio_config.value['trendFactor'].hasOwnProperty('trident') 
+      && fund_buy_ratio_config.value['trendFactor']['trident'] != null
+      && fund_buy_ratio_config.value['fund_limit_setting'] && fund_buy_ratio_config.value['fund_limit_setting']['trident_enable']) {
+    if (tot_plan_money_trident.value > tot_set_money_trident.value) {
+      if ((tot_plan_money_trident.value - tot_set_money_trident.value) / tot_plan_money_trident.value >= 0.1) {
+        _tot_warning_msg += "三叉戟需要增大金额" + parseInt(tot_plan_money_trident.value - tot_set_money_trident.value).toString() 
+        + "元, 预设" + parseInt(tot_plan_money_trident.value).toString() + "元, 已设" 
+        + parseInt(tot_set_money_trident.value).toString() + "元" + "<br>";
+      }
+    } else if (tot_plan_money_trident.value < tot_set_money_trident.value) {
+      if ((tot_set_money_trident.value - tot_plan_money_trident.value) / tot_set_money_trident.value >= 0.1) {
+        _tot_warning_msg += "三叉戟需要缩小金额" + parseInt(tot_set_money_trident.value - tot_plan_money_trident.value).toString() 
+        + "元, 预设" + parseInt(tot_plan_money_trident.value).toString() + "元, 已设" 
+        + parseInt(tot_set_money_trident.value).toString() + "元" + "<br>";
+      }
+    }
+  }
+
+  tot_warning_msg.value = _tot_warning_msg
+  if (pop_up_warn_timer.value) {
+    clearInterval(pop_up_warn_timer.value)
+    pop_up_warn_timer.value = null
+    pop_up_warn_times.value = 0
+    pop_up_warn_period.value = 1000
+  }
+  const body = document.getElementsByTagName('body')[0];
+  let search_elem = document.getElementById('cust_alert_id');
+  if (search_elem) {
+    search_elem.style.visibility = 'hidden'
+    body.removeChild(search_elem);
+  } 
+  if (fund_buy_ratio_config.value && fund_buy_ratio_config.value['fund_limit_setting'] 
+  && fund_buy_ratio_config.value && fund_buy_ratio_config.value['fund_limit_setting']['popup_msg']
+  && tot_warning_msg.value !== '' && page_is_displayed.value) {
+    startForeverPopupWarnTimer()
+  }
 }, { immediate: true })
+
+function startForeverPopupWarnTimer() {
+  pop_up_warn_timer.value = setInterval(popUpWarnLogic, pop_up_warn_period.value)
+}
+
+function popUpWarnLogic() {
+  if (pop_up_warn_timer.value) {
+    clearInterval(pop_up_warn_timer.value)
+    pop_up_warn_timer.value = null
+  }
+  const body = document.getElementsByTagName('body')[0];
+  let search_elem = document.getElementById('cust_alert_id');
+  if (search_elem) {
+    search_elem.style.visibility = 'hidden'
+    body.removeChild(search_elem);
+  }
+  if (tot_warning_msg.value === '') {
+    pop_up_warn_times.value = 0
+    pop_up_warn_period.value = 1000
+  } else {
+    pop_up_warn_times.value += 1
+    if (pop_up_warn_times.value === 1) {
+      pop_up_warn_period.value = 2000
+    } else if (pop_up_warn_times.value === 2) {
+      pop_up_warn_period.value = 3000
+    } else if (pop_up_warn_times.value === 3) {
+      pop_up_warn_period.value = 4000
+    } else if (pop_up_warn_times.value === 4) {
+      pop_up_warn_period.value = 5000
+    } else if (pop_up_warn_times.value <= 10) {
+      pop_up_warn_period.value *= pop_up_warn_times.value * 1.25
+    } else if (pop_up_warn_times.value <= 20) {
+      pop_up_warn_period.value *= pop_up_warn_times.value * 1.175
+    } else {
+      pop_up_warn_period.value *= pop_up_warn_times.value * 1.1
+    }
+    if (pop_up_warn_period.value >= 30 * 1000) {
+      pop_up_warn_period.value = 30 * 1000
+    }
+    if (page_is_displayed.value) {
+      alert(tot_warning_msg.value)
+      startForeverPopupWarnTimer()
+    }
+  }
+}
 
 watch([composeViewObjs, noteObjs], () => {
   if (composeViewObjs.value.length > 0 && noteObjs.value) {
@@ -1932,6 +2308,20 @@ onActivated( () => {
       }, 1000)
     }
   }
+  page_is_displayed.value = true
+  if (!pop_up_warn_timer.value) {
+    startForeverPopupWarnTimer()
+  }
+})
+
+onDeactivated(() => {
+  if (pop_up_warn_timer.value) {
+    clearInterval(pop_up_warn_timer.value)
+    pop_up_warn_timer.value = null
+  }
+  pop_up_warn_times.value = 0
+  pop_up_warn_period.value = 1000
+  page_is_displayed.value = false
 })
 
 onUnmounted(() => {

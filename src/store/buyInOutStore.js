@@ -278,7 +278,7 @@ export const useBuyInOutStore = defineStore('buyInOut-store', () => {
 
         } else if (_page_type === 'aggressive') {
             if (!fund_buy_ratio_config.value || !fund_buy_ratio_config.value.hasOwnProperty('feeling_factor')) {
-                elem['plan_buyin_money'] = 40
+                elem['plan_buyin_money'] = 60
             } else {
                 let _factor = fund_buy_ratio_config.value['feeling_factor'];
                 elem['plan_buyin_money'] = parseInt(150 * _factor)
@@ -349,7 +349,7 @@ export const useBuyInOutStore = defineStore('buyInOut-store', () => {
             elem['plan_buyin_money'] = parseInt(elem['plan_buyin_money']);
 
         } else if (_page_type === 'dtconvg') {
-            elem['plan_buyin_money'] = 40
+            elem['plan_buyin_money'] = 60
             if (elem.hasOwnProperty('compose_obj') && elem['compose_obj'] && elem['compose_obj']['quant_obj'] && elem['compose_obj']['quant_obj']['histo']) {
                 let _max_hitted_times = elem['compose_obj']['quant_obj']['histo']['max_hitted_times']
                 let _min_hitted_times = elem['compose_obj']['quant_obj']['histo']['min_hitted_times']
@@ -408,7 +408,7 @@ export const useBuyInOutStore = defineStore('buyInOut-store', () => {
             
         } else if (_page_type === 'compose') {
             if (elem['compose_name'] === 'gdngoat') {
-                elem['plan_buyin_money'] = 40
+                elem['plan_buyin_money'] = 60
                 if (elem['quant_obj'] && elem['quant_obj']['histo']) {
                     let _max_hitted_times = elem['quant_obj']['histo']['max_hitted_times']
                     let _min_hitted_times = elem['quant_obj']['histo']['min_hitted_times']
@@ -474,7 +474,8 @@ export const useBuyInOutStore = defineStore('buyInOut-store', () => {
                 }
                 elem['plan_buyin_money'] = parseInt(elem['plan_buyin_money']);
 
-            } else if (elem['compose_name'] === 'ovtree' || elem['compose_name'] === 'flyhorse' || elem['compose_name'] === 'medusa') {
+            } else if (elem['compose_name'] === 'ovtree' || elem['compose_name'] === 'flyhorse' || elem['compose_name'] === 'medusa' || elem['compose_name'] === 'trident') {
+                // 计算规则 和 具体的种类是绑定的，不能更改
                 elem['plan_buyin_money'] = 60
                 if (elem['quant_obj'] && elem['quant_obj']['histo']) {
                     let _max_hitted_times = elem['quant_obj']['histo']['max_hitted_times']
@@ -532,8 +533,8 @@ export const useBuyInOutStore = defineStore('buyInOut-store', () => {
                 }
                 elem['plan_buyin_money'] = parseInt(elem['plan_buyin_money']);
 
-            } else if (elem['compose_name'] === 'dolphin' || elem['compose_name'] === 'trident') {
-                elem['plan_buyin_money'] = 40
+            } else if (elem['compose_name'] === 'dolphin') {
+                elem['plan_buyin_money'] = 60
                 if (elem['quant_obj'] && elem['quant_obj']['histo']) {
                     let _max_hitted_times = elem['quant_obj']['histo']['max_hitted_times']
                     let _min_hitted_times = elem['quant_obj']['histo']['min_hitted_times']
