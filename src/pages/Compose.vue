@@ -1847,15 +1847,22 @@ watch([composeObjs, compose_name, fixedHoldObjs, buyoutRecords, noteObjs, show4S
       diffBuySet.value = (totPlanBuy.value - totSetBuy.value) / totSetBuy.value
     }
 
-    // 金毛羊特殊处理 --- 引入情绪周期
+    // 各个组合的特殊处理 --- 引入情绪周期
     let _tot_plan_money_gdngoat = 0;
     let _tot_plan_money_ovtree = 0;
     let _tot_plan_money_flyhorse = 0;    
     let _tot_plan_money_medusa = 0;
     let _tot_plan_money_dolphin = 0;
     let _tot_plan_money_trident = 0;
+    let _need_special_logic = true;
+    if (show4SoldOnly.value || showPauseOnly.value || showAdjustOnly.value || showPoleOnly.value || showNoteOnly.value) {
+      _need_special_logic = false;
+    }
 
     composeViewObjs.value.forEach(elem => {
+      if (!_need_special_logic) {
+        return;
+      }
       if (elem['compose_name'] === 'gdngoat') {
         if (!elem.hasOwnProperty('plan_buyin_money')) {
           console.error("elem in gdngoat has no plan_buyin_money: ", elem['fund_id']);
@@ -1896,6 +1903,9 @@ watch([composeObjs, compose_name, fixedHoldObjs, buyoutRecords, noteObjs, show4S
     })
 
     composeViewObjs.value.forEach(elem => {
+      if (!_need_special_logic) {
+        return;
+      }
       if (elem['compose_name'] === 'gdngoat') {
         if (!elem.hasOwnProperty('plan_buyin_money')) {
           console.error("elem in gdngoat has no plan_buyin_money: ", elem['fund_id']);
@@ -1976,6 +1986,9 @@ watch([composeObjs, compose_name, fixedHoldObjs, buyoutRecords, noteObjs, show4S
     })
 
     composeViewObjs.value.forEach(elem => {
+      if (!_need_special_logic) {
+        return;
+      }
       if (elem['compose_name'] === 'gdngoat') {
         if (!elem.hasOwnProperty('plan_buyin_money')) {
           console.error("elem in gdngoat has no plan_buyin_money: ", elem['fund_id']);
@@ -2050,9 +2063,13 @@ watch([composeObjs, compose_name, fixedHoldObjs, buyoutRecords, noteObjs, show4S
   
   if (tot_plan_money_gdngoat.value > tot_set_money_gdngoat.value) {
     if ((tot_plan_money_gdngoat.value - tot_set_money_gdngoat.value) / tot_plan_money_gdngoat.value >= 0.1) {
-      _tot_warning_msg += "金毛羊需要增大金额" + parseInt(tot_plan_money_gdngoat.value - tot_set_money_gdngoat.value).toString() + 
-      "元, 预设" + parseInt(tot_plan_money_gdngoat.value).toString() + 
-      "元, 已设" + parseInt(tot_set_money_gdngoat.value).toString() + "元" + "<br>";
+      if (fund_buy_ratio_config.value['buyoutDistance'] && ((fund_buy_ratio_config.value['buyoutDistance']['gdngoat'] != null 
+           && fund_buy_ratio_config.value['buyoutDistance']['gdngoat'] > 3) 
+           || fund_buy_ratio_config.value['buyoutDistance']['gdngoat'] === null)) {
+        _tot_warning_msg += "金毛羊需要增大金额" + parseInt(tot_plan_money_gdngoat.value - tot_set_money_gdngoat.value).toString() + 
+        "元, 预设" + parseInt(tot_plan_money_gdngoat.value).toString() + 
+        "元, 已设" + parseInt(tot_set_money_gdngoat.value).toString() + "元" + "<br>";
+      }
     }
   } else if (tot_plan_money_gdngoat.value < tot_set_money_gdngoat.value) {
     if ((tot_set_money_gdngoat.value - tot_plan_money_gdngoat.value) / tot_set_money_gdngoat.value >= 0.1) {
@@ -2068,9 +2085,13 @@ watch([composeObjs, compose_name, fixedHoldObjs, buyoutRecords, noteObjs, show4S
       && fund_buy_ratio_config.value['fund_limit_setting'] && fund_buy_ratio_config.value['fund_limit_setting']['ovtree_enable']) {
     if (tot_plan_money_ovtree.value > tot_set_money_ovtree.value) {
       if ((tot_plan_money_ovtree.value - tot_set_money_ovtree.value) / tot_plan_money_ovtree.value >= 0.1) {
-        _tot_warning_msg += "橄榄树需要增大金额" + parseInt(tot_plan_money_ovtree.value - tot_set_money_ovtree.value).toString() 
-        + "元, 预设" + parseInt(tot_plan_money_ovtree.value).toString() + "元, 已设" 
-        + parseInt(tot_set_money_ovtree.value).toString() + "元" + "<br>";
+        if (fund_buy_ratio_config.value['buyoutDistance'] && ((fund_buy_ratio_config.value['buyoutDistance']['ovtree'] != null 
+             && fund_buy_ratio_config.value['buyoutDistance']['ovtree'] > 3) 
+             || fund_buy_ratio_config.value['buyoutDistance']['ovtree'] === null)) {
+          _tot_warning_msg += "橄榄树需要增大金额" + parseInt(tot_plan_money_ovtree.value - tot_set_money_ovtree.value).toString() 
+          + "元, 预设" + parseInt(tot_plan_money_ovtree.value).toString() + "元, 已设" 
+          + parseInt(tot_set_money_ovtree.value).toString() + "元" + "<br>";
+        }
       }
     } else if (tot_plan_money_ovtree.value < tot_set_money_ovtree.value) {
       if ((tot_set_money_ovtree.value - tot_plan_money_ovtree.value) / tot_set_money_ovtree.value >= 0.1) {
@@ -2087,9 +2108,13 @@ watch([composeObjs, compose_name, fixedHoldObjs, buyoutRecords, noteObjs, show4S
       && fund_buy_ratio_config.value['fund_limit_setting'] && fund_buy_ratio_config.value['fund_limit_setting']['flyhorse_enable']) {
     if (tot_plan_money_flyhorse.value > tot_set_money_flyhorse.value) {
       if ((tot_plan_money_flyhorse.value - tot_set_money_flyhorse.value) / tot_plan_money_flyhorse.value >= 0.1) {
-        _tot_warning_msg += "飞马需要增大金额" + parseInt(tot_plan_money_flyhorse.value - tot_set_money_flyhorse.value).toString() 
-        + "元, 预设" + parseInt(tot_plan_money_flyhorse.value).toString() + "元, 已设" 
-        + parseInt(tot_set_money_flyhorse.value).toString() + "元" + "<br>";
+        if (fund_buy_ratio_config.value['buyoutDistance'] && ((fund_buy_ratio_config.value['buyoutDistance']['flyhorse'] != null 
+            && fund_buy_ratio_config.value['buyoutDistance']['flyhorse'] > 3) 
+            || fund_buy_ratio_config.value['buyoutDistance']['flyhorse'] === null)) {
+          _tot_warning_msg += "飞马需要增大金额" + parseInt(tot_plan_money_flyhorse.value - tot_set_money_flyhorse.value).toString() 
+          + "元, 预设" + parseInt(tot_plan_money_flyhorse.value).toString() + "元, 已设" 
+          + parseInt(tot_set_money_flyhorse.value).toString() + "元" + "<br>";
+        }
       }
     } else if (tot_plan_money_flyhorse.value < tot_set_money_flyhorse.value) {
       if ((tot_set_money_flyhorse.value - tot_plan_money_flyhorse.value) / tot_set_money_flyhorse.value >= 0.1) {
@@ -2106,9 +2131,13 @@ watch([composeObjs, compose_name, fixedHoldObjs, buyoutRecords, noteObjs, show4S
       && fund_buy_ratio_config.value['fund_limit_setting'] && fund_buy_ratio_config.value['fund_limit_setting']['medusa_enable']) {
     if (tot_plan_money_medusa.value > tot_set_money_medusa.value) {
       if ((tot_plan_money_medusa.value - tot_set_money_medusa.value) / tot_plan_money_medusa.value >= 0.1) {
-        _tot_warning_msg += "美杜莎需要增大金额" + parseInt(tot_plan_money_medusa.value - tot_set_money_medusa.value).toString() 
-        + "元, 预设" + parseInt(tot_plan_money_medusa.value).toString() + "元, 已设" 
-        + parseInt(tot_set_money_medusa.value).toString() + "元" + "<br>";
+        if (fund_buy_ratio_config.value['buyoutDistance'] && ((fund_buy_ratio_config.value['buyoutDistance']['medusa'] != null 
+            && fund_buy_ratio_config.value['buyoutDistance']['medusa'] > 3) 
+            || fund_buy_ratio_config.value['buyoutDistance']['medusa'] === null)) {
+          _tot_warning_msg += "美杜莎需要增大金额" + parseInt(tot_plan_money_medusa.value - tot_set_money_medusa.value).toString() 
+          + "元, 预设" + parseInt(tot_plan_money_medusa.value).toString() + "元, 已设" 
+          + parseInt(tot_set_money_medusa.value).toString() + "元" + "<br>";
+        }
       }
     } else if (tot_plan_money_medusa.value < tot_set_money_medusa.value) {
       if ((tot_set_money_medusa.value - tot_plan_money_medusa.value) / tot_set_money_medusa.value >= 0.1) {
@@ -2125,9 +2154,13 @@ watch([composeObjs, compose_name, fixedHoldObjs, buyoutRecords, noteObjs, show4S
       && fund_buy_ratio_config.value['fund_limit_setting'] && fund_buy_ratio_config.value['fund_limit_setting']['dolphin_enable']) {
     if (tot_plan_money_dolphin.value > tot_set_money_dolphin.value) {
       if ((tot_plan_money_dolphin.value - tot_set_money_dolphin.value) / tot_plan_money_dolphin.value >= 0.1) {
-        _tot_warning_msg += "海豚需要增大金额" + parseInt(tot_plan_money_dolphin.value - tot_set_money_dolphin.value).toString() 
-        + "元, 预设" + parseInt(tot_plan_money_dolphin.value).toString() + "元, 已设" 
-        + parseInt(tot_set_money_dolphin.value).toString() + "元" + "<br>";
+        if (fund_buy_ratio_config.value['buyoutDistance'] && ((fund_buy_ratio_config.value['buyoutDistance']['dolphin'] != null 
+            && fund_buy_ratio_config.value['buyoutDistance']['dolphin'] > 3) 
+            || fund_buy_ratio_config.value['buyoutDistance']['dolphin'] === null)) {        
+          _tot_warning_msg += "海豚需要增大金额" + parseInt(tot_plan_money_dolphin.value - tot_set_money_dolphin.value).toString() 
+          + "元, 预设" + parseInt(tot_plan_money_dolphin.value).toString() + "元, 已设" 
+          + parseInt(tot_set_money_dolphin.value).toString() + "元" + "<br>";
+        }
       }
     } else if (tot_plan_money_dolphin.value < tot_set_money_dolphin.value) {
       if ((tot_set_money_dolphin.value - tot_plan_money_dolphin.value) / tot_set_money_dolphin.value >= 0.1) {
@@ -2144,9 +2177,13 @@ watch([composeObjs, compose_name, fixedHoldObjs, buyoutRecords, noteObjs, show4S
       && fund_buy_ratio_config.value['fund_limit_setting'] && fund_buy_ratio_config.value['fund_limit_setting']['trident_enable']) {
     if (tot_plan_money_trident.value > tot_set_money_trident.value) {
       if ((tot_plan_money_trident.value - tot_set_money_trident.value) / tot_plan_money_trident.value >= 0.1) {
-        _tot_warning_msg += "三叉戟需要增大金额" + parseInt(tot_plan_money_trident.value - tot_set_money_trident.value).toString() 
-        + "元, 预设" + parseInt(tot_plan_money_trident.value).toString() + "元, 已设" 
-        + parseInt(tot_set_money_trident.value).toString() + "元" + "<br>";
+        if (fund_buy_ratio_config.value['buyoutDistance'] && ((fund_buy_ratio_config.value['buyoutDistance']['trident'] != null 
+        && fund_buy_ratio_config.value['buyoutDistance']['trident'] > 3) 
+        || fund_buy_ratio_config.value['buyoutDistance']['trident'] === null)) {    
+          _tot_warning_msg += "三叉戟需要增大金额" + parseInt(tot_plan_money_trident.value - tot_set_money_trident.value).toString() 
+          + "元, 预设" + parseInt(tot_plan_money_trident.value).toString() + "元, 已设" 
+          + parseInt(tot_set_money_trident.value).toString() + "元" + "<br>";
+        }
       }
     } else if (tot_plan_money_trident.value < tot_set_money_trident.value) {
       if ((tot_set_money_trident.value - tot_plan_money_trident.value) / tot_set_money_trident.value >= 0.1) {
@@ -2198,13 +2235,11 @@ function popUpWarnLogic() {
   } else {
     pop_up_warn_times.value += 1
     if (pop_up_warn_times.value === 1) {
-      pop_up_warn_period.value = 2000
-    } else if (pop_up_warn_times.value === 2) {
-      pop_up_warn_period.value = 3000
-    } else if (pop_up_warn_times.value === 3) {
-      pop_up_warn_period.value = 4000
-    } else if (pop_up_warn_times.value === 4) {
       pop_up_warn_period.value = 5000
+    } else if (pop_up_warn_times.value === 2) {
+      pop_up_warn_period.value = 6000
+    } else if (pop_up_warn_times.value === 3) {
+      pop_up_warn_period.value = 8000
     } else if (pop_up_warn_times.value <= 10) {
       pop_up_warn_period.value *= pop_up_warn_times.value * 1.25
     } else if (pop_up_warn_times.value <= 20) {
@@ -2216,7 +2251,10 @@ function popUpWarnLogic() {
       pop_up_warn_period.value = 30 * 1000
     }
     if (page_is_displayed.value) {
-      alert(tot_warning_msg.value)
+      if (show4SoldOnly.value || showPauseOnly.value || showAdjustOnly.value || showPoleOnly.value || showNoteOnly.value) {
+      } else {
+        alert(tot_warning_msg.value)
+      }
       startForeverPopupWarnTimer()
     }
   }
