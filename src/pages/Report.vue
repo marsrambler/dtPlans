@@ -619,6 +619,7 @@ const report_select_option = [
   { 'source_name': '非卖', 'source_val': 'only_non_sold' },
   { 'source_name': '上涨', 'source_val': 'only_asc' },
   { 'source_name': '下跌', 'source_val': 'only_dsc' },
+  { 'source_name': '大池', 'source_val': 'only_bigpool' },
   { 'source_name': '橄榄树', 'source_val': 'only_ovtree' },
   { 'source_name': '飞马', 'source_val': 'only_flyhorse' },
   { 'source_name': '美杜莎', 'source_val': 'only_medusa' },
@@ -729,7 +730,7 @@ watch([dynRecordObjs, reportObjsReloaded], () => {
       const fund_match = (elem) => elem['fund_id'] === backup_fund_id.value
       let _idx = dynRecordObjs.value.findIndex(fund_match)
       if (_idx === -1) {
-        console.error("Internal error, find dynRecordObjs failed by fund id: ", backup_fund_id.value)
+        console.warn("Internal error, find dynRecordObjs failed by fund id: ", backup_fund_id.value)
       } else {
         console.log("**** restore report dyn record obj successfully, fund id: ", backup_fund_id.value)
         dynRecordObjs.value[_idx]['currSelected'] = true
@@ -861,7 +862,14 @@ function excuteSearchFund() {
     } else {
       searchFundNameOrFundId.value = ""
     }
-    alert("根据id和名称都没有找到");
+    if (report_select.value !== 'all' && report_select.value !== 'inload') {
+      alert("根据id和名称都没有找到, 切换到全部种类");
+      setTimeout(function() {
+        report_select.value = 'all';
+      }, 200)
+    } else {
+      alert("根据id和名称都没有找到");
+    }
   }
 }
 
@@ -1866,13 +1874,8 @@ function scrollViewBySelection() {
 }
 
 function genReport(oneRow) {
-  if (dynRecordObjs_full && dynRecordObjs_full.value && dynRecordObjs_full.value.length > 0) {
-    dynRecordObjs_full.value.forEach(elem => {
-      elem['currSelected'] = false
-    })
-  }
-  if (dynRecordObjs_latest && dynRecordObjs_latest.value && dynRecordObjs_latest.value.length > 0) {
-    dynRecordObjs_latest.value.forEach(elem => {
+  if (dynRecordObjs && dynRecordObjs.value && dynRecordObjs.value.length > 0) {
+    dynRecordObjs.value.forEach(elem => {
       elem['currSelected'] = false
     })
   }
@@ -1884,6 +1887,7 @@ function genReport(oneRow) {
     currDynValue.value = oneRow;
     currDynValue.value['currSelected'] = true
   } else {
+    currDynValue.value['currSelected'] = false
     currDynValue.value = null
   }
 }

@@ -43,7 +43,7 @@
         <span class="text-bg-dark">{{uptTime}}</span>
         <span style="cursor: pointer; margin-left: 1rem;">
           <a href="../" class="text-info">
-            去综合门户
+            去门户
           </a>
         </span>
 
@@ -90,24 +90,41 @@
           </div>
           
           <div style="display: flex; align-items: center; color: white;">
-            <div style="display: inline-block; width: 1.5rem">设:</div>
+            <div style="display: inline-block; margin-right: 2px;">初始:{{ totInitBuy }}</div>
             <div style="display: inline-block; margin-left: 0.5rem;">
-              <div style="font-size: 0.8rem; font-weight: bold; margin-bottom: -3px; text-align: center;">{{ totSetBuy }}</div>
+              <div style="font-size: 0.8rem; font-weight: bold; margin-bottom: -3px; text-align: center;">当前:{{ totSetBuy }}</div>
               <div class="sep_line"></div>
                 <template v-if="diffBuySet >= 0.1">
                   <div class="badge bg-warning"
-                    style="font-size: 0.8rem; font-weight: bold; line-height: 0.8 !important;; display: block !important;">{{ totPlanBuy }}
+                    style="font-size: 0.8rem; font-weight: bold; line-height: 0.8 !important;; display: block !important;">决策:{{ totPlanBuy }}
                   </div>
                 </template>
                 <template v-else-if="diffBuySet <= -0.1">
                   <div class="badge bg-danger"
-                    style="font-size: 0.8rem; line-height: 0.8 !important;; display: block !important;">{{ totPlanBuy }}
+                    style="font-size: 0.8rem; line-height: 0.8 !important;; display: block !important;">决策:{{ totPlanBuy }}
                   </div>
                 </template>
                 <template v-else>
-                  <div style="font-size: 0.8rem; font-weight: bold; margin-top: -3px;">{{ totPlanBuy }}</div>
+                  <div style="font-size: 0.8rem; font-weight: bold; margin-top: -3px;">决策:{{ totPlanBuy }}</div>
                 </template>
             </div>
+            <template v-if="fund_limit_str === '管'">
+              <template v-if="fund_buyout_distance != null && fund_buyout_distance <= 3">
+                <div style="display:inline-block;margin-left:0.5rem;color:gold;font-weight:bold;">
+                  (<span style="text-decoration:line-through;color:whitesmoke;font-weight:normal;font-style:italic;">{{fund_limit_str}}</span>)
+                </div>
+              </template>
+              <template v-else>
+                <div style="display:inline-block;margin-left:0.5rem;color:gold;font-weight:bold;">
+                  ({{fund_limit_str}})
+                </div>
+              </template>
+            </template>
+            <template v-else-if="fund_limit_str === '非管'">
+              <div style="display:inline-block;margin-left:0.5rem;color:lime;font-weight:bold;">
+                ({{fund_limit_str}})
+              </div>
+            </template>            
           </div>
           
         </div>
@@ -141,12 +158,72 @@ import {Modal} from "bootstrap";
 import { useZskbStore } from "../store/zskbStore";
 import {storeToRefs} from 'pinia'
 import { useComposeStore } from '../store/composeStore';
+import { useBuyInOutStore } from '../store/buyInOutStore.js';
 
 const zskbStore = useZskbStore()
 const {rtRates} = storeToRefs(zskbStore)
 
 const composeStore = useComposeStore()
-const { totMoney, totPositiveNum, totPoleNum, totEarnMoney, totEarnRate, totSetBuy, totPlanBuy, diffBuySet } = storeToRefs(composeStore)
+const { totMoney, totPositiveNum, totPoleNum, totEarnMoney, totEarnRate, totSetBuy, totPlanBuy, diffBuySet, totInitBuy } = storeToRefs(composeStore)
+const buyInOutStore = useBuyInOutStore()
+const { fund_buy_ratio_config, curr_compose_name } = storeToRefs(buyInOutStore)
+
+const fund_limit_str = ref("")
+const fund_buyout_distance = ref(null)
+watch([fund_buy_ratio_config, curr_compose_name], () => {
+  fund_limit_str.value = ""
+  fund_buyout_distance.value = null
+  if (!curr_compose_name.value || curr_compose_name.value === 'all' || curr_compose_name.value === '') {
+    return
+  }
+  if (!fund_buy_ratio_config.value || !fund_buy_ratio_config.value['fund_limit_setting']) {
+    return
+  }
+
+  if (curr_compose_name.value === 'ovtree') {
+    if (fund_buy_ratio_config.value['fund_limit_setting']['ovtree_enable']) {
+      fund_limit_str.value = "管"
+      fund_buyout_distance.value = fund_buy_ratio_config.value['buyoutDistance']['ovtree']
+    } else {
+      fund_limit_str.value = "非管"
+    }
+  } else if (curr_compose_name.value === 'flyhorse') {
+    if (fund_buy_ratio_config.value['fund_limit_setting']['flyhorse_enable']) {
+      fund_limit_str.value = "管"
+      fund_buyout_distance.value = fund_buy_ratio_config.value['buyoutDistance']['flyhorse']
+    } else {
+      fund_limit_str.value = "非管"
+    }
+  } else if (curr_compose_name.value === 'gdngoat') {
+    if (fund_buy_ratio_config.value['fund_limit_setting']['gdngoat_enable']) {
+      fund_limit_str.value = "管"
+      fund_buyout_distance.value = fund_buy_ratio_config.value['buyoutDistance']['gdngoat']
+    } else {
+      fund_limit_str.value = "非管"
+    }
+  } else if (curr_compose_name.value === 'medusa') {
+    if (fund_buy_ratio_config.value['fund_limit_setting']['medusa_enable']) {
+      fund_limit_str.value = "管"
+      fund_buyout_distance.value = fund_buy_ratio_config.value['buyoutDistance']['medusa']
+    } else {
+      fund_limit_str.value = "非管"
+    }
+  } else if (curr_compose_name.value === 'trident') {
+    if (fund_buy_ratio_config.value['fund_limit_setting']['trident_enable']) {
+      fund_limit_str.value = "管"
+      fund_buyout_distance.value = fund_buy_ratio_config.value['buyoutDistance']['trident']
+    } else {
+      fund_limit_str.value = "非管"
+    }
+  } else if (curr_compose_name.value === 'dolphin') {
+    if (fund_buy_ratio_config.value['fund_limit_setting']['dolphin_enable']) {
+      fund_limit_str.value = "管"
+      fund_buyout_distance.value = fund_buy_ratio_config.value['buyoutDistance']['dolphin']
+    } else {
+      fund_limit_str.value = "非管"
+    }
+  }
+})
 
 const cfmDlgTitle = ref("")
 const cfmDlgCont = ref("")

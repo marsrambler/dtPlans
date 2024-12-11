@@ -784,7 +784,7 @@ function sortByField(_field) {
         let _a_compose = a['compose_plan']
         let _a_val = (_a_compose === 'noplan') ? 100 : (_a_compose === 'ovtree') ? 0 : (_a_compose === 'dolphin') ? 1 : (_a_compose === 'trident') ? 2 : (_a_compose === 'gdngoat') ? 3 : (_a_compose === 'flyhorse') ? 4 : (_a_compose === 'medusa') ? 5 : 6
         let _b_compose = b['compose_plan']
-        let _b_val = (_b_compose === 'noplan') ? 100 : (_b_compose === 'ovtree') ? 0 : (_b_compose === 'dolphin') ? 1 : (_b_compose === 'trident') ? 2 : (_b_compose === 'gdngoat') ? 3 : (_a_compose === 'flyhorse') ? 4 : (_a_compose === 'medusa') ? 5 : 6
+        let _b_val = (_b_compose === 'noplan') ? 100 : (_b_compose === 'ovtree') ? 0 : (_b_compose === 'dolphin') ? 1 : (_b_compose === 'trident') ? 2 : (_b_compose === 'gdngoat') ? 3 : (_b_compose === 'flyhorse') ? 4 : (_b_compose === 'medusa') ? 5 : 6
         return _a_val - _b_val
       });
     } else {
@@ -792,7 +792,7 @@ function sortByField(_field) {
         let _a_compose = a['compose_plan']
         let _a_val = (_a_compose === 'noplan') ? 100 : (_a_compose === 'ovtree') ? 0 : (_a_compose === 'dolphin') ? 1 : (_a_compose === 'trident') ? 2 : (_a_compose === 'gdngoat') ? 3 : (_a_compose === 'flyhorse') ? 4 : (_a_compose === 'medusa') ? 5 : 6
         let _b_compose = b['compose_plan']
-        let _b_val = (_b_compose === 'noplan') ? 100 : (_b_compose === 'ovtree') ? 0 : (_b_compose === 'dolphin') ? 1 : (_b_compose === 'trident') ? 2 : (_b_compose === 'gdngoat') ? 3 : (_a_compose === 'flyhorse') ? 4 : (_a_compose === 'medusa') ? 5 : 6
+        let _b_val = (_b_compose === 'noplan') ? 100 : (_b_compose === 'ovtree') ? 0 : (_b_compose === 'dolphin') ? 1 : (_b_compose === 'trident') ? 2 : (_b_compose === 'gdngoat') ? 3 : (_b_compose === 'flyhorse') ? 4 : (_b_compose === 'medusa') ? 5 : 6
         return _b_val - _a_val
       });
     }

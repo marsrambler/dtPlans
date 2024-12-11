@@ -15,6 +15,7 @@ export const useBuyInOutStore = defineStore('buyInOut-store', () => {
     const contStartStopObj = ref({})
     const buyOrSoldObj = ref({})
     const fund_buy_ratio_config = ref({})
+    const curr_compose_name = ref('all')
 
     // action
     async function getAllBuyoutRecords() {
@@ -504,10 +505,10 @@ export const useBuyInOutStore = defineStore('buyInOut-store', () => {
                             elem['plan_buyin_money'] = elem['plan_buyin_money'] * 0.8
                         }
                     } else {
-                        console.error("compose page/ovtree/trident/flyhorse/medusa has no statistics/min_sort_tot_earn for elem: ", elem);
+                        console.warn("compose page/ovtree/trident/flyhorse/medusa has no statistics/min_sort_tot_earn for elem: ", elem);
                     }
                 } else {
-                    console.error("compose page/ovtree/trident/flyhorse/medusa has no statistics/min_sort_tot_earn for elem: ", elem);
+                    console.warn("compose page/ovtree/trident/flyhorse/medusa has no statistics/min_sort_tot_earn for elem: ", elem);
                 }
 
                 if (elem['kbObj'] && elem['kbObj']['statistics']['fund_perc_len'] && elem['kbObj']['statistics']['fund_perc_len'] < 1100) {
@@ -725,6 +726,7 @@ export const useBuyInOutStore = defineStore('buyInOut-store', () => {
         contStartStopObj,
         buyOrSoldObj,
         fund_buy_ratio_config,
+        curr_compose_name,
         getAllBuyoutRecords,
         fundCanBeBuyOut,
         soldComposeFixedHold,

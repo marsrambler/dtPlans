@@ -1,11 +1,11 @@
 <template>
   <div :style="topSecClass">
-    <div id="op_pane" :style="{ 'height': opPaneHeight + 'rem' }" class="grid_pane_c10">
+    <div id="op_pane" :style="{ 'height': opPaneHeight + 'rem', 'text-wrap': 'nowrap' }" class="grid_pane_c12">
       <div>总数&nbsp;<span class="badge bg-success">{{ currTotNum }}</span><!--
       --></div>
       <div style="position: relative; top:4px;"><!--
         --><input class="form-check-input" type="checkbox" id="chk_convg" v-model="showOnly3Convg"><!--
-        -->&nbsp;<label for="chk_convg">强收敛</label>&nbsp;<span class="badge bg-danger" style="position:relative;top:-1px;">{{ threeConvgNum }}</span><!--
+        -->&nbsp;<label for="chk_convg">收敛</label>&nbsp;<span class="badge bg-danger" style="position:relative;top:-1px;">{{ threeConvgNum }}</span><!--
       --></div>
       <div style="cursor: pointer;" @click="clearSelected()">
         选择&nbsp;<span class="badge bg-warning text-dark">{{ currSelectedNum }}</span>
@@ -17,11 +17,16 @@
         --><input class="form-check-input" type="checkbox" id="chk_hidden" v-model="showHides"><!--
         -->&nbsp;<label for="chk_hidden">隐藏</label>&nbsp;<span class="badge bg-dark" style="cursor: pointer;position:relative;top:-1px;" @click="clearAllHides()">{{ currRepoHideNum }}</span><!--
       --></div>
-      <input type="text" class="form-control-plaintext search_box" style="grid-column: 6 / span 2;" v-model="searchCond"
+      <div style="position: relative; top:4px;">
+        <input class="form-check-input" type="checkbox" id="chk_new_add" v-model="showNewAdd"><!--
+        -->&nbsp;<label for="chk_new_add">新加</label>&nbsp;<span class="badge bg-info text-bg-success" style="position: relative; top: -1px;">{{ currNewAddNum }}</span><!--
+      --></div>           
+      <input type="text" class="form-control-plaintext search_box" style="grid-column: 7 / span 2;" v-model="searchCond"
              @keyup.enter="searchByCond()">
       <input class="btn btn-primary btn-sm" type="button" value="查找" @click="searchByCond()">
       <input class="btn btn-primary btn-sm" type="button" value="前移选择" @click="sortByField('selected')">
       <input class="btn btn-warning btn-sm" type="button" value="隐藏选择" @click="hideSelected()">
+      <input class="btn btn-warning btn-sm" type="button" value="保存" @click="saveAggressiveBase()">
       <!--
       <input class="btn btn-warning btn-sm" type="button" value="刷新" @click="getZskb()">
       -->
@@ -170,12 +175,14 @@
       <tbody>
       <template v-for="oneRow in aggressiveViewObjs" :key="oneRow.fund_id">
         <template v-if="(showOnly3Convg && 
-                            (oneRow['p50_convg_dur_rank'] && oneRow['p65_convg_dur_rank'] && oneRow['p80_convg_dur_rank']) &&
-                            ((!showHides && !oneRow['hide_disp']) || showHides)
-                        ) || 
-                        (!showOnly3Convg && 
-                            ((!showHides && !oneRow['hide_disp']) || showHides)
-                        )">
+                            (oneRow['p50_convg_dur_rank'] && oneRow['p65_convg_dur_rank'] && oneRow['p80_convg_dur_rank'])
+                        ) 
+                        || 
+                        (showHides && oneRow['hide_disp'])
+                        ||
+                        (showNewAdd && oneRow['new_add'])
+                        ||
+                        (!showOnly3Convg && !showHides && !showNewAdd && !oneRow['hide_disp'])">
           <template v-if="oneRow['lost_in_aggressive']">
             <tr v-bind:id="oneRow.fund_id" style="cursor: pointer;" @click="selOrDesRow(oneRow)"
                 v-bind:class="{ sel_row: oneRow['currSelected'] }"
@@ -242,12 +249,17 @@
                       v-if="oneRow['statistics']['perc_not_update_days'] && oneRow['statistics']['perc_not_update_days'] - 1 >= 3">
                     <span class="badge bg-danger">缺失: {{ oneRow.statistics.perc_not_update_days }}</span>
                   </template>
-                  <span v-if="oneRow['exclude_repo']" class="badge bg-dark" style="margin-left: 0.5rem;">已排除</span>
-                  <input v-else class="btn btn-danger btn-sm" style="margin-left: 0.5rem;" type="button" value="永远排除"
-                        @click.stop="addAggressiveExclude(oneRow.fund_id, oneRow.fund_name)">
+                  <template v-if="oneRow['new_add']"">
+                    <span class="badge bg-info text-bg-success" style="margin-left: 0.5rem;">新加</span>
+                  </template>
                 </div>
                 <div>
                   {{ oneRow.fund_name }}
+                  <template v-if="!oneRow['compose_plan'] || (oneRow['compose_plan'] !== 'gdngoat')">
+                    <span v-if="oneRow['exclude_repo']" class="badge bg-dark" style="margin-left: 0.5rem;">已排除</span>
+                    <input v-else class="btn btn-danger btn-sm" style="margin-left: 0.5rem;" type="button" value="永远排除"
+                          @click.stop="addAggressiveExclude(oneRow.fund_id, oneRow.fund_name)">
+                  </template>
                 </div>
                 <div style="margin-top:8px;">
                   <span v-bind:class="getCardStyle(oneRow.statistics.day_200_thres)">&nbsp;</span>
@@ -485,8 +497,8 @@ import {Modal} from "bootstrap";
 import {useBuyInOutStore} from "../store/buyInOutStore.js";
 
 const aggressiveStore = useAggressiveStore()
-const {aggressiveObjs, aggressiveExcludes} = storeToRefs(aggressiveStore)
-const {getAllAggressive, getAggressiveExcludes, addAggressiveExclude} = aggressiveStore
+const {aggressiveObjs, aggressiveExcludes, aggressiveBaseFundIds} = storeToRefs(aggressiveStore)
+const {getAllAggressive, getAggressiveExcludes, addAggressiveExclude, getBase, saveBase} = aggressiveStore
 const composeStore = useComposeStore()
 const {composeObjs} = storeToRefs(composeStore)
 const {addOrRemoveCompose, } = composeStore
@@ -514,6 +526,7 @@ const colWidMap = {
   'col_11': 5
 }
 
+getBase()
 getAllAggressive()
 getAggressiveExcludes()
 
@@ -521,8 +534,9 @@ const lostAggressiveNum = ref(0)
 const threeConvgNum = ref(0)
 const aggressiveViewObjs = ref([])
 
-watch([aggressiveObjs, aggressiveExcludes, buyin_records], () => {
+watch([aggressiveObjs, aggressiveExcludes, aggressiveBaseFundIds, buyin_records], () => {
   aggressiveViewObjs.value = aggressiveObjs.value
+
   if (aggressiveExcludes && aggressiveExcludes.value && aggressiveExcludes.value.length > 0) {
     aggressiveViewObjs.value.forEach(elem => {
       if (aggressiveExcludes.value.indexOf(elem['fund_id']) != -1) {
@@ -683,16 +697,26 @@ watch([aggressiveObjs, aggressiveExcludes, buyin_records], () => {
       }
   })
 
-  let _gdngoat_fund_objs = composeObjs.value.find(item => item['compose_name'] === 'gdngoat')['compose_objs']
+  if (composeObjs.value && composeObjs.value.length > 0) {
+  
+    let _gdngoat_fund_objs = composeObjs.value.find(item => item['compose_name'] === 'gdngoat')['compose_objs']
+    aggressiveViewObjs.value.forEach(elem => {
+      if (elem.hasOwnProperty('compose_plan') && elem['compose_plan'] && elem['compose_plan'] === 'gdngoat') {
+        elem['compose_obj'] = _gdngoat_fund_objs.find(_obj => _obj['fund_id'] === elem['fund_id'])
+        if (!elem['compose_obj'] && elem.hasOwnProperty('compose_plan') && elem['compose_plan'] != 'noplan') {
+          console.warn("aggressive page find compose_obj failed: ", elem['fund_id'], elem['fund_name']);
+        }
+      }
+      calculatePlanMoney('aggressive', elem)
+    })
+  }
 
   aggressiveViewObjs.value.forEach(elem => {
-    if (elem.hasOwnProperty('compose_plan') && elem['compose_plan'] && elem['compose_plan'] === 'gdngoat') {
-      elem['compose_obj'] = _gdngoat_fund_objs.find(_obj => _obj['fund_id'] === elem['fund_id'])
-      if (!elem['compose_obj'] && elem.hasOwnProperty('compose_plan') && elem['compose_plan'] != 'noplan') {
-        console.warn("aggressive page find compose_obj failed: ", elem['fund_id'], elem['fund_name']);
-      }
+    if (aggressiveBaseFundIds.value.indexOf(elem['fund_id']) === -1) {
+      elem['new_add'] = true
+    } else {
+      elem['new_add'] = false
     }
-    calculatePlanMoney('aggressive', elem)
   })
 
 }, {immediate: true})
@@ -727,6 +751,8 @@ watch(aggressiveViewObjs, () => {
   currSelectedNum.value = _filtered.length
   let _filtered_2 = aggressiveViewObjs.value.filter((elem) => elem['hide_disp'])
   currRepoHideNum.value = _filtered_2.length
+  let _filtered_3 = aggressiveViewObjs.value.filter((elem) => elem['new_add'])
+  currNewAddNum.value = _filtered_3.length
 }, {
   deep: true
 })
@@ -1065,6 +1091,9 @@ function clearAllHides() {
   })
 }
 
+const showNewAdd = ref(false)
+const currNewAddNum = ref(0)
+
 const showOnly3Convg = ref(false)
 
 function switchWavDisp(oneRowObj) {
@@ -1074,6 +1103,29 @@ function switchWavDisp(oneRowObj) {
     oneRowObj['show_wav'] = !oneRowObj['show_wav'];
   }
 }
+
+watch([showHides, showNewAdd, showOnly3Convg],
+ ([showHidesNow, showNewAddNow, showOnly3ConvgNow], [showHidesPrev, showNewAddPrev, showOnly3ConvgPrev]) => {
+  if (!showHidesPrev && showHidesNow) {
+    showNewAdd.value = false
+    showOnly3Convg.value = false
+  } else if (!showNewAddPrev && showNewAddNow) {
+    showHides.value = false
+    showOnly3Convg.value = false
+  } else if (!showOnly3Convg && showOnly3Convg) {
+    showHides.value = false
+    showNewAdd.value = false
+  }
+ })
+
+async function saveAggressiveBase() {
+  if (!aggressiveViewObjs.value || aggressiveViewObjs.value.length === 0) {
+    return
+  }
+  let _fund_ids = aggressiveViewObjs.value.map(elem => elem['fund_id']);
+  saveBase(_fund_ids)
+}
+
 </script>
 
 <style scoped>

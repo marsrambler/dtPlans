@@ -2,11 +2,14 @@ import {defineStore} from 'pinia'
 import {axiosInst} from "../lib/api.js";
 import {ref, watch} from 'vue'
 import { useApiStore } from './apiStore.js';
+import {getTodayStr} from "../lib/commonUtils.js";
 
 export const useComposeStore = defineStore('compose-store', () => {
 
     // state
     const composeObjs = ref([])
+    const fixedHoldObjs_full = ref([])
+    const compose_name = ref('all')
     const fixedHoldObjs = ref([])
     const totMoney = ref(0)
     const totPositiveNum = ref(0)
@@ -16,6 +19,7 @@ export const useComposeStore = defineStore('compose-store', () => {
     const totSetBuy = ref(0)
     const totPlanBuy = ref(0)
     const diffBuySet = ref(0)
+    const totInitBuy = ref(0)
     const noteObjs = ref([])
     const noteReportObjs = ref([])
 
@@ -55,7 +59,7 @@ export const useComposeStore = defineStore('compose-store', () => {
         }
     }
 
-    async function setComposeProperty(_fund_id, _fund_name, _compose_name, _money, _buyin_source) {
+    async function setComposeProperty(_fund_id, _fund_name, _compose_name, _money, _buyin_source, _loss_flag) {
         try {
             const response = await axiosInst.post("dt-plans/api/compose/set-compose-prop", {
                 'fund_id': _fund_id,
@@ -63,7 +67,8 @@ export const useComposeStore = defineStore('compose-store', () => {
                 'compose_name': _compose_name,
                 'money': _money,
                 'buyin_source': _buyin_source,
-                'set_sold_date': 'F'
+                'set_sold_date': 'F',
+                'loss_flag': _loss_flag? 'T': 'F'
             })
             if (response.status == 200) {
                 // await response.data
@@ -100,6 +105,29 @@ export const useComposeStore = defineStore('compose-store', () => {
     }
 
     async function getComposeFixedHold(_compose_name) {
+        if (!composeObjs.value || composeObjs.value.length === 0) {
+            fixedHoldObjs.value = []
+            return;
+        }
+        if (!fixedHoldObjs_full.value || fixedHoldObjs_full.value.length === 0) {
+            fixedHoldObjs.value = []
+            return;
+        }
+        if (_compose_name === 'all') {
+            fixedHoldObjs.value = fixedHoldObjs_full.value
+            return
+        } 
+        
+        let _match_composes = composeObjs.value.find(item => item['compose_name'] === _compose_name)
+        if (!_match_composes || !_match_composes['compose_objs'] || _match_composes['compose_objs'].length === 0) {
+            fixedHoldObjs.value = []
+            return;
+        }
+
+        let _fund_ids = _match_composes['compose_objs'].map(elem => elem['fund_id'])
+        fixedHoldObjs.value = fixedHoldObjs_full.value.filter(elem => _fund_ids.indexOf(elem['fund_id']) != -1)
+        console.log("$$$$$$$$ fixedHoldObjs length: ", fixedHoldObjs.value.length);
+        /*
         try {
             const response = await axiosInst.get("dt-plans/api/compose/fixed_hold_objs/" + _compose_name)
             if (response.status == 200) {
@@ -111,7 +139,40 @@ export const useComposeStore = defineStore('compose-store', () => {
         } catch (error) {
             console.log("axios get compose fixed hold error: ", error)
             fixedHoldObjs.value = []
-        }
+        }*/
+    }
+
+    async function getComposeFixedHoldFromWorker() {
+        let db;
+        let _storage_name = 'compose-hold-buyin';
+        const request = indexedDB.open(_storage_name, 1);
+        request.onsuccess = function(event) {
+            db = event.target.result;
+            console.log("open data base successfully: ", _storage_name);
+            let transaction = db.transaction([_storage_name], "readwrite");
+            let objectStore = transaction.objectStore(_storage_name);
+            let _date_str = getTodayStr();
+            let _req_qry = objectStore.get(_date_str);
+            _req_qry.onsuccess = function (event) {
+                let _data_objs = event.target.result.content;
+                db.close();
+                //console.log("*** reportStore ***, query success: ", _data_objs)
+                fixedHoldObjs_full.value = _data_objs           
+            }
+            _req_qry.onerror = function (event) {
+                console.error("*** reportStore *** query data base failed: ", _storage_name, event);
+                db.close();
+                fixedHoldObjs_full.value = []
+            }
+        };
+        request.onerror = function(event) {
+            console.error("*** reportStore *** open data base failed: ", _storage_name, event);
+            fixedHoldObjs_full.value = []
+        };
+        request.onupgradeneeded = function(event) {
+            console.error("*** reportStore *** onupgradeneeded: ", _storage_name, event);
+            fixedHoldObjs_full.value = []
+        }; 
     }
 
     async function getFundNotes4Edit() {
@@ -204,6 +265,8 @@ export const useComposeStore = defineStore('compose-store', () => {
     return {
         composeObjs,
         fixedHoldObjs,
+        fixedHoldObjs_full,
+        compose_name,
         totMoney,
         totPositiveNum,
         totPoleNum,
@@ -212,6 +275,7 @@ export const useComposeStore = defineStore('compose-store', () => {
         totSetBuy,
         totPlanBuy,
         diffBuySet,
+        totInitBuy,
         noteObjs,
         noteReportObjs,
         getAllCompose,
@@ -219,6 +283,7 @@ export const useComposeStore = defineStore('compose-store', () => {
         setComposeProperty,
         setComposeSoldDate,
         getComposeFixedHold,
+        getComposeFixedHoldFromWorker,
         getFundNotes4Edit,
         getFundNotes4Report,
         updateFundNotes,

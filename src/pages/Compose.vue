@@ -289,6 +289,19 @@
                     </template>
                   </div>
                 </template>
+                <template v-if="oneRow.hasOwnProperty('lossFlag') && oneRow['lossFlag']">
+                  <div style="display:inline-block;color:red;padding:2px;font-size:0.9rem;font-weight:bold;border:solid 1px red;border-radius:5px;margin-right:0.5rem;">损</div>
+                </template>
+                <template v-if="oneRow.hasOwnProperty('show_enable_loss_btn') && oneRow['show_enable_loss_btn']">
+                  <button type="button" class="btn btn-danger" style="font-size: 0.8rem;padding-left:5px;padding-right:5px;margin-right:0.5rem;"
+                        @click.stop="setComposeProperty_wrapper(oneRow['fund_id'], oneRow['fund_name'], oneRow['compose_name'], -2, oneRow['buyin_source'], true)">
+                        设止损</button>
+                </template>
+                <template v-if="oneRow.hasOwnProperty('show_disable_loss_btn') && oneRow['show_disable_loss_btn']">
+                  <button type="button" class="btn btn-secondary" style="font-size: 0.8rem;padding-left:5px;padding-right:5px;"
+                        @click.stop="setComposeProperty_wrapper(oneRow['fund_id'], oneRow['fund_name'], oneRow['compose_name'], -1, oneRow['buyin_source'], false)">
+                        去止损</button>
+                </template>
               </td>
               <td colspan="2" v-bind:class="{ sel_row: oneRow['currSelected'] }">
                 <template v-if="oneRow['kbObj']">
@@ -455,7 +468,7 @@
                   <span style="font-size: 1rem; font-style: italic;text-decoration: underline;">{{
                     oneRow['last_adjust_money_date'] }}</span>&nbsp;
                   <input class="btn btn-outline-danger btn-sm" style="width:3.5rem;" type="button" value="保存"
-                    @click.stop="setComposeProperty(oneRow['fund_id'], oneRow['fund_name'], oneRow['compose_name'], parseInt(oneRow['money']), oneRow['buyin_source'])">
+                    @click.stop="setComposeProperty_wrapper(oneRow['fund_id'], oneRow['fund_name'], oneRow['compose_name'], parseInt(oneRow['money']), oneRow['buyin_source'], oneRow['lossFlag'])">
                 </div>
               </td>
               <td style="text-align: center;" v-bind:class="{ sel_row: oneRow['currSelected'] }">
@@ -695,6 +708,19 @@
                     <span v-bind:class="getCardStyle(oneRow.kbObj.statistics.day_500_thres)">&nbsp;</span>
                     <span v-bind:class="getCardStyle(oneRow.kbObj.statistics.day_600_thres)">&nbsp;</span>
                   </template>
+                  <template v-if="oneRow.hasOwnProperty('lossFlag') && oneRow['lossFlag']">
+                    <div style="display:inline-block;color:red;padding:2px;font-size:0.9rem;font-weight:bold;border:solid 1px red;border-radius:5px;margin-left:0.5rem; margin-right:0.5rem;">损</div>
+                  </template>
+                  <template v-if="oneRow.hasOwnProperty('show_enable_loss_btn') && oneRow['show_enable_loss_btn']">
+                    <button type="button" class="btn btn-danger" style="font-size: 0.8rem;padding-left:5px;padding-right:5px;margin-right:0.5rem;"
+                          @click.stop="setComposeProperty_wrapper(oneRow['fund_id'], oneRow['fund_name'], oneRow['compose_name'], -2, oneRow['buyin_source'], true)">
+                          设止损</button>
+                  </template>
+                  <template v-if="oneRow.hasOwnProperty('show_disable_loss_btn') && oneRow['show_disable_loss_btn']">
+                    <button type="button" class="btn btn-secondary" style="font-size: 0.8rem;padding-left:5px;padding-right:5px;"
+                          @click.stop="setComposeProperty_wrapper(oneRow['fund_id'], oneRow['fund_name'], oneRow['compose_name'], -1, oneRow['buyin_source'], false)">
+                          去止损</button>
+                  </template>                  
                 </div>
               </td>
               <td v-bind:class="{ sel_row: oneRow['currSelected'] }" style="line-height:1.1;">
@@ -735,10 +761,12 @@
                   <div style="height: 5rem;">
                     <div style="font-weight: bold; color: darkgreen;font-size: 0.9rem;">&nbsp;</div>
                     <div style="font-weight: bold; color: darkgreen;font-size: 0.9rem;">&nbsp;</div>
-                    <template v-if="latest_sold_stat_obj[oneRow['fund_id']]">
-                      <div style="letter-spacing:-1;margin-top:0.5rem;font-size:0.9rem;text-wrap:nowrap;">
-                        卖{{latest_sold_stat_obj[oneRow['fund_id']]['days_from_last_sold']}}日
-                      </div>
+                    <template v-if="latest_sold_stat_obj && latest_sold_stat_obj[oneRow['fund_id']]">
+                      <template v-if="latest_sold_stat_obj[oneRow['fund_id']]['days_from_last_sold']">
+                        <div style="letter-spacing:-1;margin-top:0.5rem;font-size:0.9rem;text-wrap:nowrap;">
+                          卖{{latest_sold_stat_obj[oneRow['fund_id']]['days_from_last_sold']}}日
+                        </div>
+                      </template>
                       <div :style="{
                       'color': latest_sold_stat_obj[oneRow['fund_id']]['rate_from_last_sold'] >= 0? 'red': 'darkgreen',
                       'font-weight': 'bold'}">
@@ -1050,7 +1078,7 @@
                     </option>
                   </select>
                 </div>                 
-                <template v-if="oneRow['plan_buyin_money']">
+                <template v-if="oneRow.hasOwnProperty('plan_buyin_money')">
                   <div :style="{'color': oneRow['plan_buyin_money'] - oneRow['money'] >=10? '#f96' : 
                     oneRow['money'] - oneRow['plan_buyin_money'] >=10? 'red' : '',
                     'font-weight': Math.abs(oneRow['plan_buyin_money'] - oneRow['money']) >=10? 'bold': 'normal'}"
@@ -1108,7 +1136,7 @@
                   <span style="font-size: 1rem; font-style: italic;text-decoration: underline;">{{
                     oneRow['last_adjust_money_date'] }}</span>&nbsp;
                   <input class="btn btn-outline-danger btn-sm" style="width:3.5rem;" type="button" value="保存"
-                    @click.stop="setComposeProperty(oneRow['fund_id'], oneRow['fund_name'], oneRow['compose_name'], parseInt(oneRow['money']), oneRow['buyin_source'])">
+                    @click.stop="setComposeProperty_wrapper(oneRow['fund_id'], oneRow['fund_name'], oneRow['compose_name'], parseInt(oneRow['money']), oneRow['buyin_source'], oneRow['lossFlag'])">
                 </div>
               </td>
               <td style="text-align: center;" v-bind:class="{ sel_row: oneRow['currSelected'] }">
@@ -1545,10 +1573,10 @@ import { useRoute } from 'vue-router'
 
 const route = useRoute()
 const composeStore = useComposeStore()
-const { composeObjs, fixedHoldObjs, totMoney, totPositiveNum, totPoleNum, totEarnMoney, totEarnRate, totSetBuy, totPlanBuy, diffBuySet, noteObjs } = storeToRefs(composeStore)
+const { composeObjs, compose_name, fixedHoldObjs, fixedHoldObjs_full, totMoney, totPositiveNum, totPoleNum, totEarnMoney, totEarnRate, totSetBuy, totPlanBuy, diffBuySet, totInitBuy, noteObjs } = storeToRefs(composeStore)
 const { getAllCompose, setComposeProperty, setComposeSoldDate, getComposeFixedHold, addOrRemoveCompose, getFundNotes4Edit, updateFundNotes, removeFundNotes } = composeStore
 const buyInOutStore = useBuyInOutStore()
-const { buyoutRecords, wav_reports, buyout_future_objs, contStartStopObj, buyOrSoldObj, fund_buy_ratio_config} = storeToRefs(buyInOutStore)
+const { buyoutRecords, wav_reports, buyout_future_objs, contStartStopObj, buyOrSoldObj, fund_buy_ratio_config, curr_compose_name} = storeToRefs(buyInOutStore)
 const { getAllBuyoutRecords, soldComposeFixedHold, buyOutFixedFund, calculatePlanMoney, buyOutFixedFundOfToday, getAllBuyoutFutureRecords, addBuyOrSoldNote, getBuyOrSoldNote } = buyInOutStore
 const zskbStore = useZskbStore()
 const { zskbObjs } = storeToRefs(zskbStore)
@@ -1602,9 +1630,15 @@ const colWidMapSub = {
   'col_12': 4
 }
 
-const compose_name = ref('all')
-watch(compose_name, () => {
+//const compose_name = ref('all')
+
+watch([compose_name, fixedHoldObjs_full], () => {
+  if (!fixedHoldObjs_full.value || fixedHoldObjs_full.value.length === 0) {
+    console.warn("**** fixedHoldObjs_full is empty, compose-hold-buyin worker is inprogress?")
+    return;
+  }
   getComposeFixedHold(compose_name.value)
+  curr_compose_name.value = compose_name.value
 }, { immediate: true })
 
 const composeViewObjs = ref([])
@@ -1635,6 +1669,55 @@ const tot_warning_msg = ref("")
 const pop_up_warn_times = ref(0)
 const pop_up_warn_period = ref(1000)
 const page_is_displayed = ref(true)
+
+function processLossFlag4Elem(elem) {
+  if (!fund_buy_ratio_config.value) {
+    return
+  }
+  if (!fund_buy_ratio_config.value['lossSetting'] || !fund_buy_ratio_config.value['lossSetting'][elem['compose_name']]) {
+    return
+  }
+  let _lossSetting = fund_buy_ratio_config.value['lossSetting'][elem['compose_name']]
+  if (!elem.hasOwnProperty('lossFlag')) {
+    elem['lossFlag'] = false
+  }
+
+  elem['show_enable_loss_btn'] = false
+  elem['show_disable_loss_btn'] = false
+  elem['show_popup_msg'] = false
+  elem['popup_msg'] = ''
+  //oneRow['fixedHoldObj'] && oneRow['fixedHoldObj']['hold_objs'] && oneRow['fixedHoldObj']['hold_objs'].length > 0
+  if (!elem['fixedHoldObj'] || !elem['fixedHoldObj']['hold_objs'] || elem['fixedHoldObj']['hold_objs'].length === 0) {
+    return;
+  }
+  let _accu_money = elem['fixedHoldObj']['hold_objs'][elem['fixedHoldObj']['hold_objs'].length - 1]['accu_money']
+  let _accu_pure_profit = elem['fixedHoldObj']['hold_objs'][elem['fixedHoldObj']['hold_objs'].length - 1]['accu_pure_percent']
+  if ((_accu_money >= _lossSetting['money_h'] && _accu_pure_profit <= _lossSetting['rate_h'])
+    || (_accu_money >= _lossSetting['money_m'] && _accu_pure_profit <= _lossSetting['rate_m'])
+    || (_accu_money >= _lossSetting['money_l'] && _accu_pure_profit <= _lossSetting['rate_l'])) {
+    // 达到 设止损 程度
+    if (elem['lossFlag']) {
+      // 已经 有止损标志 了，什么都不做
+      console.warn(elem['compose_name'] + " " +  elem['fund_id'] + elem['fund_name'] + " already has lossFalg, do nothing")
+    } else {
+      elem['show_enable_loss_btn'] = true
+      elem['show_popup_msg'] = true
+      elem['popup_msg'] = elem['compose_name'] + " " +  elem['fund_id'] + elem['fund_name'] + "," + "需要 '设止损'"
+      console.warn("$$$$ ", elem['popup_msg'])
+    }
+  } else {
+    // 达到 去止损 程度
+    if (!elem['lossFlag']) {
+      // 本来就 没有止损标志，什么都不做
+      //console.warn(elem['compose_name'] + " " +  elem['fund_id'] + elem['fund_name'] + " has NO lossFalg, do nothing")
+    } else {
+      elem['show_disable_loss_btn'] = true
+      elem['show_popup_msg'] = true
+      elem['popup_msg'] = elem['compose_name'] + " " +  elem['fund_id'] + elem['fund_name'] + "," + "需要 '去止损'"
+      console.warn("$$$$ ", elem['popup_msg'])
+    }
+  }
+}
 
 watch([composeObjs, compose_name, fixedHoldObjs, buyoutRecords, noteObjs, show4SoldOnly, showPauseOnly, showAdjustOnly, showPoleOnly, showNoteOnly], () => {
   if (composeObjs && composeObjs.value && composeObjs.value.length > 0) {
@@ -1771,6 +1854,7 @@ watch([composeObjs, compose_name, fixedHoldObjs, buyoutRecords, noteObjs, show4S
   totEarnRate.value = ''
   totSetBuy.value = 0
   totPlanBuy.value = 0
+  totInitBuy.value = 0
   totPositiveNum.value = 0
   tot4SoldNum.value = 0
   totPauseNum.value = 0
@@ -1790,61 +1874,17 @@ watch([composeObjs, compose_name, fixedHoldObjs, buyoutRecords, noteObjs, show4S
   tot_plan_money_trident.value = 0
   tot_set_money_trident.value = 0
 
+  let _need_special_logic = true;
+  if (show4SoldOnly.value || showPauseOnly.value || showAdjustOnly.value || showPoleOnly.value || showNoteOnly.value) {
+    _need_special_logic = false;
+  }
+
   if (composeViewObjs.value.length > 0) {
 
-    composeViewObjs.value.forEach(elem => {
-      let fixedHoldObj = elem['fixedHoldObj']
-      if (fixedHoldObj && fixedHoldObj['hold_objs'] && fixedHoldObj['hold_objs'].length > 0) {
-        let lastHoldObj = fixedHoldObj['hold_objs'][fixedHoldObj['hold_objs'].length - 1]
-        totMoney.value += lastHoldObj['accu_money']
-        totEarnMoney.value += lastHoldObj['accu_pure_profit']
-        if (elem['money'] > 0) {
-          totSetBuy.value += elem['money']
-        }
-        if (elem['adjust_money'] > 0) {
-          totPlanBuy.value += elem['adjust_money']
-        }
-      }
-
-      if (elem.hasOwnProperty('kbObj') && elem['kbObj'] != null) {
-        let _kbOjb = elem['kbObj']
-        if (_kbOjb.hasOwnProperty('positive') && _kbOjb['positive'] != null) {
-          let _positive = _kbOjb['positive']
-          if (_positive['positive_reach_len'] >= 5) {
-            totPositiveNum.value += 1
-          }
-        }
-      }
-
-      if ((elem.hasOwnProperty('lost_in_aggressive') && elem['lost_in_aggressive'])
-        || (elem.hasOwnProperty('lost_in_dtconvg') && elem['lost_in_dtconvg'])
-        || (elem.hasOwnProperty('money') && elem['money'] === -2)) {
-        tot4SoldNum.value = tot4SoldNum.value + 1
-      } else if (elem.hasOwnProperty('money') && elem['money'] === -1) {
-        totPauseNum.value = totPauseNum.value + 1
-      } else if (elem.hasOwnProperty('money') && elem.hasOwnProperty('adjust_money') &&
-        elem['money'] != null && elem['adjust_money'] != null &&
-        Math.abs(elem['money'] - elem['adjust_money']) >= 3) {
-        totAdjustNum.value = totAdjustNum.value + 1
-      }
-
-      if (elem.hasOwnProperty('quant_obj') && elem['quant_obj']['hitted']) {
-        totPoleNum.value = totPoleNum.value + 1
-      }
-      calculatePlanMoney('compose', elem)
-
-      if (noteObjs.value.hasOwnProperty(elem['fund_id']) && noteObjs.value[elem['fund_id']].hasOwnProperty('note_objs')
-          && noteObjs.value[elem['fund_id']]['note_objs'].length > 0) {
-        totNoteNum.value = totNoteNum.value + 1
-      }
-    })
-
-    if (totMoney.value > 0) {
-      let _earn_rate = totEarnMoney.value / totMoney.value * 100
-      totEarnRate.value = _earn_rate.toFixed(0) + '%'
-    }
-    if (totSetBuy.value != 0) {
-      diffBuySet.value = (totPlanBuy.value - totSetBuy.value) / totSetBuy.value
+    if (_need_special_logic) {
+      composeViewObjs.value.forEach(elem => {
+        calculatePlanMoney('compose', elem)
+      })
     }
 
     // 各个组合的特殊处理 --- 引入情绪周期
@@ -1854,10 +1894,6 @@ watch([composeObjs, compose_name, fixedHoldObjs, buyoutRecords, noteObjs, show4S
     let _tot_plan_money_medusa = 0;
     let _tot_plan_money_dolphin = 0;
     let _tot_plan_money_trident = 0;
-    let _need_special_logic = true;
-    if (show4SoldOnly.value || showPauseOnly.value || showAdjustOnly.value || showPoleOnly.value || showNoteOnly.value) {
-      _need_special_logic = false;
-    }
 
     composeViewObjs.value.forEach(elem => {
       if (!_need_special_logic) {
@@ -1913,71 +1949,98 @@ watch([composeObjs, compose_name, fixedHoldObjs, buyoutRecords, noteObjs, show4S
           elem['plan_buyin_money'] = parseInt(elem['plan_buyin_money'] / _tot_plan_money_gdngoat * fund_buy_ratio_config.value['money_probe_buy'])
           if (elem['plan_buyin_money'] < 10 && elem['plan_buyin_money'] >= 5) {
             elem['plan_buyin_money'] = 10
+          } else if (elem['plan_buyin_money'] < 5) {
+            elem['plan_buyin_money'] = 0
           }
         } else {
           elem['plan_buyin_money'] = 0
         }
       } else if (elem['compose_name'] === 'ovtree' && fund_buy_ratio_config.value['max_money_for_B_stock'] 
-      && fund_buy_ratio_config.value['trendFactor'] && fund_buy_ratio_config.value['trendFactor'].hasOwnProperty('ovtree') 
-      && fund_buy_ratio_config.value['trendFactor']['ovtree'] != null) {
+      && fund_buy_ratio_config.value['trendFactor'] && fund_buy_ratio_config.value['trendFactor'].hasOwnProperty('ovtree')) {
         if (!elem.hasOwnProperty('plan_buyin_money')) {
           console.error("elem in ovtree has no plan_buyin_money: ", elem['fund_id']);
         } else if (elem['money'] > -2) {
-          elem['plan_buyin_money'] = parseInt(elem['plan_buyin_money'] / _tot_plan_money_ovtree * fund_buy_ratio_config.value['max_money_for_B_stock'] * fund_buy_ratio_config.value['trendFactor']['ovtree'])
+          if (fund_buy_ratio_config.value['trendFactor']['ovtree'] != null) {
+            elem['plan_buyin_money'] = parseInt(elem['plan_buyin_money'] / _tot_plan_money_ovtree * fund_buy_ratio_config.value['max_money_for_B_stock'] * fund_buy_ratio_config.value['trendFactor']['ovtree'])
+          } else {
+            elem['plan_buyin_money'] = parseInt(elem['plan_buyin_money'] / _tot_plan_money_ovtree * fund_buy_ratio_config.value['max_money_for_B_stock'] * 1)
+          }
           if (elem['plan_buyin_money'] < 10 && elem['plan_buyin_money'] >= 5) {
             elem['plan_buyin_money'] = 10
+          } else if (elem['plan_buyin_money'] < 5) {
+            elem['plan_buyin_money'] = 0
           }
         } else {
           elem['plan_buyin_money'] = 0
         }
       } else if (elem['compose_name'] === 'flyhorse' && fund_buy_ratio_config.value['max_money_for_fut'] 
-      && fund_buy_ratio_config.value['trendFactor'] && fund_buy_ratio_config.value['trendFactor'].hasOwnProperty('flyhorse') 
-      && fund_buy_ratio_config.value['trendFactor']['flyhorse'] != null) {
+      && fund_buy_ratio_config.value['trendFactor'] && fund_buy_ratio_config.value['trendFactor'].hasOwnProperty('flyhorse')) {
         if (!elem.hasOwnProperty('plan_buyin_money')) {
           console.error("elem in flyhorse has no plan_buyin_money: ", elem['fund_id']);
         } else if (elem['money'] > -2) {
-          elem['plan_buyin_money'] = parseInt(elem['plan_buyin_money'] / _tot_plan_money_flyhorse * fund_buy_ratio_config.value['max_money_for_fut'] * fund_buy_ratio_config.value['trendFactor']['flyhorse'])
+          if (fund_buy_ratio_config.value['trendFactor']['flyhorse'] != null) {
+            elem['plan_buyin_money'] = parseInt(elem['plan_buyin_money'] / _tot_plan_money_flyhorse * fund_buy_ratio_config.value['max_money_for_fut'] * fund_buy_ratio_config.value['trendFactor']['flyhorse'])
+          } else {
+            elem['plan_buyin_money'] = parseInt(elem['plan_buyin_money'] / _tot_plan_money_flyhorse * fund_buy_ratio_config.value['max_money_for_fut'] * 1)
+          }
           if (elem['plan_buyin_money'] < 10 && elem['plan_buyin_money'] >= 5) {
             elem['plan_buyin_money'] = 10
+          } else if (elem['plan_buyin_money'] < 5) {
+            elem['plan_buyin_money'] = 0
           }
         } else {
           elem['plan_buyin_money'] = 0
         }
       } else if (elem['compose_name'] === 'medusa' && fund_buy_ratio_config.value['max_money_for_unknow'] 
-      && fund_buy_ratio_config.value['trendFactor'] && fund_buy_ratio_config.value['trendFactor'].hasOwnProperty('medusa') 
-      && fund_buy_ratio_config.value['trendFactor']['medusa'] != null) {
+      && fund_buy_ratio_config.value['trendFactor'] && fund_buy_ratio_config.value['trendFactor'].hasOwnProperty('medusa')) {
         if (!elem.hasOwnProperty('plan_buyin_money')) {
           console.error("elem in medusa has no plan_buyin_money: ", elem['fund_id']);
         } else if (elem['money'] > -2) {
-          elem['plan_buyin_money'] = parseInt(elem['plan_buyin_money'] / _tot_plan_money_medusa * fund_buy_ratio_config.value['max_money_for_unknow'] * fund_buy_ratio_config.value['trendFactor']['medusa'])
+          if (fund_buy_ratio_config.value['trendFactor']['medusa'] != null) {
+            elem['plan_buyin_money'] = parseInt(elem['plan_buyin_money'] / _tot_plan_money_medusa * fund_buy_ratio_config.value['max_money_for_unknow'] * fund_buy_ratio_config.value['trendFactor']['medusa'])
+          } else {
+            elem['plan_buyin_money'] = parseInt(elem['plan_buyin_money'] / _tot_plan_money_medusa * fund_buy_ratio_config.value['max_money_for_unknow'] * 1)
+          }
           if (elem['plan_buyin_money'] < 10 && elem['plan_buyin_money'] >= 5) {
             elem['plan_buyin_money'] = 10
+          } else if (elem['plan_buyin_money'] < 5) {
+            elem['plan_buyin_money'] = 0
           }
         } else {
           elem['plan_buyin_money'] = 0
         }
       } else if (elem['compose_name'] === 'dolphin' && fund_buy_ratio_config.value['max_money_for_A_deb'] 
-      && fund_buy_ratio_config.value['trendFactor'] && fund_buy_ratio_config.value['trendFactor'].hasOwnProperty('dolphin') 
-      && fund_buy_ratio_config.value['trendFactor']['dolphin'] != null) {
+      && fund_buy_ratio_config.value['trendFactor'] && fund_buy_ratio_config.value['trendFactor'].hasOwnProperty('dolphin')) {
         if (!elem.hasOwnProperty('plan_buyin_money')) {
           console.error("elem in dolphin has no plan_buyin_money: ", elem['fund_id']);
         } else if (elem['money'] > -2) {
-          elem['plan_buyin_money'] = parseInt(elem['plan_buyin_money'] / _tot_plan_money_dolphin * fund_buy_ratio_config.value['max_money_for_A_deb'] * fund_buy_ratio_config.value['trendFactor']['dolphin'])
+          if (fund_buy_ratio_config.value['trendFactor']['dolphin'] != null) {
+            elem['plan_buyin_money'] = parseInt(elem['plan_buyin_money'] / _tot_plan_money_dolphin * fund_buy_ratio_config.value['max_money_for_A_deb'] * fund_buy_ratio_config.value['trendFactor']['dolphin'])
+          } else {
+            elem['plan_buyin_money'] = parseInt(elem['plan_buyin_money'] / _tot_plan_money_dolphin * fund_buy_ratio_config.value['max_money_for_A_deb'] * 1)
+          }
           if (elem['plan_buyin_money'] < 10 && elem['plan_buyin_money'] >= 5) {
             elem['plan_buyin_money'] = 10
+          } else if (elem['plan_buyin_money'] < 5) {
+            elem['plan_buyin_money'] = 0
           }
         } else {
           elem['plan_buyin_money'] = 0
         }
       } else if (elem['compose_name'] === 'trident' && fund_buy_ratio_config.value['max_money_for_B_deb'] 
-      && fund_buy_ratio_config.value['trendFactor'] && fund_buy_ratio_config.value['trendFactor'].hasOwnProperty('trident') 
-      && fund_buy_ratio_config.value['trendFactor']['trident'] != null) {
+      && fund_buy_ratio_config.value['trendFactor'] && fund_buy_ratio_config.value['trendFactor'].hasOwnProperty('trident')) {
         if (!elem.hasOwnProperty('plan_buyin_money')) {
           console.error("elem in trident has no plan_buyin_money: ", elem['fund_id']);
         } else if (elem['money'] > -2) {
-          elem['plan_buyin_money'] = parseInt(elem['plan_buyin_money'] / _tot_plan_money_trident * fund_buy_ratio_config.value['max_money_for_B_deb'] * fund_buy_ratio_config.value['trendFactor']['trident'])
+          if (fund_buy_ratio_config.value['trendFactor']['trident'] != null) {
+            elem['plan_buyin_money'] = parseInt(elem['plan_buyin_money'] / _tot_plan_money_trident * fund_buy_ratio_config.value['max_money_for_B_deb'] * fund_buy_ratio_config.value['trendFactor']['trident'])
+          } else {
+            elem['plan_buyin_money'] = parseInt(elem['plan_buyin_money'] / _tot_plan_money_trident * fund_buy_ratio_config.value['max_money_for_B_deb'] * 1)
+          }
           if (elem['plan_buyin_money'] < 10 && elem['plan_buyin_money'] >= 5) {
             elem['plan_buyin_money'] = 10
+          } else if (elem['plan_buyin_money'] < 5) {
+            elem['plan_buyin_money'] = 0
           }
         } else {
           elem['plan_buyin_money'] = 0
@@ -1999,8 +2062,7 @@ watch([composeObjs, compose_name, fixedHoldObjs, buyoutRecords, noteObjs, show4S
           tot_set_money_gdngoat.value += elem['money']
         }
       } else if (elem['compose_name'] === 'ovtree' && fund_buy_ratio_config.value['max_money_for_B_stock'] 
-      && fund_buy_ratio_config.value['trendFactor'] && fund_buy_ratio_config.value['trendFactor'].hasOwnProperty('ovtree') 
-      && fund_buy_ratio_config.value['trendFactor']['ovtree'] != null) {
+      && fund_buy_ratio_config.value['trendFactor'] && fund_buy_ratio_config.value['trendFactor'].hasOwnProperty('ovtree')) {
         if (!elem.hasOwnProperty('plan_buyin_money')) {
           console.error("elem in ovtree has no plan_buyin_money: ", elem['fund_id']);
         } else if (elem['money'] > -2) {
@@ -2010,8 +2072,7 @@ watch([composeObjs, compose_name, fixedHoldObjs, buyoutRecords, noteObjs, show4S
           tot_set_money_ovtree.value += elem['money']
         }        
       } else if (elem['compose_name'] === 'flyhorse' && fund_buy_ratio_config.value['max_money_for_fut'] 
-      && fund_buy_ratio_config.value['trendFactor'] && fund_buy_ratio_config.value['trendFactor'].hasOwnProperty('flyhorse') 
-      && fund_buy_ratio_config.value['trendFactor']['flyhorse'] != null) {
+      && fund_buy_ratio_config.value['trendFactor'] && fund_buy_ratio_config.value['trendFactor'].hasOwnProperty('flyhorse')) {
         if (!elem.hasOwnProperty('plan_buyin_money')) {
           console.error("elem in flyhorse has no plan_buyin_money: ", elem['fund_id']);
         } else if (elem['money'] > -2) {
@@ -2021,8 +2082,7 @@ watch([composeObjs, compose_name, fixedHoldObjs, buyoutRecords, noteObjs, show4S
           tot_set_money_flyhorse.value += elem['money']
         }        
       } else if (elem['compose_name'] === 'medusa' && fund_buy_ratio_config.value['max_money_for_unknow'] 
-      && fund_buy_ratio_config.value['trendFactor'] && fund_buy_ratio_config.value['trendFactor'].hasOwnProperty('medusa') 
-      && fund_buy_ratio_config.value['trendFactor']['medusa'] != null) {
+      && fund_buy_ratio_config.value['trendFactor'] && fund_buy_ratio_config.value['trendFactor'].hasOwnProperty('medusa')) {
         if (!elem.hasOwnProperty('plan_buyin_money')) {
           console.error("elem in medusa has no plan_buyin_money: ", elem['fund_id']);
         } else if (elem['money'] > -2) {
@@ -2032,8 +2092,7 @@ watch([composeObjs, compose_name, fixedHoldObjs, buyoutRecords, noteObjs, show4S
           tot_set_money_medusa.value += elem['money']
         }        
       } else if (elem['compose_name'] === 'dolphin' && fund_buy_ratio_config.value['max_money_for_A_deb'] 
-      && fund_buy_ratio_config.value['trendFactor'] && fund_buy_ratio_config.value['trendFactor'].hasOwnProperty('dolphin') 
-      && fund_buy_ratio_config.value['trendFactor']['dolphin'] != null) {
+      && fund_buy_ratio_config.value['trendFactor'] && fund_buy_ratio_config.value['trendFactor'].hasOwnProperty('dolphin')) {
         if (!elem.hasOwnProperty('plan_buyin_money')) {
           console.error("elem in dolphin has no plan_buyin_money: ", elem['fund_id']);
         } else if (elem['money'] > -2) {
@@ -2043,8 +2102,7 @@ watch([composeObjs, compose_name, fixedHoldObjs, buyoutRecords, noteObjs, show4S
           tot_set_money_dolphin.value += elem['money']
         }        
       } else if (elem['compose_name'] === 'trident' && fund_buy_ratio_config.value['max_money_for_B_deb'] 
-      && fund_buy_ratio_config.value['trendFactor'] && fund_buy_ratio_config.value['trendFactor'].hasOwnProperty('trident') 
-      && fund_buy_ratio_config.value['trendFactor']['trident'] != null) {
+      && fund_buy_ratio_config.value['trendFactor'] && fund_buy_ratio_config.value['trendFactor'].hasOwnProperty('trident')) {
         if (!elem.hasOwnProperty('plan_buyin_money')) {
           console.error("elem in trident has no plan_buyin_money: ", elem['fund_id']);
         } else if (elem['money'] > -2) {
@@ -2055,24 +2113,32 @@ watch([composeObjs, compose_name, fixedHoldObjs, buyoutRecords, noteObjs, show4S
         }        
       }
     })
-  }
 
-  scrollViewBySelection();
+    // 处理 设止损 和 去止损 逻辑
+    composeViewObjs.value.forEach(elem => {
+      processLossFlag4Elem(elem, fund_buy_ratio_config);
+    })
+  }
 
   let _tot_warning_msg = ""
   
   if (tot_plan_money_gdngoat.value > tot_set_money_gdngoat.value) {
-    if ((tot_plan_money_gdngoat.value - tot_set_money_gdngoat.value) / tot_plan_money_gdngoat.value >= 0.1) {
+    if ((tot_plan_money_gdngoat.value - tot_set_money_gdngoat.value) / tot_plan_money_gdngoat.value >= 0.1
+        || (tot_plan_money_gdngoat.value - tot_set_money_gdngoat.value >= 20)) {
       if (fund_buy_ratio_config.value['buyoutDistance'] && ((fund_buy_ratio_config.value['buyoutDistance']['gdngoat'] != null 
            && fund_buy_ratio_config.value['buyoutDistance']['gdngoat'] > 3) 
            || fund_buy_ratio_config.value['buyoutDistance']['gdngoat'] === null)) {
         _tot_warning_msg += "金毛羊需要增大金额" + parseInt(tot_plan_money_gdngoat.value - tot_set_money_gdngoat.value).toString() + 
         "元, 预设" + parseInt(tot_plan_money_gdngoat.value).toString() + 
         "元, 已设" + parseInt(tot_set_money_gdngoat.value).toString() + "元" + "<br>";
+      } else if (fund_buy_ratio_config.value['buyoutDistance'] && fund_buy_ratio_config.value['buyoutDistance']['gdngoat'] != null
+        && fund_buy_ratio_config.value['buyoutDistance']['gdngoat'] <= 3) {
+        console.warn("#### gdngoat卖出不足3日，无须增大金额，不弹窗告警")
       }
     }
   } else if (tot_plan_money_gdngoat.value < tot_set_money_gdngoat.value) {
-    if ((tot_set_money_gdngoat.value - tot_plan_money_gdngoat.value) / tot_set_money_gdngoat.value >= 0.1) {
+    if ((tot_set_money_gdngoat.value - tot_plan_money_gdngoat.value) / tot_set_money_gdngoat.value >= 0.1
+        || (tot_set_money_gdngoat.value - tot_plan_money_gdngoat.value >= 20)) {
       _tot_warning_msg += "金毛羊需要缩小金额" + parseInt(tot_set_money_gdngoat.value - tot_plan_money_gdngoat.value).toString() + 
       "元, 预设" + parseInt(tot_plan_money_gdngoat.value).toString() + 
       "元, 已设" + parseInt(tot_set_money_gdngoat.value).toString() + "元" + "<br>";
@@ -2084,17 +2150,22 @@ watch([composeObjs, compose_name, fixedHoldObjs, buyoutRecords, noteObjs, show4S
       && fund_buy_ratio_config.value['trendFactor']['ovtree'] != null 
       && fund_buy_ratio_config.value['fund_limit_setting'] && fund_buy_ratio_config.value['fund_limit_setting']['ovtree_enable']) {
     if (tot_plan_money_ovtree.value > tot_set_money_ovtree.value) {
-      if ((tot_plan_money_ovtree.value - tot_set_money_ovtree.value) / tot_plan_money_ovtree.value >= 0.1) {
+      if ((tot_plan_money_ovtree.value - tot_set_money_ovtree.value) / tot_plan_money_ovtree.value >= 0.1
+         || (tot_plan_money_ovtree.value - tot_set_money_ovtree.value >= 20)) {
         if (fund_buy_ratio_config.value['buyoutDistance'] && ((fund_buy_ratio_config.value['buyoutDistance']['ovtree'] != null 
              && fund_buy_ratio_config.value['buyoutDistance']['ovtree'] > 3) 
              || fund_buy_ratio_config.value['buyoutDistance']['ovtree'] === null)) {
           _tot_warning_msg += "橄榄树需要增大金额" + parseInt(tot_plan_money_ovtree.value - tot_set_money_ovtree.value).toString() 
           + "元, 预设" + parseInt(tot_plan_money_ovtree.value).toString() + "元, 已设" 
           + parseInt(tot_set_money_ovtree.value).toString() + "元" + "<br>";
-        }
+        } else if (fund_buy_ratio_config.value['buyoutDistance'] && fund_buy_ratio_config.value['buyoutDistance']['ovtree'] != null
+          && fund_buy_ratio_config.value['buyoutDistance']['ovtree'] <= 3) {
+            console.warn("#### ovtree卖出不足3日，无须增大金额，不弹窗告警")
+          }
       }
     } else if (tot_plan_money_ovtree.value < tot_set_money_ovtree.value) {
-      if ((tot_set_money_ovtree.value - tot_plan_money_ovtree.value) / tot_set_money_ovtree.value >= 0.1) {
+      if ((tot_set_money_ovtree.value - tot_plan_money_ovtree.value) / tot_set_money_ovtree.value >= 0.1
+          || (tot_set_money_ovtree.value - tot_plan_money_ovtree.value >= 20)) {
         _tot_warning_msg += "橄榄树需要缩小金额" + parseInt(tot_set_money_ovtree.value - tot_plan_money_ovtree.value).toString() 
         + "元, 预设" + parseInt(tot_plan_money_ovtree.value).toString() + "元, 已设" 
         + parseInt(tot_set_money_ovtree.value).toString() + "元" + "<br>";
@@ -2107,17 +2178,22 @@ watch([composeObjs, compose_name, fixedHoldObjs, buyoutRecords, noteObjs, show4S
       && fund_buy_ratio_config.value['trendFactor']['flyhorse'] != null
       && fund_buy_ratio_config.value['fund_limit_setting'] && fund_buy_ratio_config.value['fund_limit_setting']['flyhorse_enable']) {
     if (tot_plan_money_flyhorse.value > tot_set_money_flyhorse.value) {
-      if ((tot_plan_money_flyhorse.value - tot_set_money_flyhorse.value) / tot_plan_money_flyhorse.value >= 0.1) {
+      if ((tot_plan_money_flyhorse.value - tot_set_money_flyhorse.value) / tot_plan_money_flyhorse.value >= 0.1
+          || (tot_plan_money_flyhorse.value - tot_set_money_flyhorse.value >= 20)) {
         if (fund_buy_ratio_config.value['buyoutDistance'] && ((fund_buy_ratio_config.value['buyoutDistance']['flyhorse'] != null 
             && fund_buy_ratio_config.value['buyoutDistance']['flyhorse'] > 3) 
             || fund_buy_ratio_config.value['buyoutDistance']['flyhorse'] === null)) {
           _tot_warning_msg += "飞马需要增大金额" + parseInt(tot_plan_money_flyhorse.value - tot_set_money_flyhorse.value).toString() 
           + "元, 预设" + parseInt(tot_plan_money_flyhorse.value).toString() + "元, 已设" 
           + parseInt(tot_set_money_flyhorse.value).toString() + "元" + "<br>";
-        }
+        } else if (fund_buy_ratio_config.value['buyoutDistance'] && fund_buy_ratio_config.value['buyoutDistance']['flyhorse'] != null
+          && fund_buy_ratio_config.value['buyoutDistance']['flyhorse'] <= 3) {
+            console.warn("#### flyhorse卖出不足3日，无须增大金额，不弹窗告警")
+          }
       }
     } else if (tot_plan_money_flyhorse.value < tot_set_money_flyhorse.value) {
-      if ((tot_set_money_flyhorse.value - tot_plan_money_flyhorse.value) / tot_set_money_flyhorse.value >= 0.1) {
+      if ((tot_set_money_flyhorse.value - tot_plan_money_flyhorse.value) / tot_set_money_flyhorse.value >= 0.1
+          || (tot_set_money_flyhorse.value - tot_plan_money_flyhorse.value >= 20)) {
         _tot_warning_msg += "飞马需要缩小金额" + parseInt(tot_set_money_flyhorse.value - tot_plan_money_flyhorse.value).toString() 
         + "元, 预设" + parseInt(tot_plan_money_flyhorse.value).toString() + "元, 已设" 
         + parseInt(tot_set_money_flyhorse.value).toString() + "元" + "<br>";
@@ -2130,17 +2206,22 @@ watch([composeObjs, compose_name, fixedHoldObjs, buyoutRecords, noteObjs, show4S
       && fund_buy_ratio_config.value['trendFactor']['medusa'] != null
       && fund_buy_ratio_config.value['fund_limit_setting'] && fund_buy_ratio_config.value['fund_limit_setting']['medusa_enable']) {
     if (tot_plan_money_medusa.value > tot_set_money_medusa.value) {
-      if ((tot_plan_money_medusa.value - tot_set_money_medusa.value) / tot_plan_money_medusa.value >= 0.1) {
+      if ((tot_plan_money_medusa.value - tot_set_money_medusa.value) / tot_plan_money_medusa.value >= 0.1
+          || (tot_plan_money_medusa.value - tot_set_money_medusa.value >= 20)) {
         if (fund_buy_ratio_config.value['buyoutDistance'] && ((fund_buy_ratio_config.value['buyoutDistance']['medusa'] != null 
             && fund_buy_ratio_config.value['buyoutDistance']['medusa'] > 3) 
             || fund_buy_ratio_config.value['buyoutDistance']['medusa'] === null)) {
           _tot_warning_msg += "美杜莎需要增大金额" + parseInt(tot_plan_money_medusa.value - tot_set_money_medusa.value).toString() 
           + "元, 预设" + parseInt(tot_plan_money_medusa.value).toString() + "元, 已设" 
           + parseInt(tot_set_money_medusa.value).toString() + "元" + "<br>";
-        }
+        } else if (fund_buy_ratio_config.value['buyoutDistance'] && fund_buy_ratio_config.value['buyoutDistance']['medusa'] != null 
+          && fund_buy_ratio_config.value['buyoutDistance']['medusa'] <= 3) {
+            console.warn("#### medusa卖出不足3日，无须增大金额，不弹窗告警")
+          }
       }
     } else if (tot_plan_money_medusa.value < tot_set_money_medusa.value) {
-      if ((tot_set_money_medusa.value - tot_plan_money_medusa.value) / tot_set_money_medusa.value >= 0.1) {
+      if ((tot_set_money_medusa.value - tot_plan_money_medusa.value) / tot_set_money_medusa.value >= 0.1
+          || (tot_set_money_medusa.value - tot_plan_money_medusa.value >= 20)) {
         _tot_warning_msg += "美杜莎需要缩小金额" + parseInt(tot_set_money_medusa.value - tot_plan_money_medusa.value).toString() 
         + "元, 预设" + parseInt(tot_plan_money_medusa.value).toString() + "元, 已设" 
         + parseInt(tot_set_money_medusa.value).toString() + "元" + "<br>";
@@ -2153,17 +2234,22 @@ watch([composeObjs, compose_name, fixedHoldObjs, buyoutRecords, noteObjs, show4S
       && fund_buy_ratio_config.value['trendFactor']['dolphin'] != null
       && fund_buy_ratio_config.value['fund_limit_setting'] && fund_buy_ratio_config.value['fund_limit_setting']['dolphin_enable']) {
     if (tot_plan_money_dolphin.value > tot_set_money_dolphin.value) {
-      if ((tot_plan_money_dolphin.value - tot_set_money_dolphin.value) / tot_plan_money_dolphin.value >= 0.1) {
+      if ((tot_plan_money_dolphin.value - tot_set_money_dolphin.value) / tot_plan_money_dolphin.value >= 0.1
+          || (tot_plan_money_dolphin.value - tot_set_money_dolphin.value >= 20)) {
         if (fund_buy_ratio_config.value['buyoutDistance'] && ((fund_buy_ratio_config.value['buyoutDistance']['dolphin'] != null 
             && fund_buy_ratio_config.value['buyoutDistance']['dolphin'] > 3) 
             || fund_buy_ratio_config.value['buyoutDistance']['dolphin'] === null)) {        
           _tot_warning_msg += "海豚需要增大金额" + parseInt(tot_plan_money_dolphin.value - tot_set_money_dolphin.value).toString() 
           + "元, 预设" + parseInt(tot_plan_money_dolphin.value).toString() + "元, 已设" 
           + parseInt(tot_set_money_dolphin.value).toString() + "元" + "<br>";
-        }
+        } else if (fund_buy_ratio_config.value['buyoutDistance'] && fund_buy_ratio_config.value['buyoutDistance']['dolphin'] != null 
+          && fund_buy_ratio_config.value['buyoutDistance']['dolphin'] <= 3) {
+            console.warn("#### dolphin卖出不足3日，无须增大金额，不弹窗告警")
+          }
       }
     } else if (tot_plan_money_dolphin.value < tot_set_money_dolphin.value) {
-      if ((tot_set_money_dolphin.value - tot_plan_money_dolphin.value) / tot_set_money_dolphin.value >= 0.1) {
+      if ((tot_set_money_dolphin.value - tot_plan_money_dolphin.value) / tot_set_money_dolphin.value >= 0.1
+          || (tot_set_money_dolphin.value - tot_plan_money_dolphin.value >= 20)) {
         _tot_warning_msg += "海豚需要缩小金额" + parseInt(tot_set_money_dolphin.value - tot_plan_money_dolphin.value).toString() 
         + "元, 预设" + parseInt(tot_plan_money_dolphin.value).toString() + "元, 已设" 
         + parseInt(tot_set_money_dolphin.value).toString() + "元" + "<br>";
@@ -2176,22 +2262,35 @@ watch([composeObjs, compose_name, fixedHoldObjs, buyoutRecords, noteObjs, show4S
       && fund_buy_ratio_config.value['trendFactor']['trident'] != null
       && fund_buy_ratio_config.value['fund_limit_setting'] && fund_buy_ratio_config.value['fund_limit_setting']['trident_enable']) {
     if (tot_plan_money_trident.value > tot_set_money_trident.value) {
-      if ((tot_plan_money_trident.value - tot_set_money_trident.value) / tot_plan_money_trident.value >= 0.1) {
+      if ((tot_plan_money_trident.value - tot_set_money_trident.value) / tot_plan_money_trident.value >= 0.1
+          || (tot_plan_money_trident.value - tot_set_money_trident.value >= 20)) {
         if (fund_buy_ratio_config.value['buyoutDistance'] && ((fund_buy_ratio_config.value['buyoutDistance']['trident'] != null 
         && fund_buy_ratio_config.value['buyoutDistance']['trident'] > 3) 
         || fund_buy_ratio_config.value['buyoutDistance']['trident'] === null)) {    
           _tot_warning_msg += "三叉戟需要增大金额" + parseInt(tot_plan_money_trident.value - tot_set_money_trident.value).toString() 
           + "元, 预设" + parseInt(tot_plan_money_trident.value).toString() + "元, 已设" 
           + parseInt(tot_set_money_trident.value).toString() + "元" + "<br>";
-        }
+        } else if (fund_buy_ratio_config.value['buyoutDistance'] && fund_buy_ratio_config.value['buyoutDistance']['trident'] != null 
+          && fund_buy_ratio_config.value['buyoutDistance']['trident'] <= 3) {
+            console.warn("#### trident卖出不足3日，无须增大金额，不弹窗告警")
+          }
       }
     } else if (tot_plan_money_trident.value < tot_set_money_trident.value) {
-      if ((tot_set_money_trident.value - tot_plan_money_trident.value) / tot_set_money_trident.value >= 0.1) {
+      if ((tot_set_money_trident.value - tot_plan_money_trident.value) / tot_set_money_trident.value >= 0.1
+          || (tot_set_money_trident.value - tot_plan_money_trident.value >= 20)) {
         _tot_warning_msg += "三叉戟需要缩小金额" + parseInt(tot_set_money_trident.value - tot_plan_money_trident.value).toString() 
         + "元, 预设" + parseInt(tot_plan_money_trident.value).toString() + "元, 已设" 
         + parseInt(tot_set_money_trident.value).toString() + "元" + "<br>";
       }
     }
+  }
+
+  if (composeViewObjs.value.length > 0) {
+    composeViewObjs.value.forEach(elem => {
+      if (elem['show_popup_msg']) {
+        _tot_warning_msg += elem['popup_msg'] + " <br>"
+      }
+    })
   }
 
   tot_warning_msg.value = _tot_warning_msg
@@ -2212,6 +2311,67 @@ watch([composeObjs, compose_name, fixedHoldObjs, buyoutRecords, noteObjs, show4S
   && tot_warning_msg.value !== '' && page_is_displayed.value) {
     startForeverPopupWarnTimer()
   }
+
+  //
+  composeViewObjs.value.forEach(elem => {
+      let fixedHoldObj = elem['fixedHoldObj']
+      if (fixedHoldObj && fixedHoldObj['hold_objs'] && fixedHoldObj['hold_objs'].length > 0) {
+        let lastHoldObj = fixedHoldObj['hold_objs'][fixedHoldObj['hold_objs'].length - 1]
+        totMoney.value += lastHoldObj['accu_money']
+        totEarnMoney.value += lastHoldObj['accu_pure_profit']
+      }
+      if (elem['money'] > 0) {
+        totSetBuy.value += elem['money']
+      }
+      if (elem['adjust_money'] > 0) {
+        totPlanBuy.value += elem['adjust_money']
+      }
+      if (elem['plan_buyin_money']) {
+        totInitBuy.value += elem['plan_buyin_money']
+      }
+
+      if (elem.hasOwnProperty('kbObj') && elem['kbObj'] != null) {
+        let _kbOjb = elem['kbObj']
+        if (_kbOjb.hasOwnProperty('positive') && _kbOjb['positive'] != null) {
+          let _positive = _kbOjb['positive']
+          if (_positive['positive_reach_len'] >= 5) {
+            totPositiveNum.value += 1
+          }
+        }
+      }
+
+      if ((elem.hasOwnProperty('lost_in_aggressive') && elem['lost_in_aggressive'])
+        || (elem.hasOwnProperty('lost_in_dtconvg') && elem['lost_in_dtconvg'])
+        || (elem.hasOwnProperty('money') && elem['money'] === -2)) {
+        tot4SoldNum.value = tot4SoldNum.value + 1
+      } else if (elem.hasOwnProperty('money') && elem['money'] === -1) {
+        totPauseNum.value = totPauseNum.value + 1
+      } else if (elem.hasOwnProperty('money') && elem.hasOwnProperty('adjust_money') &&
+        elem['money'] != null && elem['adjust_money'] != null &&
+        Math.abs(elem['money'] - elem['adjust_money']) >= 3) {
+        totAdjustNum.value = totAdjustNum.value + 1
+      }
+
+      if (elem.hasOwnProperty('quant_obj') && elem['quant_obj']['hitted']) {
+        totPoleNum.value = totPoleNum.value + 1
+      }
+      
+      if (noteObjs.value.hasOwnProperty(elem['fund_id']) && noteObjs.value[elem['fund_id']].hasOwnProperty('note_objs')
+          && noteObjs.value[elem['fund_id']]['note_objs'].length > 0) {
+        totNoteNum.value = totNoteNum.value + 1
+      }
+    })
+
+    if (totMoney.value > 0) {
+      let _earn_rate = totEarnMoney.value / totMoney.value * 100
+      totEarnRate.value = _earn_rate.toFixed(0) + '%'
+    }
+    if (totSetBuy.value != 0) {
+      diffBuySet.value = (totPlanBuy.value - totSetBuy.value) / totSetBuy.value
+    }
+    
+    scrollViewBySelection();
+
 }, { immediate: true })
 
 function startForeverPopupWarnTimer() {
@@ -2411,7 +2571,7 @@ async function removeFixedFund() {
     dlgController.value.removeDlg.hide()
   } else if (fixed_remove_type.value == 'remove today') {
     await buyOutFixedFundOfToday(fund_id_remove.value, fund_name_remove.value);
-    await setComposeProperty(fund_obj_remove.value['fund_id'], fund_obj_remove.value['fund_name'], fund_obj_remove.value['compose_name'], -1, fund_obj_remove.value['buyin_source']);
+    await setComposeProperty(fund_obj_remove.value['fund_id'], fund_obj_remove.value['fund_name'], fund_obj_remove.value['compose_name'], -1, fund_obj_remove.value['buyin_source'], fund_obj_remove.value['lossFlag']);
     dlgController.value.removeDlg.hide()
   } else {
     console.error("internal error as remove fund type does not match.")
@@ -3233,6 +3393,30 @@ function cancelCustAddCompose() {
     dlgController.value.custAddDlg.hide();
   }
   custAddError.value = ''
+}
+
+async function setComposeProperty_wrapper(_fund_id, _fund_name, _compose_name, _money, _buyin_source, _loss_flag) {
+  let _show4SoldOnly  = show4SoldOnly.value
+  let _showPauseOnly  = showPauseOnly.value
+  let _showAdjustOnly = showAdjustOnly.value
+  let _showPoleOnly   = showPoleOnly.value
+  let _showNoteOnly   = showNoteOnly.value
+
+  await setComposeProperty(_fund_id, _fund_name, _compose_name, _money, _buyin_source, _loss_flag);
+
+  show4SoldOnly.value = false
+  showPauseOnly.value = false
+  showAdjustOnly.value = false
+  showPoleOnly.value = false
+  showNoteOnly.value = false
+
+  setTimeout(function() {
+    show4SoldOnly.value  = _show4SoldOnly
+    showPauseOnly.value  = _showPauseOnly
+    showAdjustOnly.value = _showAdjustOnly
+    showPoleOnly.value   = _showPoleOnly
+    showNoteOnly.value   = _showNoteOnly
+  }, 1000)
 }
 
 </script>

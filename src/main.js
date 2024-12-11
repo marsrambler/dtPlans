@@ -17,6 +17,7 @@ import store from "./lib/store.js";
 import router from './lib/router.js'
 import {axiosSetup} from "./lib/api.js";
 import {useReportStore} from "./store/reportStore.js"
+import {useComposeStore} from "./store/composeStore.js"
 
 StockModule(Highcharts);
 exportingInit(Highcharts)
@@ -29,7 +30,9 @@ const app =createApp(App)
 app.use(router).use(store).use(HighchartsVue).mount("#app")
 // createApp(App).mount('#app')
 const reportStore = useReportStore()
-const { getBigPoolFixedHold, getRecordsAndRatesFromWorker } = reportStore
+const { getBigPoolFixedHold, getRecordsAndRatesFromWorker, getAllComposeFixedHoldFromWorker} = reportStore
+const composeStore = useComposeStore()
+const { getComposeFixedHoldFromWorker } = composeStore
 
 window.addEventListener("message", (e) => {
   if (e.data === 'dtPlan_fund-report-objs') {
@@ -38,6 +41,9 @@ window.addEventListener("message", (e) => {
 
   } else if (e.data === 'dtPlan_fixed-hold-buyin') {
     getBigPoolFixedHold();
+  } else if (e.data === 'dtPlan_compose-hold-buyin') {
+    getAllComposeFixedHoldFromWorker();
+    getComposeFixedHoldFromWorker();
   } else {
     console.log("****  has not implemented the receiver for: ", e.data)
   }
