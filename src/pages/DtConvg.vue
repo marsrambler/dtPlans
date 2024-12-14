@@ -232,12 +232,12 @@
                       v-if="oneRow['statistics']['perc_not_update_days'] && oneRow['statistics']['perc_not_update_days'] - 1 >= 3">
                       <span class="badge bg-danger">缺失: {{ oneRow.statistics.perc_not_update_days }}</span>
                     </template>
-                    <span v-if="oneRow['exclude_repo']" class="badge bg-dark" style="margin-left: 0.5rem;">已排除</span>
-                    <input v-else class="btn btn-danger btn-sm" style="margin-left: 0.5rem;" type="button" value="永远排除"
-                      @click.stop="addConvgExclude(oneRow.fund_id, oneRow.fund_name)">
                   </div>
                   <div>
                     {{ oneRow.fund_name }}
+                    <span v-if="oneRow['exclude_repo']" class="badge bg-dark" style="margin-left: 0.5rem;">已排除</span>
+                    <input v-else class="btn btn-danger btn-sm" style="margin-left: 0.5rem;" type="button" value="永远排除"
+                      @click.stop="addConvgExclude(oneRow.fund_id, oneRow.fund_name)">
                   </div>
                   <div style="margin-top:8px;">
                     <span v-bind:class="getCardStyle(oneRow.statistics.day_200_thres)">&nbsp;</span>

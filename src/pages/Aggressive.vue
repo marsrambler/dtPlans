@@ -21,12 +21,12 @@
         <input class="form-check-input" type="checkbox" id="chk_new_add" v-model="showNewAdd"><!--
         -->&nbsp;<label for="chk_new_add">新加</label>&nbsp;<span class="badge bg-info text-bg-success" style="position: relative; top: -1px;">{{ currNewAddNum }}</span><!--
       --></div>           
-      <input type="text" class="form-control-plaintext search_box" style="grid-column: 7 / span 2;" v-model="searchCond"
+      <input class="btn btn-danger btn-sm" type="button" value="保存模版" @click="saveAggressiveBase()">
+      <input type="text" class="form-control-plaintext search_box" style="grid-column: 8 / span 2;" v-model="searchCond"
              @keyup.enter="searchByCond()">
       <input class="btn btn-primary btn-sm" type="button" value="查找" @click="searchByCond()">
       <input class="btn btn-primary btn-sm" type="button" value="前移选择" @click="sortByField('selected')">
       <input class="btn btn-warning btn-sm" type="button" value="隐藏选择" @click="hideSelected()">
-      <input class="btn btn-warning btn-sm" type="button" value="保存" @click="saveAggressiveBase()">
       <!--
       <input class="btn btn-warning btn-sm" type="button" value="刷新" @click="getZskb()">
       -->
@@ -175,7 +175,8 @@
       <tbody>
       <template v-for="oneRow in aggressiveViewObjs" :key="oneRow.fund_id">
         <template v-if="(showOnly3Convg && 
-                            (oneRow['p50_convg_dur_rank'] && oneRow['p65_convg_dur_rank'] && oneRow['p80_convg_dur_rank'])
+                            (oneRow['p50_convg_dur_rank'] && oneRow['p65_convg_dur_rank'] && oneRow['p80_convg_dur_rank']) &&
+                            !oneRow['hide_disp']
                         ) 
                         || 
                         (showHides && oneRow['hide_disp'])

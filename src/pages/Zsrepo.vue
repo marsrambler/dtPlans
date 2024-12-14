@@ -18,7 +18,7 @@
         <input class="form-check-input" type="checkbox" id="chk_kb" v-model="showKanban"><!--
         -->&nbsp;<label for="chk_kb">看板</label>&nbsp;<span class="badge bg-primary text-bg-primary" style="position: relative; top: -1px;">{{ currKanbanNum }}</span><!--
       --></div>
-      <input class="btn btn-primary btn-sm" type="button" value="前移选择" @click="sortByField('selected')">
+      <input class="btn btn-danger btn-sm" type="button" value="保存模版" @click="saveRepoBase4Ui()">
       <!--
       <input class="btn btn-info btn-sm" type="button" value="隐藏选择">
       <input class="btn btn-info btn-sm" type="button" value="清除隐藏">
@@ -27,8 +27,10 @@
              style="grid-column: 7 / span 2;"
              v-model="searchCond" @keyup.enter="searchByCond()">
       <input class="btn btn-primary btn-sm" type="button" value="查找" @click="searchByCond()">
+      <input class="btn btn-primary btn-sm" type="button" value="前移选择" @click="sortByField('selected')">
+      <!--
       <input class="btn btn-warning btn-sm" type="button" value="刷新" @click="getZsRepo()">
-      <input class="btn btn-primary btn-sm" type="button" value="保存" @click="saveRepoBase4Ui()">
+      -->
     </div>
     <table id="table_header" class="table table-bordered" style="margin-bottom: 0;">
       <thead style="">

@@ -28,7 +28,9 @@
         <input class="btn btn-primary btn-sm" type="button" value="查找" @click="searchByCond($refs.search_input.value)">
         <input class="btn btn-primary btn-sm" type="button" value="前移选择" @click="sortByField('selected')">
         <input class="btn btn-warning btn-sm" type="button" value="隐藏选择" @click="hideSelected">
+        <!--
         <input class="btn btn-warning btn-sm" type="button" value="刷新" @click="getRepoRecycles()">
+        -->
       </div>
     </div>
     <table id="table_header" class="table table-bordered" style="margin-bottom: 0;">

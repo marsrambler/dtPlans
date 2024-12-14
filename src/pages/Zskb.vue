@@ -27,12 +27,14 @@
       <div class="form-check form_check_cust">
         <input class="form-check-input" type="checkbox" id="chk_mz" v-model="mzIdxOnly">
         <label class="form-check-label" for="chk_mz">美债</label>
-      </div>      
-      <input class="btn btn-primary btn-sm" type="button" value="前移选择" @click="sortByField('selected')">
-      <input type="text" class="form-control-plaintext search_box" style="grid-column: 9 / span 2;" v-model="searchCond"
+      </div>
+      <input type="text" class="form-control-plaintext search_box" style="grid-column: 8 / span 2;" v-model="searchCond"
              @keyup.enter="searchByCond()">
       <input class="btn btn-primary btn-sm" type="button" value="查找" @click="searchByCond()">
+      <input class="btn btn-primary btn-sm" type="button" value="前移选择" @click="sortByField('selected')">      
+      <!--
       <input class="btn btn-warning btn-sm" type="button" value="刷新" @click="getZskb()">
+      -->
     </div>
     <table id="table_header" class="table table-bordered" style="margin-bottom: 0;">
       <thead style="">

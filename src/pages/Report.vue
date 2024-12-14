@@ -37,6 +37,7 @@
         <input class="form-check-input" type="checkbox" id="show_latest" v-model="onlyShowLatest">
         <label class="form-check-label" for="show_latest">仅看最近</label>
       </div>
+      <input class="btn btn-primary btn-sm" type="button" value="请求全部净值" @click="requireDynValues4ui(true);">
     </div>
     <table id="table_header" class="table table-bordered" style="margin-bottom: 0;">
       <thead style="">
@@ -528,6 +529,9 @@
             <h6 style="word-break:break-all;">{{ cfmDlgCont }}:&nbsp;{{ requireFundIds }}</h6>
             <h6 class="bg-danger" v-if="requireFundIds.trim().length === 0">非法的请求ID</h6>
           </template>
+          <template v-if="cfmDlgType === 'bulk dynvalues'">
+            <h6 style="word-break:break-all;">{{ cfmDlgCont }}:&nbsp;全部净值</h6>
+          </template>          
           <template v-if="cfmDlgType === 'gen report'">
             <textarea style="width: 100%; height: 30rem;">{{ cfmDlgCont }}</textarea>
           </template>
@@ -538,6 +542,9 @@
             <button type="button" class="btn btn-primary" v-bind:disabled="requireFundIds.trim().length === 0"
               @click.prevent="executeAction();">确认</button>
           </template>
+          <template v-if="cfmDlgType === 'bulk dynvalues'">
+            <button type="button" class="btn btn-primary" @click.prevent="executeAction();">确认</button>
+          </template>          
         </div>
       </div>
     </div>
@@ -745,16 +752,23 @@ watch([dynRecordObjs, reportObjsReloaded], () => {
     }
 })
 
-function requireDynValues4ui() {
+function requireDynValues4ui(_by_bulk=false) {
   cfmDlgTitle.value = "确认"
   cfmDlgCont.value = "要请求动态数据吗"
-  cfmDlgType.value = "get dynvalues"
+  if (!_by_bulk) {
+    cfmDlgType.value = "get dynvalues"
+  } else {
+    cfmDlgType.value = "bulk dynvalues"
+  }
   dlgController.value.reportDlg.show()
 }
 
 function executeAction() {
   if (cfmDlgType.value === "get dynvalues") {
     requireDynValues(requireFundIds.value)
+  } else if (cfmDlgType.value === "bulk dynvalues") {
+    let _fund_ids = dynRecordObjs.value.map(elem => elem['fund_id']).join(",")
+    requireDynValues(_fund_ids)
   }
   dlgController.value.reportDlg.hide()
 }
