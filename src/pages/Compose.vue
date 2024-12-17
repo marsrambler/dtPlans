@@ -221,7 +221,7 @@
                     </span>
                   </template>
                   <template v-else-if="oneRow['compose_name'] === 'medusa'">
-                    <span class="badge bg-warning text-bg-success big_badge">
+                    <span class="badge text-bg-success big_badge" style="background-color:purple !important;">
                       美杜莎
                     </span>
                   </template>                   
@@ -617,7 +617,7 @@
                     </span>
                   </template>
                   <template v-else-if="oneRow['compose_name'] === 'medusa'">
-                    <span class="badge bg-warning text-bg-success big_badge">
+                    <span class="badge text-bg-success big_badge" style="background-color:purple !important;">
                       美杜莎
                     </span>
                   </template>                   
@@ -1895,48 +1895,12 @@ watch([composeObjs, compose_name, fixedHoldObjs, buyoutRecords, noteObjs, show4S
     let _tot_plan_money_dolphin = 0;
     let _tot_plan_money_trident = 0;
 
-    composeViewObjs.value.forEach(elem => {
-      if (!_need_special_logic) {
-        return;
-      }
-      if (elem['compose_name'] === 'gdngoat') {
-        if (!elem.hasOwnProperty('plan_buyin_money')) {
-          console.error("elem in gdngoat has no plan_buyin_money: ", elem['fund_id']);
-        } else if (elem['money'] > -2) {
-          _tot_plan_money_gdngoat += elem['plan_buyin_money']
-        }
-      } else if (elem['compose_name'] === 'ovtree') {
-        if (!elem.hasOwnProperty('plan_buyin_money')) {
-          console.error("elem in ovtree has no plan_buyin_money: ", elem['fund_id']);
-        } else if (elem['money'] > -2) {
-          _tot_plan_money_ovtree += elem['plan_buyin_money']
-        }
-      } else if (elem['compose_name'] === 'flyhorse') {
-        if (!elem.hasOwnProperty('plan_buyin_money')) {
-          console.error("elem in flyhorse has no plan_buyin_money: ", elem['fund_id']);
-        } else if (elem['money'] > -2) {
-          _tot_plan_money_flyhorse += elem['plan_buyin_money']
-        }
-      } else if (elem['compose_name'] === 'medusa') {
-        if (!elem.hasOwnProperty('plan_buyin_money')) {
-          console.error("elem in medusa has no plan_buyin_money: ", elem['fund_id']);
-        } else if (elem['money'] > -2) {
-          _tot_plan_money_medusa += elem['plan_buyin_money']
-        }
-      } else if (elem['compose_name'] === 'dolphin') {
-        if (!elem.hasOwnProperty('plan_buyin_money')) {
-          console.error("elem in dolphin has no plan_buyin_money: ", elem['fund_id']);
-        } else if (elem['money'] > -2) {
-          _tot_plan_money_dolphin += elem['plan_buyin_money']
-        }
-      } else if (elem['compose_name'] === 'trident') {
-        if (!elem.hasOwnProperty('plan_buyin_money')) {
-          console.error("elem in trident has no plan_buyin_money: ", elem['fund_id']);
-        } else if (elem['money'] > -2) {
-          _tot_plan_money_trident += elem['plan_buyin_money']
-        }
-      }
-    })
+    let _tot_adj_money_gdngoat = 0;
+    let _tot_adj_money_ovtree = 0;
+    let _tot_adj_money_flyhorse = 0;    
+    let _tot_adj_money_medusa = 0;
+    let _tot_adj_money_dolphin = 0;
+    let _tot_adj_money_trident = 0;
 
     composeViewObjs.value.forEach(elem => {
       if (!_need_special_logic) {
@@ -1945,13 +1909,90 @@ watch([composeObjs, compose_name, fixedHoldObjs, buyoutRecords, noteObjs, show4S
       if (elem['compose_name'] === 'gdngoat') {
         if (!elem.hasOwnProperty('plan_buyin_money')) {
           console.error("elem in gdngoat has no plan_buyin_money: ", elem['fund_id']);
-        } else if (elem['money'] > -2) {
-          elem['plan_buyin_money'] = parseInt(elem['plan_buyin_money'] / _tot_plan_money_gdngoat * fund_buy_ratio_config.value['money_probe_buy'])
-          if (elem['plan_buyin_money'] < 10 && elem['plan_buyin_money'] >= 5) {
-            elem['plan_buyin_money'] = 10
-          } else if (elem['plan_buyin_money'] < 5) {
-            elem['plan_buyin_money'] = 0
-          }
+        } else if (elem['money'] > -2 && elem['plan_buyin_money'] > 0) {
+          _tot_plan_money_gdngoat += elem['plan_buyin_money']
+        }
+        if (!elem.hasOwnProperty('adjust_money')) {
+          console.log("elem in gdngoat has no adjust_money: ", elem['fund_id']);
+        } else if (elem['money'] > -2 && elem['adjust_money'] > 0) {
+          _tot_adj_money_gdngoat += elem['adjust_money']
+        }        
+      } else if (elem['compose_name'] === 'ovtree') {
+        if (!elem.hasOwnProperty('plan_buyin_money')) {
+          console.error("elem in ovtree has no plan_buyin_money: ", elem['fund_id']);
+        } else if (elem['money'] > -2 && elem['plan_buyin_money'] > 0) {
+          _tot_plan_money_ovtree += elem['plan_buyin_money']
+        }
+        if (!elem.hasOwnProperty('adjust_money')) {
+          console.log("elem in ovtree has no adjust_money: ", elem['fund_id']);
+        } else if (elem['money'] > -2 && elem['adjust_money'] > 0) {
+          _tot_adj_money_ovtree += elem['adjust_money']
+        }        
+      } else if (elem['compose_name'] === 'flyhorse') {
+        if (!elem.hasOwnProperty('plan_buyin_money')) {
+          console.error("elem in flyhorse has no plan_buyin_money: ", elem['fund_id']);
+        } else if (elem['money'] > -2 && elem['plan_buyin_money'] > 0) {
+          _tot_plan_money_flyhorse += elem['plan_buyin_money']
+        }
+        if (!elem.hasOwnProperty('adjust_money')) {
+          console.log("elem in flyhorse has no adjust_money: ", elem['fund_id']);
+        } else if (elem['money'] > -2 && elem['adjust_money'] > 0) {
+          _tot_adj_money_flyhorse += elem['adjust_money']
+        }        
+      } else if (elem['compose_name'] === 'medusa') {
+        if (!elem.hasOwnProperty('plan_buyin_money')) {
+          console.error("elem in medusa has no plan_buyin_money: ", elem['fund_id']);
+        } else if (elem['money'] > -2 && elem['plan_buyin_money'] > 0) {
+          _tot_plan_money_medusa += elem['plan_buyin_money']
+        }
+        if (!elem.hasOwnProperty('adjust_money')) {
+          console.log("elem in medusa has no adjust_money: ", elem['fund_id']);
+        } else if (elem['money'] > -2 && elem['adjust_money'] > 0) {
+          _tot_adj_money_medusa += elem['adjust_money']
+        }        
+      } else if (elem['compose_name'] === 'dolphin') {
+        if (!elem.hasOwnProperty('plan_buyin_money')) {
+          console.error("elem in dolphin has no plan_buyin_money: ", elem['fund_id']);
+        } else if (elem['money'] > -2 && elem['plan_buyin_money'] > 0) {
+          _tot_plan_money_dolphin += elem['plan_buyin_money']
+        }
+        if (!elem.hasOwnProperty('adjust_money')) {
+          console.log("elem in dolphin has no adjust_money: ", elem['fund_id']);
+        } else if (elem['money'] > -2 && elem['adjust_money'] > 0) {
+          _tot_adj_money_dolphin += elem['adjust_money']
+        }        
+      } else if (elem['compose_name'] === 'trident') {
+        if (!elem.hasOwnProperty('plan_buyin_money')) {
+          console.error("elem in trident has no plan_buyin_money: ", elem['fund_id']);
+        } else if (elem['money'] > -2 && elem['plan_buyin_money'] > 0) {
+          _tot_plan_money_trident += elem['plan_buyin_money']
+        }
+        if (!elem.hasOwnProperty('adjust_money')) {
+          console.log("elem in trident has no adjust_money: ", elem['fund_id']);
+        } else if (elem['money'] > -2 && elem['adjust_money'] > 0) {
+          _tot_adj_money_trident += elem['adjust_money']
+        }        
+      }
+    })
+
+    console.log("$$$$$$ rough plan_buyin_money begin $$$$$$")
+    console.log("$$$$$$ _tot_plan_money_gdngoat: ", _tot_plan_money_gdngoat, " _tot_adj_money_gdngoat: ", _tot_adj_money_gdngoat)
+    console.log("$$$$$$ _tot_plan_money_ovtree: ", _tot_plan_money_ovtree, " _tot_adj_money_ovtree: ", _tot_adj_money_ovtree)
+    console.log("$$$$$$ _tot_plan_money_flyhorse: ", _tot_plan_money_flyhorse, " _tot_adj_money_flyhorse: ", _tot_adj_money_flyhorse)
+    console.log("$$$$$$ _tot_plan_money_medusa: ", _tot_plan_money_medusa, " _tot_adj_money_medusa: ", _tot_adj_money_medusa)
+    console.log("$$$$$$ _tot_plan_money_dolphin: ", _tot_plan_money_dolphin, " _tot_adj_money_dolphin: ", _tot_adj_money_dolphin)
+    console.log("$$$$$$ _tot_plan_money_trident: ", _tot_plan_money_trident, " _tot_adj_money_trident: ", _tot_adj_money_trident)                
+    console.log("$$$$$$ rough plan_buyin_money end $$$$$$")
+
+    composeViewObjs.value.forEach(elem => {
+      if (!_need_special_logic) {
+        return;
+      }
+      if (elem['compose_name'] === 'gdngoat') {
+        if (!elem.hasOwnProperty('plan_buyin_money')) {
+          console.error("elem in gdngoat has no plan_buyin_money: ", elem['fund_id']);
+        } else if (elem['money'] > -2 && elem['plan_buyin_money'] > 0) {
+          elem['plan_buyin_money'] = Math.round(elem['plan_buyin_money'] * fund_buy_ratio_config.value['money_probe_buy'] / _tot_plan_money_gdngoat)
         } else {
           elem['plan_buyin_money'] = 0
         }
@@ -1959,16 +2000,11 @@ watch([composeObjs, compose_name, fixedHoldObjs, buyoutRecords, noteObjs, show4S
       && fund_buy_ratio_config.value['trendFactor'] && fund_buy_ratio_config.value['trendFactor'].hasOwnProperty('ovtree')) {
         if (!elem.hasOwnProperty('plan_buyin_money')) {
           console.error("elem in ovtree has no plan_buyin_money: ", elem['fund_id']);
-        } else if (elem['money'] > -2) {
+        } else if (elem['money'] > -2 && elem['plan_buyin_money'] > 0) {
           if (fund_buy_ratio_config.value['trendFactor']['ovtree'] != null) {
-            elem['plan_buyin_money'] = parseInt(elem['plan_buyin_money'] / _tot_plan_money_ovtree * fund_buy_ratio_config.value['max_money_for_B_stock'] * fund_buy_ratio_config.value['trendFactor']['ovtree'])
+            elem['plan_buyin_money'] = Math.round(elem['plan_buyin_money'] * fund_buy_ratio_config.value['max_money_for_B_stock'] * fund_buy_ratio_config.value['trendFactor']['ovtree'] / _tot_plan_money_ovtree)
           } else {
-            elem['plan_buyin_money'] = parseInt(elem['plan_buyin_money'] / _tot_plan_money_ovtree * fund_buy_ratio_config.value['max_money_for_B_stock'] * 1)
-          }
-          if (elem['plan_buyin_money'] < 10 && elem['plan_buyin_money'] >= 5) {
-            elem['plan_buyin_money'] = 10
-          } else if (elem['plan_buyin_money'] < 5) {
-            elem['plan_buyin_money'] = 0
+            elem['plan_buyin_money'] = Math.round(elem['plan_buyin_money'] * fund_buy_ratio_config.value['max_money_for_B_stock'] / _tot_plan_money_ovtree)
           }
         } else {
           elem['plan_buyin_money'] = 0
@@ -1977,16 +2013,11 @@ watch([composeObjs, compose_name, fixedHoldObjs, buyoutRecords, noteObjs, show4S
       && fund_buy_ratio_config.value['trendFactor'] && fund_buy_ratio_config.value['trendFactor'].hasOwnProperty('flyhorse')) {
         if (!elem.hasOwnProperty('plan_buyin_money')) {
           console.error("elem in flyhorse has no plan_buyin_money: ", elem['fund_id']);
-        } else if (elem['money'] > -2) {
+        } else if (elem['money'] > -2 && elem['plan_buyin_money'] > 0) {
           if (fund_buy_ratio_config.value['trendFactor']['flyhorse'] != null) {
-            elem['plan_buyin_money'] = parseInt(elem['plan_buyin_money'] / _tot_plan_money_flyhorse * fund_buy_ratio_config.value['max_money_for_fut'] * fund_buy_ratio_config.value['trendFactor']['flyhorse'])
+            elem['plan_buyin_money'] = Math.round(elem['plan_buyin_money'] * fund_buy_ratio_config.value['max_money_for_fut'] * fund_buy_ratio_config.value['trendFactor']['flyhorse'] / _tot_plan_money_flyhorse)
           } else {
-            elem['plan_buyin_money'] = parseInt(elem['plan_buyin_money'] / _tot_plan_money_flyhorse * fund_buy_ratio_config.value['max_money_for_fut'] * 1)
-          }
-          if (elem['plan_buyin_money'] < 10 && elem['plan_buyin_money'] >= 5) {
-            elem['plan_buyin_money'] = 10
-          } else if (elem['plan_buyin_money'] < 5) {
-            elem['plan_buyin_money'] = 0
+            elem['plan_buyin_money'] = Math.round(elem['plan_buyin_money'] * fund_buy_ratio_config.value['max_money_for_fut'] / _tot_plan_money_flyhorse)
           }
         } else {
           elem['plan_buyin_money'] = 0
@@ -1995,16 +2026,11 @@ watch([composeObjs, compose_name, fixedHoldObjs, buyoutRecords, noteObjs, show4S
       && fund_buy_ratio_config.value['trendFactor'] && fund_buy_ratio_config.value['trendFactor'].hasOwnProperty('medusa')) {
         if (!elem.hasOwnProperty('plan_buyin_money')) {
           console.error("elem in medusa has no plan_buyin_money: ", elem['fund_id']);
-        } else if (elem['money'] > -2) {
+        } else if (elem['money'] > -2 && elem['plan_buyin_money'] > 0) {
           if (fund_buy_ratio_config.value['trendFactor']['medusa'] != null) {
-            elem['plan_buyin_money'] = parseInt(elem['plan_buyin_money'] / _tot_plan_money_medusa * fund_buy_ratio_config.value['max_money_for_unknow'] * fund_buy_ratio_config.value['trendFactor']['medusa'])
+            elem['plan_buyin_money'] = Math.round(elem['plan_buyin_money'] * fund_buy_ratio_config.value['max_money_for_unknow'] * fund_buy_ratio_config.value['trendFactor']['medusa'] / _tot_plan_money_medusa)
           } else {
-            elem['plan_buyin_money'] = parseInt(elem['plan_buyin_money'] / _tot_plan_money_medusa * fund_buy_ratio_config.value['max_money_for_unknow'] * 1)
-          }
-          if (elem['plan_buyin_money'] < 10 && elem['plan_buyin_money'] >= 5) {
-            elem['plan_buyin_money'] = 10
-          } else if (elem['plan_buyin_money'] < 5) {
-            elem['plan_buyin_money'] = 0
+            elem['plan_buyin_money'] = Math.round(elem['plan_buyin_money'] * fund_buy_ratio_config.value['max_money_for_unknow'] / _tot_plan_money_medusa)
           }
         } else {
           elem['plan_buyin_money'] = 0
@@ -2013,38 +2039,28 @@ watch([composeObjs, compose_name, fixedHoldObjs, buyoutRecords, noteObjs, show4S
       && fund_buy_ratio_config.value['trendFactor'] && fund_buy_ratio_config.value['trendFactor'].hasOwnProperty('dolphin')) {
         if (!elem.hasOwnProperty('plan_buyin_money')) {
           console.error("elem in dolphin has no plan_buyin_money: ", elem['fund_id']);
-        } else if (elem['money'] > -2) {
+        } else if (elem['money'] > -2 && elem['plan_buyin_money'] > 0) {
           if (fund_buy_ratio_config.value['trendFactor']['dolphin'] != null) {
-            elem['plan_buyin_money'] = parseInt(elem['plan_buyin_money'] / _tot_plan_money_dolphin * fund_buy_ratio_config.value['max_money_for_A_deb'] * fund_buy_ratio_config.value['trendFactor']['dolphin'])
+            elem['plan_buyin_money'] = Math.round(elem['plan_buyin_money'] * fund_buy_ratio_config.value['max_money_for_A_deb'] * fund_buy_ratio_config.value['trendFactor']['dolphin'] / _tot_plan_money_dolphin)
           } else {
-            elem['plan_buyin_money'] = parseInt(elem['plan_buyin_money'] / _tot_plan_money_dolphin * fund_buy_ratio_config.value['max_money_for_A_deb'] * 1)
-          }
-          if (elem['plan_buyin_money'] < 10 && elem['plan_buyin_money'] >= 5) {
-            elem['plan_buyin_money'] = 10
-          } else if (elem['plan_buyin_money'] < 5) {
-            elem['plan_buyin_money'] = 0
+            elem['plan_buyin_money'] = Math.round(elem['plan_buyin_money'] * fund_buy_ratio_config.value['max_money_for_A_deb'] / _tot_plan_money_dolphin)
           }
         } else {
           elem['plan_buyin_money'] = 0
-        }
+        }        
       } else if (elem['compose_name'] === 'trident' && fund_buy_ratio_config.value['max_money_for_B_deb'] 
       && fund_buy_ratio_config.value['trendFactor'] && fund_buy_ratio_config.value['trendFactor'].hasOwnProperty('trident')) {
         if (!elem.hasOwnProperty('plan_buyin_money')) {
           console.error("elem in trident has no plan_buyin_money: ", elem['fund_id']);
-        } else if (elem['money'] > -2) {
+        } else if (elem['money'] > -2 && elem['plan_buyin_money'] > 0) {
           if (fund_buy_ratio_config.value['trendFactor']['trident'] != null) {
-            elem['plan_buyin_money'] = parseInt(elem['plan_buyin_money'] / _tot_plan_money_trident * fund_buy_ratio_config.value['max_money_for_B_deb'] * fund_buy_ratio_config.value['trendFactor']['trident'])
+            elem['plan_buyin_money'] = Math.round(elem['plan_buyin_money'] * fund_buy_ratio_config.value['max_money_for_B_deb'] * fund_buy_ratio_config.value['trendFactor']['trident'] / _tot_plan_money_trident)
           } else {
-            elem['plan_buyin_money'] = parseInt(elem['plan_buyin_money'] / _tot_plan_money_trident * fund_buy_ratio_config.value['max_money_for_B_deb'] * 1)
-          }
-          if (elem['plan_buyin_money'] < 10 && elem['plan_buyin_money'] >= 5) {
-            elem['plan_buyin_money'] = 10
-          } else if (elem['plan_buyin_money'] < 5) {
-            elem['plan_buyin_money'] = 0
+            elem['plan_buyin_money'] = Math.round(elem['plan_buyin_money'] * fund_buy_ratio_config.value['max_money_for_B_deb'] / _tot_plan_money_trident)
           }
         } else {
           elem['plan_buyin_money'] = 0
-        }
+        }       
       }
     })
 
@@ -2055,7 +2071,7 @@ watch([composeObjs, compose_name, fixedHoldObjs, buyoutRecords, noteObjs, show4S
       if (elem['compose_name'] === 'gdngoat') {
         if (!elem.hasOwnProperty('plan_buyin_money')) {
           console.error("elem in gdngoat has no plan_buyin_money: ", elem['fund_id']);
-        } else if (elem['money'] > -2) {
+        } else if (elem['money'] > -2 && elem['plan_buyin_money'] > 0) {
           tot_plan_money_gdngoat.value += elem['plan_buyin_money']
         }
         if (elem['money'] > 0) {
@@ -2065,7 +2081,7 @@ watch([composeObjs, compose_name, fixedHoldObjs, buyoutRecords, noteObjs, show4S
       && fund_buy_ratio_config.value['trendFactor'] && fund_buy_ratio_config.value['trendFactor'].hasOwnProperty('ovtree')) {
         if (!elem.hasOwnProperty('plan_buyin_money')) {
           console.error("elem in ovtree has no plan_buyin_money: ", elem['fund_id']);
-        } else if (elem['money'] > -2) {
+        } else if (elem['money'] > -2 && elem['plan_buyin_money'] > 0) {
           tot_plan_money_ovtree.value += elem['plan_buyin_money']
         }
         if (elem['money'] > 0) {
@@ -2075,7 +2091,7 @@ watch([composeObjs, compose_name, fixedHoldObjs, buyoutRecords, noteObjs, show4S
       && fund_buy_ratio_config.value['trendFactor'] && fund_buy_ratio_config.value['trendFactor'].hasOwnProperty('flyhorse')) {
         if (!elem.hasOwnProperty('plan_buyin_money')) {
           console.error("elem in flyhorse has no plan_buyin_money: ", elem['fund_id']);
-        } else if (elem['money'] > -2) {
+        } else if (elem['money'] > -2 && elem['plan_buyin_money'] > 0) {
           tot_plan_money_flyhorse.value += elem['plan_buyin_money']
         }
         if (elem['money'] > 0) {
@@ -2085,7 +2101,7 @@ watch([composeObjs, compose_name, fixedHoldObjs, buyoutRecords, noteObjs, show4S
       && fund_buy_ratio_config.value['trendFactor'] && fund_buy_ratio_config.value['trendFactor'].hasOwnProperty('medusa')) {
         if (!elem.hasOwnProperty('plan_buyin_money')) {
           console.error("elem in medusa has no plan_buyin_money: ", elem['fund_id']);
-        } else if (elem['money'] > -2) {
+        } else if (elem['money'] > -2 && elem['plan_buyin_money'] > 0) {
           tot_plan_money_medusa.value += elem['plan_buyin_money']
         }
         if (elem['money'] > 0) {
@@ -2095,7 +2111,7 @@ watch([composeObjs, compose_name, fixedHoldObjs, buyoutRecords, noteObjs, show4S
       && fund_buy_ratio_config.value['trendFactor'] && fund_buy_ratio_config.value['trendFactor'].hasOwnProperty('dolphin')) {
         if (!elem.hasOwnProperty('plan_buyin_money')) {
           console.error("elem in dolphin has no plan_buyin_money: ", elem['fund_id']);
-        } else if (elem['money'] > -2) {
+        } else if (elem['money'] > -2 && elem['plan_buyin_money'] > 0) {
           tot_plan_money_dolphin.value += elem['plan_buyin_money']
         }
         if (elem['money'] > 0) {
@@ -2105,12 +2121,88 @@ watch([composeObjs, compose_name, fixedHoldObjs, buyoutRecords, noteObjs, show4S
       && fund_buy_ratio_config.value['trendFactor'] && fund_buy_ratio_config.value['trendFactor'].hasOwnProperty('trident')) {
         if (!elem.hasOwnProperty('plan_buyin_money')) {
           console.error("elem in trident has no plan_buyin_money: ", elem['fund_id']);
-        } else if (elem['money'] > -2) {
+        } else if (elem['money'] > -2 && elem['plan_buyin_money'] > 0) {
           tot_plan_money_trident.value += elem['plan_buyin_money']
         }
         if (elem['money'] > 0) {
           tot_set_money_trident.value += elem['money']
         }        
+      }
+    })
+
+    console.log("$$$$$$ recalc plan_buyin_money begin $$$$$$")
+    console.log("$$$$$$ tot_plan_money_gdngoat.value: ", tot_plan_money_gdngoat.value, " tot_set_money_gdngoat.value: ", tot_set_money_gdngoat.value)
+    console.log("$$$$$$ tot_plan_money_ovtree.value: ", tot_plan_money_ovtree.value, " tot_set_money_ovtree.value: ", tot_set_money_ovtree.value)
+    console.log("$$$$$$ tot_plan_money_flyhorse.value: ", tot_plan_money_flyhorse.value, " tot_set_money_flyhorse.value: ", tot_set_money_flyhorse.value)
+    console.log("$$$$$$ tot_plan_money_medusa.value: ", tot_plan_money_medusa.value, " tot_set_money_medusa.value: ", tot_set_money_medusa.value)
+    console.log("$$$$$$ tot_plan_money_dolphin.value: ", tot_plan_money_dolphin.value, " tot_set_money_dolphin.value: ", tot_set_money_dolphin.value)
+    console.log("$$$$$$ tot_plan_money_trident.value: ", tot_plan_money_trident.value, " tot_set_money_trident: ", tot_set_money_trident.value)                
+    console.log("$$$$$$ recalc plan_buyin_money end $$$$$$")
+
+    composeViewObjs.value.forEach(elem => {
+      if (!_need_special_logic) {
+        return;
+      }
+      if (elem['compose_name'] === 'gdngoat') {
+        if (!elem.hasOwnProperty('adjust_money')) {
+          console.log("elem in gdngoat has no adjust_money: ", elem['fund_id']);
+        } else if (elem['money'] > -2 && elem['adjust_money'] > 0) {
+          if (tot_plan_money_gdngoat.value > 0 && _tot_adj_money_gdngoat > 0) {
+            elem['adjust_money'] = Math.round(elem['adjust_money'] * tot_plan_money_gdngoat.value / _tot_adj_money_gdngoat)
+          }
+        } else {
+          elem['adjust_money'] = 0
+        }        
+      } else if (elem['compose_name'] === 'ovtree') {
+        if (!elem.hasOwnProperty('adjust_money')) {
+          console.log("elem in ovtree has no adjust_money: ", elem['fund_id']);
+        } else if (elem['money'] > -2 && elem['adjust_money'] > 0) {
+          if (tot_plan_money_ovtree.value > 0 && _tot_adj_money_ovtree > 0) {
+            elem['adjust_money'] = Math.round(elem['adjust_money'] * tot_plan_money_ovtree.value / _tot_adj_money_ovtree)
+          }
+        } else {
+          elem['adjust_money'] = 0
+        }      
+      } else if (elem['compose_name'] === 'flyhorse') {
+        if (!elem.hasOwnProperty('adjust_money')) {
+          console.log("elem in flyhorse has no adjust_money: ", elem['fund_id']);
+        } else if (elem['money'] > -2 && elem['adjust_money'] > 0) {
+          if (tot_plan_money_flyhorse.value > 0 && _tot_adj_money_flyhorse > 0) {
+            elem['adjust_money'] = Math.round(elem['adjust_money'] * tot_plan_money_flyhorse.value / _tot_adj_money_flyhorse)
+          }
+        } else {
+          elem['adjust_money'] = 0
+        }       
+      } else if (elem['compose_name'] === 'medusa') {
+        if (!elem.hasOwnProperty('adjust_money')) {
+          console.log("elem in medusa has no adjust_money: ", elem['fund_id']);
+        } else if (elem['money'] > -2 && elem['adjust_money'] > 0) {
+          if (tot_plan_money_medusa.value > 0 && _tot_adj_money_medusa > 0) {
+            elem['adjust_money'] = Math.round(elem['adjust_money'] * tot_plan_money_medusa.value / _tot_adj_money_medusa)
+          }
+        } else {
+          elem['adjust_money'] = 0
+        } 
+      } else if (elem['compose_name'] === 'dolphin') {
+        if (!elem.hasOwnProperty('adjust_money')) {
+          console.log("elem in dolphin has no adjust_money: ", elem['fund_id']);
+        } else if (elem['money'] > -2 && elem['adjust_money'] > 0) {
+          if (tot_plan_money_dolphin.value > 0 && _tot_adj_money_dolphin > 0) {
+            elem['adjust_money'] = Math.round(elem['adjust_money'] * tot_plan_money_dolphin.value / _tot_adj_money_dolphin)
+          }
+        } else {
+          elem['adjust_money'] = 0
+        }      
+      } else if (elem['compose_name'] === 'trident') {
+        if (!elem.hasOwnProperty('adjust_money')) {
+          console.log("elem in trident has no adjust_money: ", elem['fund_id']);
+        } else if (elem['money'] > -2 && elem['adjust_money'] > 0) {
+          if (tot_plan_money_trident.value > 0 && _tot_adj_money_trident > 0) {
+            elem['adjust_money'] = Math.round(elem['adjust_money'] * tot_plan_money_trident.value / _tot_adj_money_trident)
+          }
+        } else {
+          elem['adjust_money'] = 0
+        } 
       }
     })
 
@@ -2326,7 +2418,7 @@ watch([composeObjs, compose_name, fixedHoldObjs, buyoutRecords, noteObjs, show4S
       if (elem['adjust_money'] > 0) {
         totPlanBuy.value += elem['adjust_money']
       }
-      if (elem['plan_buyin_money']) {
+      if (elem['plan_buyin_money'] > 0) {
         totInitBuy.value += elem['plan_buyin_money']
       }
 

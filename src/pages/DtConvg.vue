@@ -196,7 +196,7 @@
                           </span>
                         </template>
                         <template v-else-if="oneRow['compose_plan'] === 'medusa'">
-                            <span class="badge bg-warning text-bg-success big_badge">
+                            <span class="badge text-bg-success big_badge" style="background-color:purple !important;">
                               美杜莎
                             </span>
                         </template>                         
@@ -235,9 +235,11 @@
                   </div>
                   <div>
                     {{ oneRow.fund_name }}
-                    <span v-if="oneRow['exclude_repo']" class="badge bg-dark" style="margin-left: 0.5rem;">已排除</span>
-                    <input v-else class="btn btn-danger btn-sm" style="margin-left: 0.5rem;" type="button" value="永远排除"
-                      @click.stop="addConvgExclude(oneRow.fund_id, oneRow.fund_name)">
+                    <template v-if="!oneRow['compose_plan'] || (oneRow['compose_plan'] !== 'dolphin')">
+                      <span v-if="oneRow['exclude_repo']" class="badge bg-dark" style="margin-left: 0.5rem;">已排除</span>
+                      <input v-else class="btn btn-danger btn-sm" style="margin-left: 0.5rem;" type="button" value="永远排除"
+                        @click.stop="addConvgExclude(oneRow.fund_id, oneRow.fund_name)">
+                      </template>
                   </div>
                   <div style="margin-top:8px;">
                     <span v-bind:class="getCardStyle(oneRow.statistics.day_200_thres)">&nbsp;</span>
@@ -417,7 +419,7 @@
                           </span>
                         </template>
                         <template v-else-if="oneRow['compose_plan'] === 'medusa'">
-                            <span class="badge bg-warning text-bg-success big_badge">
+                            <span class="badge text-bg-success big_badge" style="background-color:purple !important;">
                               美杜莎
                             </span>
                         </template>                         

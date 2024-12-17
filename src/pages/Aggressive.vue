@@ -214,7 +214,7 @@
                           </span>
                       </template>
                       <template v-else-if="oneRow['compose_plan'] === 'medusa'">
-                          <span class="badge bg-warning text-bg-success big_badge">
+                          <span class="badge text-bg-success big_badge" style="background-color:purple !important;">
                             美杜莎
                           </span>
                       </template>                                            
@@ -429,7 +429,7 @@
                           </span>
                       </template>
                       <template v-else-if="oneRow['compose_plan'] === 'medusa'">
-                          <span class="badge bg-warning text-bg-success big_badge">
+                          <span class="badge text-bg-success big_badge" style="background-color:purple !important;">
                             美杜莎
                           </span>
                       </template>                         

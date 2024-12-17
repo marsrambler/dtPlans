@@ -454,7 +454,7 @@
                         </span>
                       </template>
                       <template v-else-if="oneRow['tranStateObj']['compose_plan'] === 'medusa'">
-                        <span class="badge bg-warning text-bg-success big_badge stack_2_info">
+                        <span class="badge text-bg-success big_badge stack_2_info" style="background-color:purple !important;">
                           美杜莎
                         </span>
                       </template>                                            

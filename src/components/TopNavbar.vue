@@ -1,5 +1,5 @@
 <template>
-  <nav class="navbar fixed-top navbar-expand-sm navbar-dark bg-dark">
+  <nav class="navbar fixed-top navbar-expand-sm navbar-dark bg-dark" style="text-wrap:nowrap;">
     <div class="container-fluid">
       <a class="navbar-brand" href="#">
         <img width=32 height=32 style="border-radius: 16px;" src="/images/poseidon.png">
