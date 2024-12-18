@@ -91,44 +91,51 @@
           
           <div style="display: flex; align-items: center; color: white;">
             <div style="display: inline-block; margin-right: 2px;">初始:{{ totInitBuy }}</div>
-            <div style="display: inline-block; margin-left: 0.5rem;">
+            <div style="display: inline-block; margin-left: 0.5rem; height: 2.5rem;">
               <div style="font-size: 0.8rem; font-weight: bold; margin-bottom: -3px; text-align: center;">当前:{{ totSetBuy }}</div>
               <div class="sep_line"></div>
-                <template v-if="diffBuySet >= 0.1">
-                  <div class="badge bg-warning"
-                    style="font-size: 0.8rem; font-weight: bold; line-height: 0.8 !important;; display: block !important;">决策:{{ totPlanBuy }}
-                  </div>
-                </template>
-                <template v-else-if="diffBuySet <= -0.1">
-                  <div class="badge bg-danger"
-                    style="font-size: 0.8rem; line-height: 0.8 !important;; display: block !important;">决策:{{ totPlanBuy }}
-                  </div>
-                </template>
-                <template v-else>
-                  <div style="font-size: 0.8rem; font-weight: bold; margin-top: -3px;">决策:{{ totPlanBuy }}</div>
-                </template>
-            </div>
-            <template v-if="fund_limit_str === '管'">
-              <template v-if="fund_buyout_distance != null && fund_buyout_distance <= 3">
-                <div style="display:inline-block;margin-left:0.5rem;color:gold;font-weight:bold;">
-                  (<span style="text-decoration:line-through;color:whitesmoke;font-weight:normal;font-style:italic;">{{fund_limit_str}}</span>)
+              <template v-if="diffBuySet >= 0.1">
+                <div class="badge bg-warning"
+                  style="font-size: 0.8rem; font-weight: bold; line-height: 0.8 !important;; display: block !important;">决策:{{ totPlanBuy }}
+                </div>
+              </template>
+              <template v-else-if="diffBuySet <= -0.1">
+                <div class="badge bg-danger"
+                  style="font-size: 0.8rem; line-height: 0.8 !important;; display: block !important;">决策:{{ totPlanBuy }}
                 </div>
               </template>
               <template v-else>
-                <div style="display:inline-block;margin-left:0.5rem;color:gold;font-weight:bold;">
-                  ({{fund_limit_str}})
+                <div style="font-size: 0.8rem; font-weight: bold; margin-top: -3px;">决策:{{ totPlanBuy }}</div>
+              </template>
+            </div>
+
+            <div style="display: inline-block; margin-left: 0.5rem; height: 2.5rem;">
+              <template v-if="curr_compose_name">
+                <div style="color:cyan;font-weight:bold;font-size:0.8rem;margin-bottom:-3px;text-align:center;">
+                  {{composeNameMap[curr_compose_name]}}
                 </div>
               </template>
-            </template>
-            <template v-else-if="fund_limit_str === '非管'">
-              <div style="display:inline-block;margin-left:0.5rem;color:lime;font-weight:bold;">
-                ({{fund_limit_str}})
-              </div>
-            </template>            
+              <div class="sep_line"></div>
+              <template v-if="fund_limit_str === '管'">
+                <template v-if="fund_buyout_distance != null && fund_buyout_distance <= 3">
+                  <div style="font-size:0.8rem;font-weight:bold;display:block !important;color:gold;text-align:center;line-height:1.2 !important;">
+                    (<span style="text-decoration:line-through;color:whitesmoke;font-weight:normal;font-style:italic;">{{fund_limit_str}}</span>)
+                  </div>
+                </template>
+                <template v-else>
+                  <div style="font-size:0.8rem;font-weight:bold;display:block !important;color:gold;text-align:center;line-height:1.2 !important;">
+                    ({{fund_limit_str}})
+                  </div>
+                </template>
+              </template>
+              <template v-else-if="fund_limit_str === '非管'">
+                <div style="font-size:0.8rem;font-weight:bold;display:block !important;color:lime;text-align:center;line-height:1.2 !important;">
+                  ({{fund_limit_str}})
+                </div>
+              </template>                
+            </div>
           </div>
-          
         </div>
-
       </div>
     </div>
   </nav>
@@ -159,6 +166,16 @@ import { useZskbStore } from "../store/zskbStore";
 import {storeToRefs} from 'pinia'
 import { useComposeStore } from '../store/composeStore';
 import { useBuyInOutStore } from '../store/buyInOutStore.js';
+
+const composeNameMap = {
+  'all': '全部',
+  'ovtree': '橄榄树',
+  'flyhorse': '飞马',
+  'gdngoat': '金毛羊',
+  'medusa': '美杜莎',
+  'trident': '三叉戟',
+  'dolphin': '海豚'
+}
 
 const zskbStore = useZskbStore()
 const {rtRates} = storeToRefs(zskbStore)
