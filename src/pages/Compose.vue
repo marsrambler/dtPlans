@@ -2193,65 +2193,67 @@ watch([composeObjs, compose_name, fixedHoldObjs, buyoutRecords, noteObjs, show4S
     console.log("$$$$$$ tot_plan_money_trident.value: ", tot_plan_money_trident.value, " tot_set_money_trident: ", tot_set_money_trident.value)                
     console.log("$$$$$$ recalc plan_buyin_money end $$$$$$")
 
+    let _today_str_4_adj = getTodayStr()
+
     composeViewObjs.value.forEach(elem => {
       if (!_need_special_logic) {
         return;
       }
       if (elem['compose_name'] === 'gdngoat') {
-        if (!elem.hasOwnProperty('adjust_money')) {
-          console.log("elem in gdngoat has no adjust_money: ", elem['fund_id']);
+        if (!elem.hasOwnProperty('adjust_money') || !elem.hasOwnProperty('last_adjust_money_date')) {
+          console.log("elem in gdngoat has no adjust_money or last_adjust_money_date: ", elem['fund_id']);
         } else if (elem['money'] > -2 && elem['adjust_money'] > 0) {
-          if (tot_plan_money_gdngoat.value > 0 && _tot_adj_money_gdngoat > 0) {
+          if (tot_plan_money_gdngoat.value > 0 && _tot_adj_money_gdngoat > 0 && _today_str_4_adj != elem['last_adjust_money_date']) {
             elem['adjust_money'] = Math.round(elem['adjust_money'] * tot_plan_money_gdngoat.value / _tot_adj_money_gdngoat)
           }
         } else {
           elem['adjust_money'] = 0
         }        
       } else if (elem['compose_name'] === 'ovtree') {
-        if (!elem.hasOwnProperty('adjust_money')) {
-          console.log("elem in ovtree has no adjust_money: ", elem['fund_id']);
+        if (!elem.hasOwnProperty('adjust_money') || !elem.hasOwnProperty('last_adjust_money_date')) {
+          console.log("elem in ovtree has no adjust_money or last_adjust_money_date: ", elem['fund_id']);
         } else if (elem['money'] > -2 && elem['adjust_money'] > 0) {
-          if (tot_plan_money_ovtree.value > 0 && _tot_adj_money_ovtree > 0) {
+          if (tot_plan_money_ovtree.value > 0 && _tot_adj_money_ovtree > 0 && _today_str_4_adj != elem['last_adjust_money_date']) {
             elem['adjust_money'] = Math.round(elem['adjust_money'] * tot_plan_money_ovtree.value / _tot_adj_money_ovtree)
           }
         } else {
           elem['adjust_money'] = 0
         }      
       } else if (elem['compose_name'] === 'flyhorse') {
-        if (!elem.hasOwnProperty('adjust_money')) {
-          console.log("elem in flyhorse has no adjust_money: ", elem['fund_id']);
+        if (!elem.hasOwnProperty('adjust_money') || !elem.hasOwnProperty('last_adjust_money_date')) {
+          console.log("elem in flyhorse has no adjust_money or last_adjust_money_date: ", elem['fund_id']);
         } else if (elem['money'] > -2 && elem['adjust_money'] > 0) {
-          if (tot_plan_money_flyhorse.value > 0 && _tot_adj_money_flyhorse > 0) {
+          if (tot_plan_money_flyhorse.value > 0 && _tot_adj_money_flyhorse > 0 && _today_str_4_adj != elem['last_adjust_money_date']) {
             elem['adjust_money'] = Math.round(elem['adjust_money'] * tot_plan_money_flyhorse.value / _tot_adj_money_flyhorse)
           }
         } else {
           elem['adjust_money'] = 0
         }       
       } else if (elem['compose_name'] === 'medusa') {
-        if (!elem.hasOwnProperty('adjust_money')) {
-          console.log("elem in medusa has no adjust_money: ", elem['fund_id']);
+        if (!elem.hasOwnProperty('adjust_money') || !elem.hasOwnProperty('last_adjust_money_date')) {
+          console.log("elem in medusa has no adjust_money or last_adjust_money_date: ", elem['fund_id']);
         } else if (elem['money'] > -2 && elem['adjust_money'] > 0) {
-          if (tot_plan_money_medusa.value > 0 && _tot_adj_money_medusa > 0) {
+          if (tot_plan_money_medusa.value > 0 && _tot_adj_money_medusa > 0 && _today_str_4_adj != elem['last_adjust_money_date']) {
             elem['adjust_money'] = Math.round(elem['adjust_money'] * tot_plan_money_medusa.value / _tot_adj_money_medusa)
           }
         } else {
           elem['adjust_money'] = 0
         } 
       } else if (elem['compose_name'] === 'dolphin') {
-        if (!elem.hasOwnProperty('adjust_money')) {
-          console.log("elem in dolphin has no adjust_money: ", elem['fund_id']);
+        if (!elem.hasOwnProperty('adjust_money') || !elem.hasOwnProperty('last_adjust_money_date')) {
+          console.log("elem in dolphin has no adjust_money or last_adjust_money_date: ", elem['fund_id']);
         } else if (elem['money'] > -2 && elem['adjust_money'] > 0) {
-          if (tot_plan_money_dolphin.value > 0 && _tot_adj_money_dolphin > 0) {
+          if (tot_plan_money_dolphin.value > 0 && _tot_adj_money_dolphin > 0 && _today_str_4_adj != elem['last_adjust_money_date']) {
             elem['adjust_money'] = Math.round(elem['adjust_money'] * tot_plan_money_dolphin.value / _tot_adj_money_dolphin)
           }
         } else {
           elem['adjust_money'] = 0
         }      
       } else if (elem['compose_name'] === 'trident') {
-        if (!elem.hasOwnProperty('adjust_money')) {
-          console.log("elem in trident has no adjust_money: ", elem['fund_id']);
+        if (!elem.hasOwnProperty('adjust_money') || !elem.hasOwnProperty('last_adjust_money_date')) {
+          console.log("elem in trident has no adjust_money or last_adjust_money_date: ", elem['fund_id']);
         } else if (elem['money'] > -2 && elem['adjust_money'] > 0) {
-          if (tot_plan_money_trident.value > 0 && _tot_adj_money_trident > 0) {
+          if (tot_plan_money_trident.value > 0 && _tot_adj_money_trident > 0 && _today_str_4_adj != elem['last_adjust_money_date']) {
             elem['adjust_money'] = Math.round(elem['adjust_money'] * tot_plan_money_trident.value / _tot_adj_money_trident)
           }
         } else {
