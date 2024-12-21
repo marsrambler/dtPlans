@@ -186,21 +186,48 @@
                     <template v-if="oneRow['compose_plan'] && oneRow['compose_plan'] !== 'noplan'">
                       <div>
                         <template v-if="oneRow['compose_plan'] === 'ovtree'">
-                          <span class="badge bg-primary text-bg-success big_badge">
+                          <span class="badge bg-primary text-bg-success big_badge"
+                          :class="{'half_badge': oneRow['refer_compose_name'] && oneRow['refer_compose_name'] != ''}">
                             橄榄树
                           </span>
                         </template>
                         <template v-else-if="oneRow['compose_plan'] === 'flyhorse'">
-                          <template v-if="!oneRow['refer_compose_name'] || oneRow['refer_compose_name'] == ''">
-                            <span class="badge bg-secondary text-bg-success big_badge">
-                              飞马
-                            </span>
-                          </template>
-                          <template v-else-if="oneRow['refer_compose_name']">
-                            <span class="badge bg-secondary text-bg-success" style="line-height:1.8;width:5rem;">
-                              飞马
-                            </span>
-                            <template v-if="oneRow['refer_compose_name'] === 'ovtree'">
+                          <span class="badge bg-secondary text-bg-success big_badge"
+                          :class="{'half_badge': oneRow['refer_compose_name'] && oneRow['refer_compose_name'] != ''}">
+                            飞马
+                          </span>                    
+                        </template>
+                        <template v-else-if="oneRow['compose_plan'] === 'medusa'">
+                          <span class="badge text-bg-success big_badge" style="background-color:purple !important;"
+                          :class="{'half_badge': oneRow['refer_compose_name'] && oneRow['refer_compose_name'] != ''}">
+                            美杜莎
+                          </span>
+                        </template>                         
+                        <template v-else-if="oneRow['compose_plan'] === 'dolphin'">
+                          <span class="badge bg-info text-bg-success big_badge"
+                          :class="{'half_badge': oneRow['refer_compose_name'] && oneRow['refer_compose_name'] != ''}">
+                            海豚
+                          </span>
+                        </template>
+                        <template v-else-if="oneRow['compose_plan'] === 'trident'">
+                          <span class="badge bg-success text-bg-success big_badge"
+                          :class="{'half_badge': oneRow['refer_compose_name'] && oneRow['refer_compose_name'] != ''}">
+                            三叉戟
+                          </span>
+                        </template>
+                        <template v-else-if="oneRow['compose_plan'] === 'gdngoat'">
+                          <span class="badge bg-danger text-bg-success big_badge"
+                          :class="{'half_badge': oneRow['refer_compose_name'] && oneRow['refer_compose_name'] != ''}">
+                            金毛羊
+                          </span>
+                        </template>
+                        <template v-if="oneRow['refer_compose_name']">
+                            <template v-if="oneRow['refer_compose_name'] === 'flyhorse'">
+                              <span class="badge bg-secondary text-bg-success" style="line-height:1.8;width:5rem;margin-top:5px;">
+                                飞马
+                              </span>
+                            </template>
+                            <template v-else-if="oneRow['refer_compose_name'] === 'ovtree'">
                               <span class="badge bg-primary text-bg-success" style="line-height:1.8;width:5rem;margin-top:5px;">
                                 橄榄树
                               </span>
@@ -225,28 +252,12 @@
                                 金毛羊
                               </span>                            
                             </template>
-                          </template>                          
-                        </template>
-                        <template v-else-if="oneRow['compose_plan'] === 'medusa'">
-                            <span class="badge text-bg-success big_badge" style="background-color:purple !important;">
-                              美杜莎
-                            </span>
-                        </template>                         
-                        <template v-else-if="oneRow['compose_plan'] === 'dolphin'">
-                          <span class="badge bg-info text-bg-success big_badge">
-                            海豚
-                          </span>
-                        </template>
-                        <template v-else-if="oneRow['compose_plan'] === 'trident'">
-                          <span class="badge bg-success text-bg-success big_badge">
-                            三叉戟
-                          </span>
-                        </template>
-                        <template v-else-if="oneRow['compose_plan'] === 'gdngoat'">
-                          <span class="badge bg-danger text-bg-success big_badge">
-                            金毛羊
-                          </span>
-                        </template>
+                            <template v-else-if="oneRow['refer_compose_name'] === 'big_pool' || oneRow['refer_compose_name'] === 'bigpool'">
+                              <span class="badge bg-warning text-bg-success" style="line-height:1.8;width:5rem;margin-top:5px;">
+                                大池
+                              </span>                            
+                            </template>                            
+                          </template>                            
                       </div>
                     </template>
                   </div>
@@ -441,21 +452,48 @@
                       </template>
                       <div style="text-align: center;">
                         <template v-if="oneRow['compose_plan'] === 'ovtree'">
-                          <span class="badge bg-primary text-bg-success big_badge">
+                          <span class="badge bg-primary text-bg-success big_badge"
+                          :class="{'half_badge': oneRow['refer_compose_name'] && oneRow['refer_compose_name'] != ''}">
                             橄榄树
                           </span>
                         </template>
                         <template v-else-if="oneRow['compose_plan'] === 'flyhorse'">
-                          <template v-if="!oneRow['refer_compose_name'] || oneRow['refer_compose_name'] == ''">
-                            <span class="badge bg-secondary text-bg-success big_badge">
-                              飞马
-                            </span>
-                          </template>
-                          <template v-else-if="oneRow['refer_compose_name']">
-                            <span class="badge bg-secondary text-bg-success" style="line-height:1.8;width:5rem;margin-top:5px;">
-                              飞马
-                            </span>
-                            <template v-if="oneRow['refer_compose_name'] === 'ovtree'">
+                          <span class="badge bg-secondary text-bg-success big_badge"
+                          :class="{'half_badge': oneRow['refer_compose_name'] && oneRow['refer_compose_name'] != ''}">
+                            飞马
+                          </span>
+                        </template>
+                        <template v-else-if="oneRow['compose_plan'] === 'medusa'">
+                          <span class="badge text-bg-success big_badge" style="background-color:purple !important;"
+                          :class="{'half_badge': oneRow['refer_compose_name'] && oneRow['refer_compose_name'] != ''}">
+                            美杜莎
+                          </span>
+                        </template>                         
+                        <template v-else-if="oneRow['compose_plan'] === 'dolphin'">
+                          <span class="badge bg-info text-bg-success big_badge"
+                          :class="{'half_badge': oneRow['refer_compose_name'] && oneRow['refer_compose_name'] != ''}">
+                            海豚
+                          </span>
+                        </template>
+                        <template v-else-if="oneRow['compose_plan'] === 'trident'">
+                          <span class="badge bg-success text-bg-success big_badge"
+                          :class="{'half_badge': oneRow['refer_compose_name'] && oneRow['refer_compose_name'] != ''}">
+                            三叉戟
+                          </span>
+                        </template>
+                        <template v-else-if="oneRow['compose_plan'] === 'gdngoat'">
+                          <span class="badge bg-danger text-bg-success big_badge"
+                          :class="{'half_badge': oneRow['refer_compose_name'] && oneRow['refer_compose_name'] != ''}">
+                            金毛羊
+                          </span>
+                        </template>
+                        <template v-if="oneRow['refer_compose_name']">
+                            <template v-if="oneRow['refer_compose_name'] === 'flyhorse'">
+                              <span class="badge bg-secondary text-bg-success" style="line-height:1.8;width:5rem;margin-top:5px;">
+                                飞马
+                              </span>
+                            </template>
+                            <template v-else-if="oneRow['refer_compose_name'] === 'ovtree'">
                               <span class="badge bg-primary text-bg-success" style="line-height:1.8;width:5rem;margin-top:5px;">
                                 橄榄树
                               </span>
@@ -480,28 +518,12 @@
                                 金毛羊
                               </span>                            
                             </template>
-                          </template>
-                        </template>
-                        <template v-else-if="oneRow['compose_plan'] === 'medusa'">
-                            <span class="badge text-bg-success big_badge" style="background-color:purple !important;">
-                              美杜莎
-                            </span>
-                        </template>                         
-                        <template v-else-if="oneRow['compose_plan'] === 'dolphin'">
-                          <span class="badge bg-info text-bg-success big_badge">
-                            海豚
-                          </span>
-                        </template>
-                        <template v-else-if="oneRow['compose_plan'] === 'trident'">
-                          <span class="badge bg-success text-bg-success big_badge">
-                            三叉戟
-                          </span>
-                        </template>
-                        <template v-else-if="oneRow['compose_plan'] === 'gdngoat'">
-                          <span class="badge bg-danger text-bg-success big_badge">
-                            金毛羊
-                          </span>
-                        </template>
+                            <template v-else-if="oneRow['refer_compose_name'] === 'big_pool' || oneRow['refer_compose_name'] === 'bigpool'">
+                              <span class="badge bg-warning text-bg-success" style="line-height:1.8;width:5rem;margin-top:5px;">
+                                大池
+                              </span>                            
+                            </template>                            
+                          </template>                        
                       </div>
                     </template>
                   </div>
