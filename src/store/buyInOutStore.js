@@ -511,10 +511,10 @@ export const useBuyInOutStore = defineStore('buyInOut-store', () => {
                     console.warn("compose page/ovtree/trident/flyhorse/medusa has no statistics/min_sort_tot_earn for elem: ", elem);
                 }
 
-                if (elem['kbObj'] && elem['kbObj']['statistics']['fund_perc_len'] && elem['kbObj']['statistics']['fund_perc_len'] < 1100) {
+                if (elem['kbObj'] && elem['kbObj']['statistics'] && elem['kbObj']['statistics']['fund_perc_len'] && elem['kbObj']['statistics']['fund_perc_len'] < 1100) {
                     elem['plan_buyin_money'] = elem['plan_buyin_money'] - 5
                 }
-                if (elem['kbObj'] && elem['kbObj']['statistics']['fund_perc_len'] && elem['kbObj']['statistics']['fund_perc_len'] < 880) {
+                if (elem['kbObj'] && elem['kbObj']['statistics'] && elem['kbObj']['statistics']['fund_perc_len'] && elem['kbObj']['statistics']['fund_perc_len'] < 880) {
                     elem['plan_buyin_money'] = elem['plan_buyin_money'] - 5
                 }
                 if (elem['wav_obj'] && elem['wav_obj']['wav_sort_level']) {
@@ -569,10 +569,10 @@ export const useBuyInOutStore = defineStore('buyInOut-store', () => {
                     console.error("compose page/dolphin has no statistics/min_sort_tot_earn for elem: ", elem);
                 }
 
-                if (elem['kbObj'] && elem['kbObj']['statistics']['fund_perc_len'] && elem['kbObj']['statistics']['fund_perc_len'] < 1100) {
+                if (elem['kbObj'] && elem['kbObj']['statistics'] && elem['kbObj']['statistics']['fund_perc_len'] && elem['kbObj']['statistics']['fund_perc_len'] < 1100) {
                     elem['plan_buyin_money'] = elem['plan_buyin_money'] - 5
                 }
-                if (elem['kbObj'] && elem['kbObj']['statistics']['fund_perc_len'] && elem['kbObj']['statistics']['fund_perc_len'] < 880) {
+                if (elem['kbObj'] && elem['kbObj']['statistics'] && elem['kbObj']['statistics']['fund_perc_len'] && elem['kbObj']['statistics']['fund_perc_len'] < 880) {
                     elem['plan_buyin_money'] = elem['plan_buyin_money'] - 5
                 }
                 if (elem['wav_obj'] && elem['wav_obj']['wav_sort_level']) {

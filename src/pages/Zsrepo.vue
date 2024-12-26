@@ -256,7 +256,7 @@
                 <input type="text" class="form-control-plaintext input_box_br" style="max-width: 25rem;"
                        v-model="oneRow['indexUrl']">
                 <label>Spider:&nbsp;</label>
-                <select class="form-select nr_select" style="width: 5rem;" v-model="oneRow['specialSpider']"
+                <select class="form-select nr_select" style="width: 7rem;" v-model="oneRow['specialSpider']"
                         @click.stop>
                   <option v-for="option in spider_versions" v-bind:value="option.source_val">
                     {{ option.source_name }}
@@ -379,7 +379,8 @@ const colWidMap = {
 
 const spider_versions = [
   {'source_name': 'v1', 'source_val': 'v1'},
-  {'source_name': 'v2', 'source_val': 'v2'}
+  {'source_name': 'v2', 'source_val': 'v2'},
+  {'source_name': '临时借用', 'source_val': 'v99'}
 ]
 
 const showHides = ref(false)

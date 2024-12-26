@@ -1,7 +1,7 @@
 <template>
   <template v-if="!simplifyMode">
     <template v-if="itemArray.length > 0">
-      <div class="flex_row_wp" :ref="(el) => (rowElements['container'] = el)">
+      <div id="flex_container_wnd" class="flex_row_wp" :ref="(el) => (rowElements['container'] = el)">
         <template v-for="oneItem in itemArray" :key="oneItem">
           <template v-if="oneItem.indexOf('---') == -1">
             <input class="btn btn-danger btn-sm" type="button" :value="oneItem" @click="$emit('click-item', oneItem)">
@@ -11,7 +11,7 @@
           </template>
         </template>
         <div class="form-check form_check_cust" style="display: inline-block; margin-bottom: -0.6rem;">
-          <input class="form-check-input" type="checkbox" v-model="useFilterMode">
+          <input class="form-check-input" type="checkbox" id="flexCheckDefault" v-model="useFilterMode">
           <label class="form-check-label" for="flexCheckDefault">使用过滤</label>
         </div>
         <input class="btn btn-primary btn-sm" type="button" value="排序" @click="$emit('order-filter')">
@@ -21,7 +21,7 @@
   </template>
   <template v-else>
     <template v-if="itemSubArray.length > 0">
-      <div class="flex_row_wp" :ref="(el) => (rowElements['container'] = el)">
+      <div id="flex_container_wnd" class="flex_row_wp" :ref="(el) => (rowElements['container'] = el)">
         <template v-for="oneItem in itemSubArray" :key="oneItem">
           <template v-if="oneItem.indexOf('---') == -1">
             <input class="btn btn-danger btn-sm" type="button" :value="oneItem">

@@ -341,7 +341,7 @@
                 </template>
               </td>
               <td colspan="2" v-bind:class="{ sel_row: oneRow['currSelected'] }">
-                <template v-if="oneRow['kbObj']">
+                <template v-if="oneRow['kbObj'] && oneRow.kbObj.positive">
                   <div style="height: 1.8em; position: relative; text-align: center;"
                     v-bind:class="getPosColor(oneRow.kbObj.positive.positive_reach_len)">
                     <template v-if="oneRow.hasOwnProperty('quant_obj') && oneRow['quant_obj']['max_hitted']">
@@ -964,7 +964,7 @@
                 </template>
               </td>
               <td v-bind:class="{ sel_row: oneRow['currSelected'] }" style="padding-left: 2px !important; padding-right: 2px !important;">
-                <template v-if="oneRow['kbObj']">
+                <template v-if="oneRow['kbObj'] && oneRow.kbObj.positive">
                   <div style="height: 1.8em; position: relative; text-align: center;"
                     v-bind:class="getPosColor(oneRow.kbObj.positive.positive_reach_len)">
                     <template v-if="oneRow.hasOwnProperty('quant_obj') && oneRow['quant_obj']['max_hitted']">

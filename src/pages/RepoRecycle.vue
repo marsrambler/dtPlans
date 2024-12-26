@@ -169,7 +169,7 @@ import {
   infoPaneHeight,
   infoTabContTopPos
 } from "../lib/commonUtils.js"
-import {ref, watch, nextTick, computed, onUpdated, onMounted} from "vue";
+import {ref, watch, nextTick, computed, onUpdated, onMounted, onActivated, onDeactivated} from "vue";
 import {storeToRefs} from 'pinia'
 import {useZsRepoStore} from "../store/zsrepoStore.js";
 import {useZskbStore} from '../store/zskbStore';
@@ -464,6 +464,22 @@ function containerResized(param0, param1) {
   console.log("receiver container resized: ", param0, param1)
   infoPaneHeight.value = param0
 }
+
+function autoRelayoutWnd() {
+  let _uiElem = document.getElementById("flex_container_wnd");
+  if (!_uiElem) {
+    console.warn("RepoRecycle.vue autoRelayoutWnd failed, get flex_container_wnd is null, should use timer?")
+    return
+  }
+  console.log("RepoRecycle.vue autoRelayoutWnd enter, get flex_container_wnd successfully")
+  let _height = _uiElem.scrollHeight ? _uiElem.scrollHeight : _uiElem.clientHeight ? _uiElem.clientHeight : _uiElem.offsetHeight
+  let remPx = parseInt(getComputedStyle(document.documentElement).fontSize)
+  infoPaneHeight.value = _height / remPx
+}
+
+onActivated( () => {
+  autoRelayoutWnd()
+})
 
 </script>
 
