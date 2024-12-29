@@ -17,18 +17,32 @@ async function getSyncStatus() {
     }    
 }
 
-async function runKanban() {
+async function runKanban(for_run) {
     try {
-        const response = await axiosInst.post("dt-plans/api/run-kanban", {})
+        const response = await axiosInst.post("dt-plans/api/run-kanban", {
+            'for_run': for_run
+        })
         if (response.status == 200) {
-            useApiStore().pop_alert_msg("发送运行看板成功")
+            if (for_run) {
+                useApiStore().pop_alert_msg("发送运行看板成功")
+            } else {
+                useApiStore().pop_alert_msg("发送保存看板成功")
+            }
             return true
         } else {
-            console.error("run kanban failed: ", response)
+            if (for_run) {
+                console.error("run kanban failed: ", response)
+            } else {
+                console.error("save kanban failed: ", response)
+            }
             return false
         }
     } catch (error) {
-        console.log("run kanban failed: ", error)
+        if (for_run) {
+            console.log("run kanban failed: ", error)
+        } else {
+            console.log("save kanban failed: ", error)
+        }
         return false
     }
 }

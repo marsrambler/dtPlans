@@ -27,8 +27,12 @@
               style="background-color: black; padding: 0;">
               <li>
                 <button style="width: 100%; border-radius: 0;" type="button" class="btn btn-secondary"
-                  @click="runKanban4ui();">运行看板</button>
+                  @click="runKanban4ui(true);">运行看板</button>
               </li>
+              <li>
+                <button style="width: 100%; border-radius: 0;" type="button" class="btn btn-secondary"
+                  @click="runKanban4ui(false);">保存看板</button>
+              </li>              
               <li>
                 <button style="width: 100%; border-radius: 0;" type="button" class="btn btn-secondary"
                   @click="syncKanban4ui();">同步看板</button>
@@ -277,10 +281,15 @@ onMounted(async () => {
   server_status_objs.value = await getSyncStatus()
 })
 
-function runKanban4ui() {
+function runKanban4ui(for_run=true) {
   cfmDlgTitle.value = "确认"
-  cfmDlgCont.value = "要在服务器上运行看板吗？"
-  cfmDlgType.value = "run kanban"
+  if (for_run) {
+    cfmDlgCont.value = "要在服务器上运行看板吗？"
+    cfmDlgType.value = "run kanban"
+  } else {
+    cfmDlgCont.value = "要在服务器上保存看板吗？"
+    cfmDlgType.value = "save kanban"
+  }
   dlgController.value.cfmDlg.show()
 }
 
@@ -300,7 +309,9 @@ function syncCluster4ui() {
 
 function runOrSyncKanban() {
   if (cfmDlgType.value === "run kanban") {
-    runKanban()
+    runKanban(true)
+  } else if (cfmDlgType.value === "save kanban") {
+    runKanban(false)
   } else if (cfmDlgType.value === "sync kanban") {
     syncKanban()
   } else if (cfmDlgType.value === "sync cluster") {
