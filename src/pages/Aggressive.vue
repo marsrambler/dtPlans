@@ -1257,85 +1257,101 @@ async function saveAggressiveBase() {
 }
 
 .manager_above_year_3_with_change {
-  border: dashed 3px black;
+  /* border: dashed 3px black; */
+  padding: 3px;
   background-color: purple;
   color: white;
 }
 .manager_above_year_3_without_change {
-  border: solid 3px white;
+  /* border: solid 3px white; */
+  padding: 3px;
   background-color: purple;
   color: white;
 }
 .manager_above_year_2_with_change {
-  border: dashed 3px black;
+  /* border: dashed 3px black; */
+  padding: 3px;
   background-color: red;
   color: white;
 }
 .manager_above_year_2_without_change {
-  border: solid 3px white;
+  /* border: solid 3px white; */
+  padding: 3px;
   background-color: red;
   color: white;
 }
 .manager_above_year_1_with_change {
-  border: dashed 3px black;
+  /* border: dashed 3px black; */
+  padding: 3px;
   background-color: orange;
   color: white;
 }
 .manager_above_year_1_without_change {
-  border: solid 3px white;
+  /* border: solid 3px white; */
+  padding: 3px;
   background-color: orange;
   color: white;
 }
 .manager_above_year_half_with_change {
-  border: dashed 3px black;
+  /* border: dashed 3px black; */
+  padding: 3px;
   background-color: pink;
   color: white;
 }
 .manager_above_year_half_without_change {
-  border: solid 3px white;
+  /* border: solid 3px white; */
+  padding: 3px;
   background-color: pink;
   color: white;
 }
 .manager_above_year_0_with_change {
-  border: dashed 3px black;
+  /* border: dashed 3px black; */
+  padding: 3px;
   color: #08c;
 }
 .manager_above_year_0_without_change {
-  border: solid 3px white;
+  /* border: solid 3px white; */
+  padding: 3px;
   color: #08c;
 }
 
 .emtpy_already_buy {
   cursor: pointer;
-  border: solid 2px white;
+  padding: 2px;
+  /* border: solid 2px white; */
 }
 .small_already_buy {
   cursor: pointer;
-  border: solid 2px #FFCCCC;
+  /* border: solid 2px #FFCCCC; */
+  padding: 2px;
   background-color: #FFCCCC;
   color: white;
 }
 .middle_already_buy {
   cursor: pointer;
-  border: solid 2px #FF9966;
+  /* border: solid 2px #FF9966; */
+  padding: 2px;
   background-color: #FF9966;
   color: white;
 }
 .big_already_buy {
   cursor: pointer;
-  border: solid 2px #FF6666;
+  /* border: solid 2px #FF6666; */
+  padding: 2px;
   background-color: #FF6666;
   color: white;
 }
 .very_big_already_buy {
   cursor: pointer;
-  border: solid 2px red;
+  /* border: solid 2px red; */
+  padding: 2px;
   background-color: red;
   color: white;
 }
 .extr_big_already_buy {
   cursor: pointer;
-  border: solid 2px purple;
+  /* border: solid 2px purple; */
+  padding: 2px;
   background-color: purple;
   color: white;
 }
