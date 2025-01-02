@@ -16,6 +16,10 @@ table {
     table-layout: fixed !important;
 }
 
+.form-check-input {
+    margin-top: 0.3rem !important;
+}
+
 #op_pane, .op_pane {
     background: linear-gradient(to top, rgba(128, 128, 128, 0.5) 0%, rgba(51, 51, 51, 0.6) 50%, rgba(128, 128, 128, 0.5) 100%);
     color: whitesmoke;

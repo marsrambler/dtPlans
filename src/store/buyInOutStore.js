@@ -16,6 +16,7 @@ export const useBuyInOutStore = defineStore('buyInOut-store', () => {
     const buyOrSoldObj = ref({})
     const fund_buy_ratio_config = ref({})
     const curr_compose_name = ref('all')
+    const bulk_set_obj = ref(null)
 
     // action
     async function getAllBuyoutRecords() {
@@ -717,6 +718,52 @@ export const useBuyInOutStore = defineStore('buyInOut-store', () => {
         }
     }
 
+    async function getBulkSetMode() {
+        try {
+            const response = await axiosInst.get("api/get-bulk-set")
+            if (response.status == 200) {
+                bulk_set_obj.value = await response.data;
+            } else {
+                console.error("axios get bulk set failed: ", response)
+            }
+        } catch (error) {
+            console.log("axios get bulk set error: ", error)
+        }
+    }
+
+    async function enterBulkSetMode(_mode) {
+        try {
+            const response = await axiosInst.post("api/enter-bulk-set-mode", {
+                'type': _mode
+            })
+            if (response.status == 200) {
+                await response.data
+                useApiStore().pop_alert_msg("进入组合调整成功")
+                await getBulkSetMode()
+            } else {
+                console.error("axios enterBulkSetMode failed: ", response)
+            }
+        } catch (error) {
+            console.log("axios enterBulkSetMode error", error)
+        }
+    }
+
+    async function leaveBulkSetMode() {
+        try {
+            const response = await axiosInst.post("api/leave-bulk-set-mode", {
+            })
+            if (response.status == 200) {
+                await response.data
+                useApiStore().pop_alert_msg("退出组合调整成功")
+                await getBulkSetMode()
+            } else {
+                console.error("axios leaveBulkSetMode failed: ", response)
+            }
+        } catch (error) {
+            console.log("axios leaveBulkSetMode error", error)
+        }
+    }
+
     return {
         buyoutRecords,
         buyin_records,
@@ -727,6 +774,7 @@ export const useBuyInOutStore = defineStore('buyInOut-store', () => {
         buyOrSoldObj,
         fund_buy_ratio_config,
         curr_compose_name,
+        bulk_set_obj,
         getAllBuyoutRecords,
         fundCanBeBuyOut,
         soldComposeFixedHold,
@@ -740,7 +788,10 @@ export const useBuyInOutStore = defineStore('buyInOut-store', () => {
         getContStartStop,
         addBuyOrSoldNote,
         getBuyOrSoldNote,
-        getFundAndBuyRatioConfig
+        getFundAndBuyRatioConfig,
+        getBulkSetMode,
+        enterBulkSetMode,
+        leaveBulkSetMode
     }
 
 });

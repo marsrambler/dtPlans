@@ -40,7 +40,19 @@
               <li>
                 <button style="width: 100%; border-radius: 0;" type="button" class="btn btn-secondary"
                   @click="syncCluster4ui();">同步集群</button>
-              </li>              
+              </li>
+              <template v-if="bulk_set_obj && bulk_set_obj['mode'] && bulk_set_obj['mode'] == 'empty'">
+                <li>
+                  <button style="width: 100%; border-radius: 0;" type="button" class="btn btn-secondary"
+                    @click="enterBulkSetMode('compose_adj');">进入批调</button>
+                </li>                  
+              </template>
+              <template v-if="bulk_set_obj && bulk_set_obj['mode'] && bulk_set_obj['mode'] != 'empty'">
+                <li>
+                  <button style="width: 100%; border-radius: 0;" type="button" class="btn btn-secondary"
+                    @click="leaveBulkSetMode();">离开批调</button>
+                </li>                    
+              </template>                            
             </ul>
           </li>
         </ul>
@@ -187,7 +199,8 @@ const {rtRates} = storeToRefs(zskbStore)
 const composeStore = useComposeStore()
 const { totMoney, totPositiveNum, totPoleNum, totEarnMoney, totEarnRate, totSetBuy, totPlanBuy, diffBuySet, totInitBuy } = storeToRefs(composeStore)
 const buyInOutStore = useBuyInOutStore()
-const { fund_buy_ratio_config, curr_compose_name } = storeToRefs(buyInOutStore)
+const { fund_buy_ratio_config, curr_compose_name, bulk_set_obj } = storeToRefs(buyInOutStore)
+const {getBulkSetMode, enterBulkSetMode, leaveBulkSetMode} = buyInOutStore
 
 const fund_limit_str = ref("")
 const fund_buyout_distance = ref(null)
