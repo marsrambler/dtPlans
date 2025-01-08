@@ -398,6 +398,8 @@ watch([zsRepoObjs, zskbObjs, zsRepoHides, zsRepoExcludes, zsRepoBases, showHides
       elem['indexUrl'] = _searches[0]['indexUrl']
       if (_searches[0].hasOwnProperty("specialSpider") && _searches[0]['specialSpider'] === "v2") {
         elem['specialSpider'] = "v2"
+      } else if (_searches[0].hasOwnProperty("specialSpider") && _searches[0]['specialSpider'] === "v99") {
+        elem['specialSpider'] = "v99"
       } else {
         elem['specialSpider'] = "v1"
       }

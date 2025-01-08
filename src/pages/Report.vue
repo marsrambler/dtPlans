@@ -249,7 +249,17 @@
               <div>追:&nbsp;{{ oneRow.statistics?.append_fixed_times }}</div>              
             </td>
             <td style="line-height: 1.2rem;" v-bind:class="{ sel_row: oneRow['currSelected'] }">
-              <div class="text-bg-danger">卖:&nbsp;{{ oneRow.statistics?.last_sold_profit?.currStatistics?.tot_profit_perc_str }}</div>
+              <template v-if="oneRow.statistics && oneRow.statistics.last_sold_profit && oneRow.statistics.last_sold_profit.currStatistics && oneRow.statistics.last_sold_profit.currStatistics.tot_profit_perc_str">
+                <template v-if="oneRow.statistics.last_sold_profit.currStatistics.tot_profit_perc_str[0] == '-'">
+                  <div class="text-bg-success">卖:&nbsp;{{ oneRow.statistics?.last_sold_profit?.currStatistics?.tot_profit_perc_str }}</div>
+                </template>
+                <template v-else>
+                  <div class="text-bg-danger">卖:&nbsp;{{ oneRow.statistics?.last_sold_profit?.currStatistics?.tot_profit_perc_str }}</div>
+                </template>                
+              </template>
+              <template v-else>
+                <div>卖:&nbsp;{{ oneRow.statistics?.last_sold_profit?.currStatistics?.tot_profit_perc_str }}</div>
+              </template>
               <template v-if="oneRow.statistics &&
                 oneRow.statistics.last_sold_wide_profit &&
                 oneRow.statistics.last_sold_wide_profit.length > 4">
@@ -261,7 +271,17 @@
               </template>
             </td>
             <td style="line-height: 1.2rem;" v-bind:class="{ sel_row: oneRow['currSelected'] }">
-              <div>卖:&nbsp;{{ oneRow.statistics?.latest_price_date_profit?.tot_profit_perc_str }}</div>
+              <template v-if="oneRow.statistics && oneRow.statistics.latest_price_date_profit && oneRow.statistics.latest_price_date_profit.tot_profit_perc_str">
+                <template v-if="oneRow.statistics.latest_price_date_profit.tot_profit_perc_str[0] == '-'">
+                  <div class="text-bg-success">卖:&nbsp;{{ oneRow.statistics?.latest_price_date_profit?.tot_profit_perc_str }}</div>
+                </template>
+                <template v-else>
+                  <div class="text-bg-danger">卖:&nbsp;{{ oneRow.statistics?.latest_price_date_profit?.tot_profit_perc_str }}</div>
+                </template>                
+              </template>
+              <template v-else>
+                <div>卖:&nbsp;{{ oneRow.statistics?.latest_price_date_profit?.tot_profit_perc_str }}</div>
+              </template>
               <template v-if="oneRow.statistics &&
                 oneRow.statistics.latest_price_date_wide_profit &&
                 oneRow.statistics.latest_price_date_wide_profit.length > 4">

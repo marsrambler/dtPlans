@@ -728,7 +728,7 @@
                   </template>
                   <template v-if="oneRow['kbObj']">
                     <span style="font-size: 1rem; font-style: italic;text-decoration: underline;">
-                      {{ oneRow.kbObj.statistics.last_perc_date_str }}
+                      {{ oneRow?.kbObj?.statistics?.last_perc_date_str }}
                     </span>
                   </template>
                 </div>
@@ -760,7 +760,7 @@
                   <div>{{ oneRow.fund_name }}&nbsp;
                     <template v-if="oneRow['kbObj']">
                       <span style="font-size: 1rem; font-style: italic;text-decoration: underline;">
-                        {{ oneRow.kbObj.statistics.fund_perc_len }}
+                        {{ oneRow.kbObj?.statistics?.fund_perc_len }}
                       </span>
                     </template>
                     <template v-if="oneRow['last_sold_date']">
@@ -775,7 +775,7 @@
                   </div>
                 </template>
                 <div style="margin-top:8px;">
-                  <template v-if="oneRow['kbObj']">
+                  <template v-if="oneRow['kbObj'] && oneRow.kbObj.statistics">
                     <span v-bind:class="getCardStyle(oneRow.kbObj.statistics.day_200_thres)">&nbsp;</span>
                     <span v-bind:class="getCardStyle(oneRow.kbObj.statistics.day_300_thres)">&nbsp;</span>
                     <span v-bind:class="getCardStyle(oneRow.kbObj.statistics.day_400_thres)">&nbsp;</span>
@@ -1021,7 +1021,7 @@
                 </template>
               </td>
               <td style="text-align: center;" v-bind:class="{ sel_row: oneRow['currSelected'] }">
-                <template v-if="oneRow['kbObj']">
+                <template v-if="oneRow['kbObj'] && oneRow.kbObj.positive">
                   <div style="height:1.8em;">
                     <span v-bind:class="getHitStyle(oneRow.kbObj.positive.day_5_positive_reach)">&nbsp;</span>
                     <span v-bind:class="getHitStyle(oneRow.kbObj.positive.day_10_positive_reach)">&nbsp;</span>
