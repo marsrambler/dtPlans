@@ -1619,6 +1619,23 @@
       </div>
     </div>
   </div>
+  <template v-if="composeTipsMapObj[compose_name] && composeTipsMapObj[compose_name]['tip'].trim() != '' && composeTipsMapObj[compose_name]['show_tip']">
+    <div :style="{'position': 'fixed',
+      'top': tabContTopPos + 'rem',
+      'width': '100%',
+      'height': '1.2rem',
+      'background-color': 'cyan',
+      'color': 'red',
+      'opacity': '0.8',
+      'font-size': '0.85rem',
+      'font-weight': 'bold',
+      'padding-left': '0.5rem',
+      'letter-spacing': '5px'}">
+      {{ composeTipsMapObj[compose_name]['tip'] }}
+      <span style="cursor: pointer; margin-left: 1rem; color: blue; font-size: 0.85rem;" 
+      @click="composeTipsMapObj[compose_name]['show_tip'] = false;">关闭</span>
+    </div>
+  </template> 
 </template>
 
 <script setup>
@@ -1647,8 +1664,8 @@ import { useRoute } from 'vue-router'
 
 const route = useRoute()
 const composeStore = useComposeStore()
-const { composeObjs, compose_name, fixedHoldObjs, fixedHoldObjs_full, totMoney, totPositiveNum, totPoleNum, totEarnMoney, totEarnRate, totSetBuy, totPlanBuy, diffBuySet, totInitBuy, noteObjs } = storeToRefs(composeStore)
-const { getAllCompose, setComposeProperty, setComposeSoldDate, getComposeFixedHold, addOrRemoveCompose, getFundNotes4Edit, updateFundNotes, removeFundNotes } = composeStore
+const { composeObjs, compose_name, fixedHoldObjs, fixedHoldObjs_full, totMoney, totPositiveNum, totPoleNum, totEarnMoney, totEarnRate, totSetBuy, totPlanBuy, diffBuySet, totInitBuy, noteObjs, composeTipsMapObj } = storeToRefs(composeStore)
+const { getAllCompose, setComposeProperty, setComposeSoldDate, getComposeFixedHold, addOrRemoveCompose, getFundNotes4Edit, updateFundNotes, removeFundNotes, getComposeTips } = composeStore
 const buyInOutStore = useBuyInOutStore()
 const { buyoutRecords, wav_reports, buyout_future_objs, contStartStopObj, buyOrSoldObj, fund_buy_ratio_config, curr_compose_name} = storeToRefs(buyInOutStore)
 const { getAllBuyoutRecords, soldComposeFixedHold, buyOutFixedFund, calculatePlanMoney, buyOutFixedFundOfToday, getAllBuyoutFutureRecords, addBuyOrSoldNote, getBuyOrSoldNote } = buyInOutStore

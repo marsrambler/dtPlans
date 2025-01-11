@@ -22,6 +22,7 @@ export const useComposeStore = defineStore('compose-store', () => {
     const totInitBuy = ref(0)
     const noteObjs = ref([])
     const noteReportObjs = ref([])
+    const composeTipsMapObj = ref({})
 
     // action
     async function getAllCompose() {
@@ -262,6 +263,24 @@ export const useComposeStore = defineStore('compose-store', () => {
         }
     }
 
+    // action
+    async function getComposeTips() {
+        composeTipsMapObj.value = new Object
+        try {
+            const response = await axiosInst.get("api/get-compose-tips")
+            if (response.status == 200) {
+                let _tmp_objs = await response.data;
+                _tmp_objs['tips'].forEach(element => {
+                    composeTipsMapObj.value[element['compose']] = element
+                });
+            } else {
+                console.error("axios get all compose tips failed: ", response) 
+            }
+        } catch (error) {
+            console.log("axios get all compose tips error: ", error)
+        }
+    }
+
     return {
         composeObjs,
         fixedHoldObjs,
@@ -278,6 +297,7 @@ export const useComposeStore = defineStore('compose-store', () => {
         totInitBuy,
         noteObjs,
         noteReportObjs,
+        composeTipsMapObj,
         getAllCompose,
         addOrRemoveCompose,
         setComposeProperty,
@@ -287,6 +307,7 @@ export const useComposeStore = defineStore('compose-store', () => {
         getFundNotes4Edit,
         getFundNotes4Report,
         updateFundNotes,
-        removeFundNotes
+        removeFundNotes,
+        getComposeTips
     }
 });
