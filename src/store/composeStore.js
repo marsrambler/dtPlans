@@ -105,7 +105,7 @@ export const useComposeStore = defineStore('compose-store', () => {
         }
     }
 
-    async function getComposeFixedHold(_compose_name) {
+    function getComposeFixedHold(_compose_name) {
         if (!composeObjs.value || composeObjs.value.length === 0) {
             fixedHoldObjs.value = []
             return;
@@ -157,22 +157,26 @@ export const useComposeStore = defineStore('compose-store', () => {
             _req_qry.onsuccess = function (event) {
                 let _data_objs = event.target.result.content;
                 db.close();
-                //console.log("*** reportStore ***, query success: ", _data_objs)
-                fixedHoldObjs_full.value = _data_objs           
+                //console.log("*** composeStore ***, query success: ", _data_objs)
+                fixedHoldObjs_full.value = _data_objs
+                fixedHoldObjs.value = fixedHoldObjs_full.value           
             }
             _req_qry.onerror = function (event) {
-                console.error("*** reportStore *** query data base failed: ", _storage_name, event);
+                console.error("*** composeStore *** query data base failed: ", _storage_name, event);
                 db.close();
                 fixedHoldObjs_full.value = []
+                fixedHoldObjs.value = fixedHoldObjs_full.value
             }
         };
         request.onerror = function(event) {
-            console.error("*** reportStore *** open data base failed: ", _storage_name, event);
+            console.error("*** composeStore *** open data base failed: ", _storage_name, event);
             fixedHoldObjs_full.value = []
+            fixedHoldObjs.value = fixedHoldObjs_full.value
         };
         request.onupgradeneeded = function(event) {
-            console.error("*** reportStore *** onupgradeneeded: ", _storage_name, event);
+            console.error("*** composeStore *** onupgradeneeded: ", _storage_name, event);
             fixedHoldObjs_full.value = []
+            fixedHoldObjs.value = fixedHoldObjs_full.value
         }; 
     }
 

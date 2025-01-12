@@ -188,7 +188,11 @@
 
   <div style="position: relative;">
     <table id="cust_table_content" class="table table-bordered cust_table_cls"
-      :style="{ 'position': 'absolute', 'top': tabContTopPos + 'rem', 'min-width': minPaneWidth + 'rem' }">
+      :style="{ 'position': 'absolute', 
+          'top': (composeTipsMapObj[compose_name] && 
+                  composeTipsMapObj[compose_name]['tip'].trim() != '' && 
+                  composeTipsMapObj[compose_name]['show_tip'])? tabContTopPos + 1.5 + 'rem' : tabContTopPos + 'rem', 
+          'min-width': minPaneWidth + 'rem' }">
       <thead style="">
         <tr>
           <th :style="{ 'width': colWidMap['col_1'] + 'rem' }"></th>
@@ -1623,16 +1627,15 @@
     <div :style="{'position': 'fixed',
       'top': tabContTopPos + 'rem',
       'width': '100%',
-      'height': '1.2rem',
-      'background-color': 'cyan',
+      'height': '1.5rem',
+      'background-color': 'gold',
       'color': 'red',
-      'opacity': '0.8',
-      'font-size': '0.85rem',
       'font-weight': 'bold',
       'padding-left': '0.5rem',
-      'letter-spacing': '5px'}">
+      'letter-spacing': '5px',
+      'line-height': '1.6'}">
       {{ composeTipsMapObj[compose_name]['tip'] }}
-      <span style="cursor: pointer; margin-left: 1rem; color: blue; font-size: 0.85rem;" 
+      <span style="cursor: pointer; margin-left: 1rem; color: blue;" 
       @click="composeTipsMapObj[compose_name]['show_tip'] = false;">关闭</span>
     </div>
   </template> 
@@ -1723,14 +1726,20 @@ const colWidMapSub = {
 
 //const compose_name = ref('all')
 
-watch([compose_name, fixedHoldObjs_full], () => {
+watch([compose_name, composeObjs, fixedHoldObjs_full], () => {
   if (!fixedHoldObjs_full.value || fixedHoldObjs_full.value.length === 0) {
-    console.warn("**** fixedHoldObjs_full is empty, compose-hold-buyin worker is inprogress?")
+    console.warn("**** compose.vue fixedHoldObjs_full is empty, compose-hold-buyin worker is inprogress?")
+    return;
+  }
+  if (!composeObjs || !composeObjs.value || composeObjs.value.length === 0) {
+    console.warn("**** compose.vue bypass getComposeFixedHold as composeObjs is empty");
     return;
   }
   getComposeFixedHold(compose_name.value)
+  console.log("*** compose.vue getComposeFixedHold result: ", fixedHoldObjs.value.length, " compose_name: ", compose_name.value)
   curr_compose_name.value = compose_name.value
-}, { immediate: true })
+}/*, { immediate: true }*/)
+
 
 const composeViewObjs = ref([])
 const show4SoldOnly = ref(false)
@@ -1810,74 +1819,37 @@ function processLossFlag4Elem(elem) {
   }
 }
 
-watch([composeObjs, compose_name, fixedHoldObjs, buyoutRecords, noteObjs, show4SoldOnly, showPauseOnly, showAdjustOnly, showPoleOnly, showNoteOnly], () => {
-  if (composeObjs && composeObjs.value && composeObjs.value.length > 0) {
-    composeObjs.value.forEach(elem => {
-      if (elem['compose_objs'] && elem['compose_objs'].length > 0) {
-        elem['compose_objs'].forEach(_obj => {
-          _obj['show_temp_quant_tip'] = false
-          _obj['write_note_date'] = getTodayStr()
-          _obj['write_note_perc'] = ''
-          _obj['write_note_comments'] = ''
-          _obj['note_objs'] = []
-          _obj['curr_note_idx'] = -1
-        })
-      }
-    })
+watch([composeObjs, compose_name, fixedHoldObjs, buyoutRecords, noteObjs, show4SoldOnly, showPauseOnly, showAdjustOnly, showPoleOnly, showNoteOnly], () => {  
+  if (!composeObjs || !composeObjs.value || composeObjs.value.length === 0) {
+    console.warn("compose.vue bypass watch as composeObjs is empty")
+    return
   }
-  composeViewObjs.value = []
-  if (composeObjs && composeObjs.value && composeObjs.value.length > 0) {
-    if (compose_name.value === 'all') {
-      composeObjs.value.forEach(item => {
-        if (!show4SoldOnly.value && !showPauseOnly.value && !showAdjustOnly.value && !showPoleOnly.value && !showNoteOnly.value) {
-          composeViewObjs.value.push(...item['compose_objs'])
-        } else {
-          item['compose_objs'].forEach(_obj => {
-            let _added_in = false
-            if (show4SoldOnly.value) {
-              if (_obj['lost_in_aggressive'] || _obj['lost_in_dtconvg'] || (_obj.hasOwnProperty('money') && _obj['money'] === -2)) {
-                composeViewObjs.value.push(_obj)
-                _added_in = true
-              }
-            }
-            if (showPauseOnly.value && !_added_in) {
-              if ((_obj.hasOwnProperty('money') && _obj['money'] === -1) &&
-                (!_obj['lost_in_aggressive'] && !_obj['lost_in_dtconvg'])) {
-                composeViewObjs.value.push(_obj)
-                _added_in = true
-              }
-            }
-            if (showAdjustOnly.value && !_added_in) {
-              if (_obj.hasOwnProperty('money') && _obj.hasOwnProperty('adjust_money')) {
-                if (_obj['money'] != null && _obj['adjust_money'] != null) {
-                  if (Math.abs(_obj['money'] - _obj['adjust_money']) >= 3) {
-                    composeViewObjs.value.push(_obj)
-                    _added_in = true
-                  }
-                }
-              }
-            }
-            if (showPoleOnly.value && !_added_in) {
-              if (_obj.hasOwnProperty("quant_obj") && _obj['quant_obj']['hitted']) {
-                composeViewObjs.value.push(_obj)
-                _added_in = true
-              }
-            }
-            if (showNoteOnly.value && !_added_in) {
-              if (noteObjs.value.hasOwnProperty(_obj['fund_id']) && noteObjs.value[_obj['fund_id']].hasOwnProperty('note_objs')
-                  && noteObjs.value[_obj['fund_id']]['note_objs'].length > 0) {
-                composeViewObjs.value.push(_obj)
-              }
-            }
-          })
-        }
+  if (!fixedHoldObjs || !fixedHoldObjs.value || fixedHoldObjs.value.length === 0) {
+    console.warn("compose.vue bypass watch as fixedHoldObjs is empty")
+    return
+  }
+  console.log("compose.vue watch fixedHoldObjs.value size: ", fixedHoldObjs.value.length);
+
+  composeObjs.value.forEach(elem => {
+    if (elem['compose_objs'] && elem['compose_objs'].length > 0) {
+      elem['compose_objs'].forEach(_obj => {
+        _obj['show_temp_quant_tip'] = false
+        _obj['write_note_date'] = getTodayStr()
+        _obj['write_note_perc'] = ''
+        _obj['write_note_comments'] = ''
+        _obj['note_objs'] = []
+        _obj['curr_note_idx'] = -1
       })
-    } else {
+    }
+  })
+
+  composeViewObjs.value = []
+  if (compose_name.value === 'all') {
+    composeObjs.value.forEach(item => {
       if (!show4SoldOnly.value && !showPauseOnly.value && !showAdjustOnly.value && !showPoleOnly.value && !showNoteOnly.value) {
-        composeViewObjs.value = composeObjs.value.find(item => item['compose_name'] === compose_name.value)['compose_objs']
+        composeViewObjs.value.push(...item['compose_objs'])
       } else {
-        let _match_composes = composeObjs.value.find(item => item['compose_name'] === compose_name.value)
-        _match_composes['compose_objs'].forEach(_obj => {
+        item['compose_objs'].forEach(_obj => {
           let _added_in = false
           if (show4SoldOnly.value) {
             if (_obj['lost_in_aggressive'] || _obj['lost_in_dtconvg'] || (_obj.hasOwnProperty('money') && _obj['money'] === -2)) {
@@ -1903,10 +1875,10 @@ watch([composeObjs, compose_name, fixedHoldObjs, buyoutRecords, noteObjs, show4S
             }
           }
           if (showPoleOnly.value && !_added_in) {
-              if (_obj.hasOwnProperty("quant_obj") && _obj['quant_obj']['hitted']) {
-                composeViewObjs.value.push(_obj)
-                _added_in = true
-              }
+            if (_obj.hasOwnProperty("quant_obj") && _obj['quant_obj']['hitted']) {
+              composeViewObjs.value.push(_obj)
+              _added_in = true
+            }
           }
           if (showNoteOnly.value && !_added_in) {
             if (noteObjs.value.hasOwnProperty(_obj['fund_id']) && noteObjs.value[_obj['fund_id']].hasOwnProperty('note_objs')
@@ -1916,10 +1888,55 @@ watch([composeObjs, compose_name, fixedHoldObjs, buyoutRecords, noteObjs, show4S
           }
         })
       }
+    })
+  } else {
+    if (!show4SoldOnly.value && !showPauseOnly.value && !showAdjustOnly.value && !showPoleOnly.value && !showNoteOnly.value) {
+      composeViewObjs.value = composeObjs.value.find(item => item['compose_name'] === compose_name.value)['compose_objs']
+    } else {
+      let _match_composes = composeObjs.value.find(item => item['compose_name'] === compose_name.value)
+      _match_composes['compose_objs'].forEach(_obj => {
+        let _added_in = false
+        if (show4SoldOnly.value) {
+          if (_obj['lost_in_aggressive'] || _obj['lost_in_dtconvg'] || (_obj.hasOwnProperty('money') && _obj['money'] === -2)) {
+            composeViewObjs.value.push(_obj)
+            _added_in = true
+          }
+        }
+        if (showPauseOnly.value && !_added_in) {
+          if ((_obj.hasOwnProperty('money') && _obj['money'] === -1) &&
+            (!_obj['lost_in_aggressive'] && !_obj['lost_in_dtconvg'])) {
+            composeViewObjs.value.push(_obj)
+            _added_in = true
+          }
+        }
+        if (showAdjustOnly.value && !_added_in) {
+          if (_obj.hasOwnProperty('money') && _obj.hasOwnProperty('adjust_money')) {
+            if (_obj['money'] != null && _obj['adjust_money'] != null) {
+              if (Math.abs(_obj['money'] - _obj['adjust_money']) >= 3) {
+                composeViewObjs.value.push(_obj)
+                _added_in = true
+              }
+            }
+          }
+        }
+        if (showPoleOnly.value && !_added_in) {
+            if (_obj.hasOwnProperty("quant_obj") && _obj['quant_obj']['hitted']) {
+              composeViewObjs.value.push(_obj)
+              _added_in = true
+            }
+        }
+        if (showNoteOnly.value && !_added_in) {
+          if (noteObjs.value.hasOwnProperty(_obj['fund_id']) && noteObjs.value[_obj['fund_id']].hasOwnProperty('note_objs')
+              && noteObjs.value[_obj['fund_id']]['note_objs'].length > 0) {
+            composeViewObjs.value.push(_obj)
+          }
+        }
+      })
     }
   }
 
-  if (fixedHoldObjs.value.length > 0 && buyoutRecords.value.length > 0) {
+
+  if (buyoutRecords.value.length > 0) {
     fixedHoldObjs.value.forEach(item => {
       if (item['hold_objs'] && item['hold_objs'].length > 0) {
         item['hold_objs'].forEach(oneHold => {
@@ -1934,7 +1951,7 @@ watch([composeObjs, compose_name, fixedHoldObjs, buyoutRecords, noteObjs, show4S
     })
   }
 
-  if (fixedHoldObjs.value.length > 0 && composeViewObjs.value.length > 0) {
+  if (composeViewObjs.value.length > 0) {
     composeViewObjs.value.forEach(item => {
       item['fixedHoldObj'] = fixedHoldObjs.value.find(elem => elem['fund_id'] === item['fund_id'])
     })

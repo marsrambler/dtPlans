@@ -42,8 +42,8 @@ window.addEventListener("message", (e) => {
   } else if (e.data === 'dtPlan_fixed-hold-buyin') {
     getBigPoolFixedHold();
   } else if (e.data === 'dtPlan_compose-hold-buyin') {
-    getAllComposeFixedHoldFromWorker();
     getComposeFixedHoldFromWorker();
+    getAllComposeFixedHoldFromWorker();
   } else {
     console.log("****  has not implemented the receiver for: ", e.data)
   }
