@@ -47,6 +47,23 @@ async function runKanban(for_run) {
     }
 }
 
+async function runReport() {
+    try {
+        const response = await axiosInst.post("dt-plans/api/run-report", {
+        })
+        if (response.status == 200) {
+            useApiStore().pop_alert_msg("发送运行报告成功")
+            return true
+        } else {
+            console.error("run report failed: ", response)
+            return false
+        }
+    } catch (error) {
+        console.log("run report failed: ", error)
+        return false
+    }
+}
+
 async function syncKanban() {
     try {
         const response = await axiosInst.get("api/sync-server")
@@ -82,6 +99,7 @@ async function syncCluster() {
 export {
     getSyncStatus,
     runKanban,
+    runReport,
     syncKanban,
     syncCluster
 }

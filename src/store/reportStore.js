@@ -789,6 +789,26 @@ export const useReportStore = defineStore('report-store', () => {
                     elem['tranStateObj']['compose_plan'] === 'gdngoat');
                 dynRecordObjs.value = _filterObjs
             }
+        } else if (report_select.value === 'only_others') {
+            if (onlyShowLatest.value) {
+                let _filterObjs = dynRecordObjs_latest.value.filter((elem) => elem['tranStateObj'] && 
+                    ( 
+                        (elem['tranStateObj'].hasOwnProperty('compose_plan') && 
+                        elem['tranStateObj']['compose_plan'] === '') || 
+                        (!elem['tranStateObj'].hasOwnProperty('compose_plan') || 
+                        !elem['tranStateObj']['compose_plan'])
+                    ));
+                dynRecordObjs.value = _filterObjs
+            } else {
+                let _filterObjs = dynRecordObjs_full.value.filter((elem) => elem['tranStateObj'] && 
+                    ( 
+                        (elem['tranStateObj'].hasOwnProperty('compose_plan') && 
+                        elem['tranStateObj']['compose_plan'] === '') || 
+                        (!elem['tranStateObj'].hasOwnProperty('compose_plan') || 
+                        !elem['tranStateObj']['compose_plan'])
+                    ));
+                dynRecordObjs.value = _filterObjs
+            }
         }
         reportObjsReloaded.value = true;
     })

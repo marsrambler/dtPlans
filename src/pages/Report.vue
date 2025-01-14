@@ -499,7 +499,7 @@
                           </span>
                       </template>
                       <template v-else>
-                          <span class="badge bg-dark text-bg-success big_badge para_info">
+                          <span class="badge bg-dark text-bg-success big_badge para_info" style="font-size:0.7rem !important;padding:1px 12px !important;">
                             无
                           </span>
                       </template>
@@ -652,7 +652,8 @@ const report_select_option = [
   { 'source_name': '美杜莎', 'source_val': 'only_medusa' },
   { 'source_name': '海豚', 'source_val': 'only_dolphin' },
   { 'source_name': '三叉戟', 'source_val': 'only_trident' },
-  { 'source_name': '金毛羊', 'source_val': 'only_gdngoat' }
+  { 'source_name': '金毛羊', 'source_val': 'only_gdngoat' },
+  { 'source_name': '其它', 'source_val': 'only_others' }
 ]
 
 // getBigPoolFixedHold()

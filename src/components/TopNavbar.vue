@@ -32,12 +32,16 @@
               <li>
                 <button style="width: 100%; border-radius: 0;" type="button" class="btn btn-secondary"
                   @click="runKanban4ui(false);">保存看板</button>
-              </li>              
+              </li>
+              <li style="border-bottom: solid 1px white;">
+                <button style="width: 100%; border-radius: 0;" type="button" class="btn btn-secondary"
+                  @click="runKanban4ui(false, true);">运行报告</button>
+              </li>                             
               <li>
                 <button style="width: 100%; border-radius: 0;" type="button" class="btn btn-secondary"
                   @click="syncKanban4ui();">同步看板</button>
               </li>
-              <li>
+              <li style="border-bottom: solid 1px white;">
                 <button style="width: 100%; border-radius: 0;" type="button" class="btn btn-secondary"
                   @click="syncCluster4ui();">同步集群</button>
               </li>
@@ -176,7 +180,7 @@
 
 <script setup>
 import {onMounted, ref, computed, watch} from 'vue'
-import { getSyncStatus, runKanban, syncKanban, syncCluster } from "../lib/opApi.js";
+import { getSyncStatus, runKanban, runReport, syncKanban, syncCluster } from "../lib/opApi.js";
 import {Modal} from "bootstrap";
 import { useZskbStore } from "../store/zskbStore";
 import {storeToRefs} from 'pinia'
@@ -294,14 +298,19 @@ onMounted(async () => {
   server_status_objs.value = await getSyncStatus()
 })
 
-function runKanban4ui(for_run=true) {
+function runKanban4ui(for_run=true, only_report=false) {
   cfmDlgTitle.value = "确认"
-  if (for_run) {
-    cfmDlgCont.value = "要在服务器上运行看板吗？"
-    cfmDlgType.value = "run kanban"
+  if (only_report) {
+    cfmDlgCont.value = "要在服务器上运行报告吗？"
+    cfmDlgType.value = "run report"    
   } else {
-    cfmDlgCont.value = "要在服务器上保存看板吗？"
-    cfmDlgType.value = "save kanban"
+    if (for_run) {
+      cfmDlgCont.value = "要在服务器上运行看板吗？"
+      cfmDlgType.value = "run kanban"
+    } else {
+      cfmDlgCont.value = "要在服务器上保存看板吗？"
+      cfmDlgType.value = "save kanban"
+    }
   }
   dlgController.value.cfmDlg.show()
 }
@@ -329,6 +338,8 @@ function runOrSyncKanban() {
     syncKanban()
   } else if (cfmDlgType.value === "sync cluster") {
     syncCluster()
+  } else if (cfmDlgType.value === "run report") {
+    runReport()
   }
   dlgController.value.cfmDlg.hide()
 }
