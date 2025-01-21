@@ -335,12 +335,12 @@
                 </template>
                 <template v-if="oneRow.hasOwnProperty('show_enable_loss_btn') && oneRow['show_enable_loss_btn']">
                   <button type="button" class="btn btn-danger" style="font-size: 0.8rem;padding-left:5px;padding-right:5px;margin-right:0.5rem;"
-                        @click.stop="setComposeProperty_wrapper(oneRow['fund_id'], oneRow['fund_name'], oneRow['compose_name'], -2, oneRow['buyin_source'], true)">
+                        @click.stop="setComposeProperty_wrapper(oneRow['fund_id'], oneRow['fund_name'], oneRow['compose_name'], -2, oneRow['buyin_source'], true, oneRow['fixed_buyin_date'])">
                         设止损</button>
                 </template>
                 <template v-if="oneRow.hasOwnProperty('show_disable_loss_btn') && oneRow['show_disable_loss_btn']">
                   <button type="button" class="btn btn-secondary" style="font-size: 0.8rem;padding-left:5px;padding-right:5px;"
-                        @click.stop="setComposeProperty_wrapper(oneRow['fund_id'], oneRow['fund_name'], oneRow['compose_name'], -1, oneRow['buyin_source'], false)">
+                        @click.stop="setComposeProperty_wrapper(oneRow['fund_id'], oneRow['fund_name'], oneRow['compose_name'], -1, oneRow['buyin_source'], false, oneRow['fixed_buyin_date'])">
                         去止损</button>
                 </template>
               </td>
@@ -408,7 +408,7 @@
                       </span>
                     </template>
                   </div>
-                  <div>
+                  <div style="text-wrap:nowrap;">
                     计:&nbsp;
                     <template v-if="oneRow['hold_accu_pure_percent_str']">
                       <span
@@ -416,6 +416,17 @@
                         {{ oneRow['hold_accu_pure_percent_str'] }}
                       </span>
                     </template>
+                    <select class="form-select" style="display:inline-block !important;width:4rem;margin-bottom:8px;margin-left:5px;padding:0 5px;"
+                    :style="{
+                  'color': oneRow['fixed_buyin_date'] === '每月'? 'red': 
+                           oneRow['fixed_buyin_date'] === '每日'? 'black': 'blue',
+                  'border-color': oneRow['fixed_buyin_date'] === '每月'? 'red':
+                           oneRow['fixed_buyin_date'] === '每日'? 'black': 'blue'}" 
+                    @click.stop v-model="oneRow['fixed_buyin_date']">
+                      <option v-for="option in buy_in_date_options" v-bind:value="option.source_val">
+                        {{ option.source_name }}
+                      </option>
+                    </select>                    
                   </div>
                 </template>
                 <template v-if="oneRow.hasOwnProperty('money') && oneRow['money'] > 0 && (!buyout_future_objs.hasOwnProperty(oneRow['fund_id']) || !buyout_future_objs[oneRow['fund_id']])">
@@ -509,7 +520,7 @@
                   <span style="font-size: 1rem; font-style: italic;text-decoration: underline;">{{
                     oneRow['last_adjust_money_date'] }}</span>&nbsp;
                   <input class="btn btn-outline-danger btn-sm" style="width:3.5rem;" type="button" value="保存"
-                    @click.stop="setComposeProperty_wrapper(oneRow['fund_id'], oneRow['fund_name'], oneRow['compose_name'], parseInt(oneRow['money']), oneRow['buyin_source'], oneRow['lossFlag'])">
+                    @click.stop="setComposeProperty_wrapper(oneRow['fund_id'], oneRow['fund_name'], oneRow['compose_name'], parseInt(oneRow['money']), oneRow['buyin_source'], oneRow['lossFlag'], oneRow['fixed_buyin_date'])">
                 </div>
               </td>
               <td style="text-align: center;" v-bind:class="{ sel_row: oneRow['currSelected'] }">
@@ -791,12 +802,12 @@
                   </template>
                   <template v-if="oneRow.hasOwnProperty('show_enable_loss_btn') && oneRow['show_enable_loss_btn']">
                     <button type="button" class="btn btn-danger" style="font-size: 0.8rem;padding-left:5px;padding-right:5px;margin-right:0.5rem;"
-                          @click.stop="setComposeProperty_wrapper(oneRow['fund_id'], oneRow['fund_name'], oneRow['compose_name'], -2, oneRow['buyin_source'], true)">
+                          @click.stop="setComposeProperty_wrapper(oneRow['fund_id'], oneRow['fund_name'], oneRow['compose_name'], -2, oneRow['buyin_source'], true, oneRow['fixed_buyin_date'])">
                           设止损</button>
                   </template>
                   <template v-if="oneRow.hasOwnProperty('show_disable_loss_btn') && oneRow['show_disable_loss_btn']">
                     <button type="button" class="btn btn-secondary" style="font-size: 0.8rem;padding-left:5px;padding-right:5px;"
-                          @click.stop="setComposeProperty_wrapper(oneRow['fund_id'], oneRow['fund_name'], oneRow['compose_name'], -1, oneRow['buyin_source'], false)">
+                          @click.stop="setComposeProperty_wrapper(oneRow['fund_id'], oneRow['fund_name'], oneRow['compose_name'], -1, oneRow['buyin_source'], false, oneRow['fixed_buyin_date'])">
                           去止损</button>
                   </template>                  
                 </div>
@@ -1101,7 +1112,7 @@
                       </span>
                     </template>
                   </div>
-                  <div>
+                  <div style="text-wrap:nowrap;">
                     计:
                     <template
                       v-if="oneRow['fixedHoldObj'] && oneRow['fixedHoldObj']['hold_objs'] && oneRow['fixedHoldObj']['hold_objs'].length > 0">
@@ -1111,6 +1122,17 @@
                         {{ accu_pure_percent_str }}
                       </span>
                     </template>
+                    <select class="form-select" style="display:inline-block !important;width:4rem;margin-bottom:8px;margin-left:5px;padding:0 5px;"
+                    :style="{
+                  'color': oneRow['fixed_buyin_date'] === '每月'? 'red': 
+                           oneRow['fixed_buyin_date'] === '每日'? 'black': 'blue',
+                  'border-color': oneRow['fixed_buyin_date'] === '每月'? 'red':
+                           oneRow['fixed_buyin_date'] === '每日'? 'black': 'blue'}" 
+                    @click.stop v-model="oneRow['fixed_buyin_date']">
+                      <option v-for="option in buy_in_date_options" v-bind:value="option.source_val">
+                        {{ option.source_name }}
+                      </option>
+                    </select>                    
                   </div>
                 </template>
                 <template v-if="oneRow.hasOwnProperty('money') && oneRow['money'] > 0 && (!buyout_future_objs.hasOwnProperty(oneRow['fund_id']) || !buyout_future_objs[oneRow['fund_id']])">
@@ -1214,7 +1236,7 @@
                   <span style="font-size: 1rem; font-style: italic;text-decoration: underline;">{{
                     oneRow['last_adjust_money_date'] }}</span>&nbsp;
                   <input class="btn btn-outline-danger btn-sm" style="width:3.5rem;" type="button" value="保存"
-                    @click.stop="setComposeProperty_wrapper(oneRow['fund_id'], oneRow['fund_name'], oneRow['compose_name'], parseInt(oneRow['money']), oneRow['buyin_source'], oneRow['lossFlag'])">
+                    @click.stop="setComposeProperty_wrapper(oneRow['fund_id'], oneRow['fund_name'], oneRow['compose_name'], parseInt(oneRow['money']), oneRow['buyin_source'], oneRow['lossFlag'], oneRow['fixed_buyin_date'])">
                 </div>
               </td>
               <td style="text-align: center;" v-bind:class="{ sel_row: oneRow['currSelected'] }">
@@ -1695,6 +1717,16 @@ const buy_in_sources_options = [
   { 'source_name': '京东', 'source_val': 'jd' },
   { 'source_name': '同花顺', 'source_val': 'ths' },
   { 'source_name': '招商', 'source_val': 'zs' }
+]
+
+const buy_in_date_options = [
+  { 'source_name': '每日', 'source_val': '每日' },
+  { 'source_name': '周一', 'source_val': '周一' },
+  { 'source_name': '周二', 'source_val': '周二' },
+  { 'source_name': '周三', 'source_val': '周三' },
+  { 'source_name': '周四', 'source_val': '周四' },
+  { 'source_name': '周五', 'source_val': '周五' },
+  { 'source_name': '每月', 'source_val': '每月' }
 ]
 
 const colWidMap = {
@@ -2773,7 +2805,7 @@ async function removeFixedFund() {
     dlgController.value.removeDlg.hide()
   } else if (fixed_remove_type.value == 'remove today') {
     await buyOutFixedFundOfToday(fund_id_remove.value, fund_name_remove.value);
-    await setComposeProperty(fund_obj_remove.value['fund_id'], fund_obj_remove.value['fund_name'], fund_obj_remove.value['compose_name'], -1, fund_obj_remove.value['buyin_source'], fund_obj_remove.value['lossFlag']);
+    await setComposeProperty(fund_obj_remove.value['fund_id'], fund_obj_remove.value['fund_name'], fund_obj_remove.value['compose_name'], -1, fund_obj_remove.value['buyin_source'], fund_obj_remove.value['lossFlag'], fund_obj_remove.value['fixed_buyin_date']);
     dlgController.value.removeDlg.hide()
   } else {
     console.error("internal error as remove fund type does not match.")
@@ -3597,14 +3629,14 @@ function cancelCustAddCompose() {
   custAddError.value = ''
 }
 
-async function setComposeProperty_wrapper(_fund_id, _fund_name, _compose_name, _money, _buyin_source, _loss_flag) {
+async function setComposeProperty_wrapper(_fund_id, _fund_name, _compose_name, _money, _buyin_source, _loss_flag, _fixed_buyin_date) {
   let _show4SoldOnly  = show4SoldOnly.value
   let _showPauseOnly  = showPauseOnly.value
   let _showAdjustOnly = showAdjustOnly.value
   let _showPoleOnly   = showPoleOnly.value
   let _showNoteOnly   = showNoteOnly.value
 
-  await setComposeProperty(_fund_id, _fund_name, _compose_name, _money, _buyin_source, _loss_flag);
+  await setComposeProperty(_fund_id, _fund_name, _compose_name, _money, _buyin_source, _loss_flag, _fixed_buyin_date);
 
   show4SoldOnly.value = false
   showPauseOnly.value = false

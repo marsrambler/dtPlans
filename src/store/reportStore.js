@@ -27,6 +27,7 @@ export const useReportStore = defineStore('report-store', () => {
     const sync_in_progress = ref(false)
     const latest_sold_stat_obj = ref(null)
     const objsTransFlag = ref(false)
+    const fundBuyWeight = ref({})
 
     // action
     async function requireDynValues(_fund_ids) {
@@ -813,6 +814,48 @@ export const useReportStore = defineStore('report-store', () => {
         reportObjsReloaded.value = true;
     })
 
+    async function getFundBuyWeight() {
+        try {
+            const response = await axiosInst.get("dt-plans/api/get-fund-buy-weight")
+            if (response.status == 200) {
+                let _temp_arr_objs = await response.data;
+                if (_temp_arr_objs && _temp_arr_objs.length > 0) {
+                    _temp_arr_objs.forEach(elem => {
+                        fundBuyWeight.value[elem['fund_id']] = elem['buy_weight']
+                    })
+                }
+            } else {
+                console.error("axios get fund buy weight failed: ", response)
+                fundBuyWeight.value = {}
+            }
+        } catch (error) {
+            console.log("axios get fund buy weight error: ", error)
+            fundBuyWeight.value = {}
+        }
+    }
+
+    // this function is useless now...
+    async function setFundBuyWeight(_fund_id, _fund_name, _compose_plan, _op_type, _weight) {
+        try {
+            const response = await axiosInst.post("dt-plans/api/set-fund-buy-weight", {
+                'fund_id': _fund_id,
+                'fund_name': _fund_name,
+                'compose_plan': _compose_plan,
+                'op_type': _op_type,
+                'new_weight': _weight
+            })
+            if (response.status === 200) {
+                useApiStore().pop_alert_msg("设置权重成功: " + _fund_name)
+                await getFundBuyWeight()
+                alert("设置权重成功后，需要手动刷新相关页面，才能更新金额。")
+            } else {
+                console.error("axios set fund buy weight failed: ", response)
+            }
+        } catch (error) {
+            console.log("axios set fund buy weight failed: ", error)
+        }
+    }
+
     return {
         dynRecordObjs,
         dynRecordObjs_full,
@@ -828,6 +871,7 @@ export const useReportStore = defineStore('report-store', () => {
         removedDateObjs,
         requireDynValues,
         latest_sold_stat_obj,
+        fundBuyWeight,
         getRecordsAndRates,
         getRecordsAndRatesFromWorker,
         getRetroFunds,
@@ -839,6 +883,8 @@ export const useReportStore = defineStore('report-store', () => {
         removeLocalDynvalue,
         removeDate4Report,
         getRemovedDate4Report,
-        syncServerData
+        syncServerData,
+        getFundBuyWeight,
+        setFundBuyWeight
     }
 });

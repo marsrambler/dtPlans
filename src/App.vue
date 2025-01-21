@@ -21,7 +21,7 @@ const {getRtRates, getZskb} = zskbStore
 const composeStore = useComposeStore()
 const {getAllCompose, getComposeFixedHold, getComposeTips} = composeStore
 const reportStore = useReportStore()
-const {getRecordsAndRates, getRetroFunds, getFixedFunds, getAllComposeFixedHold, getBigPoolFixedHold, getRemovedDate4Report} = reportStore
+const {getRecordsAndRates, getRetroFunds, getFixedFunds, getAllComposeFixedHold, getBigPoolFixedHold, getRemovedDate4Report, getFundBuyWeight, setFundBuyWeight} = reportStore
 const aggressiveStore = useAggressiveStore()
 const {getAllAggressive} = aggressiveStore
 const buyInOutStore = useBuyInOutStore()
@@ -48,6 +48,7 @@ onUpdated(() => {
   });
 });
 
+getFundBuyWeight()
 getZsRepo()
 getZsRepoHides()
 getZsRepoExclude()

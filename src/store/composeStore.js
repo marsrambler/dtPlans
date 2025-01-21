@@ -60,7 +60,7 @@ export const useComposeStore = defineStore('compose-store', () => {
         }
     }
 
-    async function setComposeProperty(_fund_id, _fund_name, _compose_name, _money, _buyin_source, _loss_flag) {
+    async function setComposeProperty(_fund_id, _fund_name, _compose_name, _money, _buyin_source, _loss_flag, _fixed_buyin_date) {
         try {
             const response = await axiosInst.post("dt-plans/api/compose/set-compose-prop", {
                 'fund_id': _fund_id,
@@ -69,7 +69,8 @@ export const useComposeStore = defineStore('compose-store', () => {
                 'money': _money,
                 'buyin_source': _buyin_source,
                 'set_sold_date': 'F',
-                'loss_flag': _loss_flag? 'T': 'F'
+                'loss_flag': _loss_flag? 'T': 'F',
+                'fixed_buyin_date': _fixed_buyin_date
             })
             if (response.status == 200) {
                 // await response.data

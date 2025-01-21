@@ -55,14 +55,36 @@
             </div>
           </th>
           <th :style="{ 'width': colWidMap['col_2'] + 'rem' }">
-            <span>收益率</span>
+            <div class="w50_w_br" @click="sortByField('min_earn')">
+              <template v-if="sortFieldName === 'min_earn'">
+                <span v-if="sortFieldFlag"><i class="bi bi-arrow-up"></i></span>
+                <span v-else><i class="bi bi-arrow-down"></i></span>
+              </template>
+              <span>收益率</span>
+            </div>
+            <div class="w50_w_br" @click="sortByField('earn_per_year')" style="border: none;">
+              <template v-if="sortFieldName === 'earn_per_year'">
+                <span v-if="sortFieldFlag"><i class="bi bi-arrow-up"></i></span>
+                <span v-else><i class="bi bi-arrow-down"></i></span>
+              </template>
+              <span>年化</span>
+            </div>            
           </th>
-          <th :style="{ 'width': colWidMap['col_3'] + 'rem' }" @click="sortByField('hold_days')">
-            <template v-if="sortFieldName === 'hold_days'">
-              <span v-if="sortFieldFlag"><i class="bi bi-arrow-up"></i></span>
-              <span v-else><i class="bi bi-arrow-down"></i></span>
-            </template>
-            <span>买入</span>
+          <th :style="{ 'width': colWidMap['col_3'] + 'rem' }">
+            <div class="w50_w_br" @click="sortByField('buyin_weight')">
+              <template v-if="sortFieldName === 'buyin_weight'">
+                <span v-if="sortFieldFlag"><i class="bi bi-arrow-up"></i></span>
+                <span v-else><i class="bi bi-arrow-down"></i></span>
+              </template>
+              <span>权重</span>
+            </div>
+            <div class="w50_w_br" @click="sortByField('hold_days')" style="border: none;">
+              <template v-if="sortFieldName === 'hold_days'">
+                <span v-if="sortFieldFlag"><i class="bi bi-arrow-up"></i></span>
+                <span v-else><i class="bi bi-arrow-down"></i></span>
+              </template>
+              <span>买入</span>
+            </div> 
           </th>
           <th :style="{ 'width': colWidMap['col_4'] + 'rem' }">
             <div class="w50_w_br" @click="sortByField('last_sold')">
@@ -165,6 +187,57 @@
                 </div>
               </template>
               <div>净值日:&nbsp;<span class="text-bg-warning">{{ oneRow.statistics?.latest_price_date }}</span></div>
+              <div style="margin-top: 5px;padding-top:5px;border-top:solid 1px;line-height:1.2;">
+                <template v-if="!onlyShowLatest">
+                  <div>
+                    <template v-if="oneRow['statistics'] && oneRow['statistics']['tot_exchange_days_natural']">
+                      <span style="font-size:0.9rem;">总持:&nbsp;{{ oneRow.statistics.tot_exchange_days_natural }}日</span>
+                    </template>                  
+                    <template v-if="oneRow.hasOwnProperty('real_sold_times')">
+                      <span style="margin-left:5px;font-size:0.9rem;">实卖:&nbsp;{{ oneRow.real_sold_times }}次</span>
+                    </template>
+                  </div>
+                </template>
+                <template v-if="oneRow.hasOwnProperty('avg_sold_natural_days')">
+                  <div style="font-size:0.9rem;">
+                    <template v-if="!onlyShowLatest">
+                      平均持有:&nbsp;
+                    </template>
+                    <template v-else>
+                      单次持有:&nbsp;
+                    </template>
+                    {{ oneRow.avg_sold_natural_days }}日
+                  </div>
+                </template>
+                <template v-if="oneRow['statistics'] && oneRow['statistics']['last_sold_profit'] && oneRow['statistics']['last_sold_profit']['currStatistics'] && oneRow['statistics']['last_sold_profit']['currStatistics']['tot_profit_perc_str']">
+                  <div style="font-size:0.9rem;">
+                    <template v-if="!onlyShowLatest">
+                      平均盈利:&nbsp;
+                    </template>
+                    <template v-else>
+                      单次盈利:&nbsp;
+                    </template>                    
+                    <span :style="{
+                      'color':  oneRow['statistics']['last_sold_profit']['currStatistics']['tot_profit_perc'] >= 0? 'red': 'darkgreen',
+                      'font-weight': 'bold',
+                      'font-size': '0.9rem'
+                    }">
+                      {{ oneRow['statistics']['last_sold_profit']['currStatistics']['tot_profit_perc_str'] }}
+                    </span>
+                  </div>
+                </template>
+                <template v-if="oneRow['trans_profit_per_year_str']">
+                  <div style="font-size:0.9rem;">折合年化:&nbsp;
+                    <span :style="{
+                      'color': oneRow['trans_profit_per_year'] >= 0? 'red': 'darkgreen',
+                      'font-weight': 'bold',
+                      'font-size': '0.9rem'
+                    }">
+                      {{ oneRow['trans_profit_per_year_str'] }}
+                    </span>
+                  </div>
+                </template>                                    
+              </div>
             </td>
             <td v-bind:class="{ sel_row: oneRow['currSelected'] }">
               <template v-if="zskbViewObjs && zskbViewObjs[oneRow.fund_id]">
@@ -182,6 +255,45 @@
                   {{ zskbViewObjs[oneRow.fund_id]['statistics']['min_earn_tri_str'] }}&nbsp;
                   {{ zskbViewObjs[oneRow.fund_id]['statistics']['avg_earn_tri_str'] }}&nbsp;
                   {{ zskbViewObjs[oneRow.fund_id]['statistics']['max_earn_tri_str'] }}
+                </div>
+                <template v-if="fundBuyWeight.hasOwnProperty(oneRow.fund_id)">
+                  <div style="border-top:solid 1px darkgrey;margin-top:5px;padding-top:8px;text-align:right;">
+                    权重:&nbsp;
+                    <!--
+                    <span :style="{
+                    'color': fundBuyWeight[oneRow.fund_id] > 100? 'red' : fundBuyWeight[oneRow.fund_id] < 100? 'darkgreen' : 'black', 
+                    'font-weight': fundBuyWeight[oneRow.fund_id] != 100? 'bold' : 'normal'}">
+                    {{fundBuyWeight[oneRow.fund_id]}}
+                    </span>
+                    -->
+                    <input type="number" style="width: 5rem; border-radius: 5px;" 
+                    :style="{
+                    'color': fundBuyWeight[oneRow.fund_id] > 100? 'red' : fundBuyWeight[oneRow.fund_id] < 100? 'darkgreen' : 'black', 
+                    'font-weight': fundBuyWeight[oneRow.fund_id] != 100? 'bold' : 'normal'}"
+                    v-model="fundBuyWeight[oneRow.fund_id]" @click.stop>
+                  </div>
+                </template>
+                <!--
+                <div style="display:flex;margin-top:5px;column-gap:8px;">
+                  <button type="button" class="btn btn-danger" style="font-size:0.9rem !important;padding-left:2px;padding-right:2px;" 
+                  @click="setFundWeightFromUI(oneRow, 'inc', fundBuyWeight[oneRow.fund_id])">
+                    增加权重
+                  </button>
+                  <button type="button" class="btn btn-primary" style="font-size:0.9rem !important;padding-left:2px;padding-right:2px;" 
+                  @click="setFundWeightFromUI(oneRow, 'dec', fundBuyWeight[oneRow.fund_id])">
+                    减小权重
+                  </button>
+                </div>
+                -->
+                <div style="display:flex;margin-top:5px;column-gap:8px;align-items:center;justify-content:end;">
+                  <button type="button" class="btn btn-primary" style="font-size:0.9rem !important;padding-left:2px;padding-right:2px;" 
+                  @click="setFundWeightFromUI(oneRow, 'test', fundBuyWeight[oneRow.fund_id])">
+                    测试权重
+                  </button>                
+                  <button type="button" class="btn btn-danger" style="font-size:0.9rem !important;padding-left:2px;padding-right:2px;" 
+                  @click="setFundWeightFromUI(oneRow, 'set', fundBuyWeight[oneRow.fund_id])">
+                    设置权重
+                  </button>
                 </div>
               </template>
             </td>
@@ -618,8 +730,8 @@ const zskbStore = useZskbStore()
 const { zskbObjs } = storeToRefs(zskbStore)
 
 const reportStore = useReportStore()
-const { dynRecordObjs_full, dynRecordObjs_latest, dynRecordObjs, onlyShowLatest, report_select, reportObjsReloaded } = storeToRefs(reportStore)
-const { requireDynValues, getRecordsAndRates, removeLocalDynvalue, getBigPoolFixedHold, getIndexRtRate, removeDate4Report, syncServerData } = reportStore
+const { dynRecordObjs_full, dynRecordObjs_latest, dynRecordObjs, onlyShowLatest, report_select, reportObjsReloaded, fundBuyWeight } = storeToRefs(reportStore)
+const { requireDynValues, getRecordsAndRates, removeLocalDynvalue, getBigPoolFixedHold, getIndexRtRate, removeDate4Report, syncServerData, getFundBuyWeight, setFundBuyWeight } = reportStore
 
 const composeStore = useComposeStore()
 const {noteObjs, noteReportObjs} = storeToRefs(composeStore)
@@ -1220,12 +1332,32 @@ watch(currDynValue, () => {
   chartOptions.value['series'][9]['data'] = []
   chartOptions.value['series'][10]['data'] = []
 
-  let _price_arr = []
-  // price list 
+  let _title_prefix = ''
+  if (onlyShowLatest.value) {
+    _title_prefix = '单次'
+  } else {
+    _title_prefix = '平均'
+  }
+/*
   chartOptions.value['title']['text'] = currDynValue.value['fund_id'] + " "
-    + currDynValue.value['fund_name'] + " " + currDynValue.value['statistics']['tot_exchange_days'] + "天"
+    + currDynValue.value['fund_name'] + "\t\t" + currDynValue.value['statistics']['tot_exchange_days'] + "天"
     + " 盈利" + " " + currDynValue.value['statistics'].last_sold_profit.currStatistics.tot_profit_perc_str
+*/
+  if (onlyShowLatest.value) {
+    chartOptions.value['title']['text'] = currDynValue.value['fund_id'] + " " + currDynValue.value['fund_name'] + 
+    "\t\t\t" + _title_prefix + '持有(交易)' + currDynValue.value['avg_sold_natural_days'] + "天" + 
+    "\t\t\t" + _title_prefix + "盈利 " + " " + currDynValue.value['statistics'].last_sold_profit.currStatistics.tot_profit_perc_str + 
+    "\t\t\t" + "折合年化 " + currDynValue.value['trans_profit_per_year_str']
+  } else {
+    chartOptions.value['title']['text'] = currDynValue.value['fund_id'] + " " + currDynValue.value['fund_name'] + 
+    "\t\t\t" + '总持有(交易)' + currDynValue.value['statistics']['tot_exchange_days_natural'] + "天" + 
+    "\t\t\t" + _title_prefix + '持有(交易)' + currDynValue.value['avg_sold_natural_days'] + "天" + 
+    "\t\t\t" + _title_prefix + "盈利 " + " " + currDynValue.value['statistics'].last_sold_profit.currStatistics.tot_profit_perc_str + 
+    "\t\t\t" + "折合年化 " + currDynValue.value['trans_profit_per_year_str']    
+  }
 
+  let _price_arr = []
+  // price list
   let percList4draw = currDynValue.value['percList4draw']
   percList4draw.forEach(element => {
     let _timestamp = Date.parse(element[0])
@@ -1874,6 +2006,78 @@ function sortByField(_field, _new_sort=true) {
         return b_val - a_val
       });
     }
+  } else if (_field === 'min_earn') {
+    if (sortFieldFlag.value) {
+      dynRecordObjs.value.sort((a, b) => {
+        let a_val = 0, b_val = 0
+        if (zskbViewObjs.value[a.fund_id] && zskbViewObjs.value[a.fund_id]['statistics'] && zskbViewObjs.value[a.fund_id]['statistics']['min_sort_tot_earn']) {
+          a_val = zskbViewObjs.value[a.fund_id]['statistics']['min_sort_tot_earn']
+        }
+        if (zskbViewObjs.value[b.fund_id] && zskbViewObjs.value[b.fund_id]['statistics'] && zskbViewObjs.value[b.fund_id]['statistics']['min_sort_tot_earn']) {
+          b_val = zskbViewObjs.value[b.fund_id]['statistics']['min_sort_tot_earn']
+        }        
+        return a_val - b_val
+      });
+    } else {
+      dynRecordObjs.value.sort((a, b) => {
+        let a_val = 0, b_val = 0
+        if (zskbViewObjs.value[a.fund_id] && zskbViewObjs.value[a.fund_id]['statistics'] && zskbViewObjs.value[a.fund_id]['statistics']['min_sort_tot_earn']) {
+          a_val = zskbViewObjs.value[a.fund_id]['statistics']['min_sort_tot_earn']
+        }
+        if (zskbViewObjs.value[b.fund_id] && zskbViewObjs.value[b.fund_id]['statistics'] && zskbViewObjs.value[b.fund_id]['statistics']['min_sort_tot_earn']) {
+          b_val = zskbViewObjs.value[b.fund_id]['statistics']['min_sort_tot_earn']
+        }        
+        return b_val - a_val
+      });        
+    }
+  } else if (_field === 'earn_per_year') {
+    if (sortFieldFlag.value) {
+      dynRecordObjs.value.sort((a, b) => {
+        let a_val = 0, b_val = 0
+        if (a.hasOwnProperty('trans_profit_per_year')) {
+          a_val = a['trans_profit_per_year']
+        }
+        if (b.hasOwnProperty('trans_profit_per_year')) {
+          b_val = b['trans_profit_per_year']
+        }
+        return a_val - b_val        
+      });
+    } else {
+      dynRecordObjs.value.sort((a, b) => {
+        let a_val = 0, b_val = 0
+        if (a.hasOwnProperty('trans_profit_per_year')) {
+          a_val = a['trans_profit_per_year']
+        }
+        if (b.hasOwnProperty('trans_profit_per_year')) {
+          b_val = b['trans_profit_per_year']
+        }
+        return b_val - a_val        
+      });    
+    }
+  } else if (_field === 'buyin_weight') {
+    if (sortFieldFlag.value) {
+      dynRecordObjs.value.sort((a, b) => {
+        let a_val = 0, b_val = 0
+        if (fundBuyWeight.value[a.fund_id]) {
+          a_val = fundBuyWeight.value[a.fund_id]
+        }
+        if (fundBuyWeight.value[b.fund_id]) {
+          b_val = fundBuyWeight.value[b.fund_id]
+        }
+        return a_val - b_val        
+      });
+    } else {
+      dynRecordObjs.value.sort((a, b) => {
+        let a_val = 0, b_val = 0
+        if (fundBuyWeight.value[a.fund_id]) {
+          a_val = fundBuyWeight.value[a.fund_id]
+        }
+        if (fundBuyWeight.value[b.fund_id]) {
+          b_val = fundBuyWeight.value[b.fund_id]
+        }
+        return b_val - a_val
+      });    
+    }
   } else if (_field === 'selected') {
     dynRecordObjs.value.sort((a, b) => {
       if (a.hasOwnProperty('currSelected') && b.hasOwnProperty('currSelected')) {
@@ -2147,6 +2351,38 @@ function navigateNote(oneRowObj, bPrev=true) {
   oneRowObj['write_note_date'] = _one_note['date_str']
   oneRowObj['write_note_perc'] = _one_note['perc_str']
   oneRowObj['write_note_comments'] = _one_note['comments']
+}
+
+function setFundWeightFromUI(oneRowObj, _op_type, _weight) {
+  if (_op_type != 'inc' && _op_type != 'dec' && _op_type != 'set' && _op_type != 'test') {
+    alert("非法的调用, _op_type is invalid");
+    return
+  }
+  if (_weight == null) {
+    alert("非法的调用, _weight is invalid");
+    return
+  }
+  if (!oneRowObj['tranStateObj'] || !oneRowObj['tranStateObj']['compose_plan']) {
+    alert("该产品不属于组合, 没法设置权重");
+    return
+  }
+  if (['ovtree', 'flyhorse', 'medusa', 'dolphin', 'trident', 'gdngoat', 'bigpool', 'big_pool'].indexOf(oneRowObj['tranStateObj']['compose_plan']) == -1) {
+    alert("该产品组合值是: " + oneRowObj['tranStateObj']['compose_plan'] + ' 无法设置权重');
+    return
+  }
+  let _cfm_msg = ''
+  if (_op_type == 'inc') {
+    _cfm_msg = '确定要手动 增加 产品买入的权重: ' + oneRowObj['fund_id'] + " " + oneRowObj['fund_name'] + "?"
+  } else if (_op_type == 'dec') {
+    _cfm_msg = '确定要手动 减小 产品买入的权重: ' + oneRowObj['fund_id'] + " " + oneRowObj['fund_name'] + "?"
+  } else if (_op_type == 'test') {
+    _cfm_msg = '确定要手动 设置 产品买入的权重: ' + oneRowObj['fund_id'] + " " + oneRowObj['fund_name'] + "?"
+  } else if (_op_type == 'set') {
+    _cfm_msg = '确定要手动 写入 产品买入的权重: ' + oneRowObj['fund_id'] + " " + oneRowObj['fund_name'] + "?"
+  }
+  confirm(_cfm_msg, function() {
+    setFundBuyWeight(oneRowObj['fund_id'], oneRowObj['fund_name'], oneRowObj['tranStateObj']['compose_plan'], _op_type, _weight)
+  }, function() {})
 }
 
 </script>
