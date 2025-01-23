@@ -154,40 +154,48 @@
               :ref="(el) => { if (el) { rowElements[oneRow.fund_id] = el; } }"
               v-bind:class="{ sel_row: oneRow['currSelected'] }">
             <td v-bind:class="{ sel_row: oneRow['currSelected'] }">
-              <div style="display: flex; align-items: center;">
-                <span>
-                {{ oneRow.fund_id }}
-                </span>
-                <span style="padding: 1px 3px; border-radius: 5px; border: solid 1px darkgreen; color: darkgreen; margin-left: 0.5rem; margin-right: 0.5rem; cursor: pointer;"
-                @click.stop="addBuyOrSoldNote(oneRow['fund_id'], oneRow['fund_name'], true, false,
-                  (oneRow['tranStateObj'] && oneRow['tranStateObj']['compose_plan'])? oneRow['tranStateObj']['compose_plan'] : ''
-                )">
-                想买<template v-if="buyOrSoldObj[oneRow['fund_id']] && buyOrSoldObj[oneRow['fund_id']]['buy_times']">({{buyOrSoldObj[oneRow['fund_id']]['buy_times']}})</template>
-                </span>
-                <span style="padding: 1px 3px; border-radius: 5px; border: solid 1px chocolate; color: chocolate; cursor: pointer;"
-                @click.stop="addBuyOrSoldNote(oneRow['fund_id'], oneRow['fund_name'], false, true,
-                  (oneRow['tranStateObj'] && oneRow['tranStateObj']['compose_plan'])? oneRow['tranStateObj']['compose_plan'] : ''
-                )">
-                想卖<template v-if="buyOrSoldObj[oneRow['fund_id']] && buyOrSoldObj[oneRow['fund_id']]['sold_times']">({{buyOrSoldObj[oneRow['fund_id']]['sold_times']}})</template>
-                </span>                
+              <div style="height:5rem;white-space:nowrap;">
+                <div style="display: flex; align-items: center;">
+                  <span>
+                  {{ oneRow.fund_id }}
+                  </span>
+                  <span style="padding: 1px 3px; border-radius: 5px; border: solid 1px darkgreen; color: darkgreen; margin-left: 0.5rem; margin-right: 0.5rem; cursor: pointer;"
+                  @click.stop="addBuyOrSoldNote(oneRow['fund_id'], oneRow['fund_name'], true, false,
+                    (oneRow['tranStateObj'] && oneRow['tranStateObj']['compose_plan'])? oneRow['tranStateObj']['compose_plan'] : ''
+                  )">
+                  想买<template v-if="buyOrSoldObj[oneRow['fund_id']] && buyOrSoldObj[oneRow['fund_id']]['buy_times']">({{buyOrSoldObj[oneRow['fund_id']]['buy_times']}})</template>
+                  </span>
+                  <span style="padding: 1px 3px; border-radius: 5px; border: solid 1px chocolate; color: chocolate; cursor: pointer;"
+                  @click.stop="addBuyOrSoldNote(oneRow['fund_id'], oneRow['fund_name'], false, true,
+                    (oneRow['tranStateObj'] && oneRow['tranStateObj']['compose_plan'])? oneRow['tranStateObj']['compose_plan'] : ''
+                  )">
+                  想卖<template v-if="buyOrSoldObj[oneRow['fund_id']] && buyOrSoldObj[oneRow['fund_id']]['sold_times']">({{buyOrSoldObj[oneRow['fund_id']]['sold_times']}})</template>
+                  </span>                
+                </div>
+                <template v-if="noteObjs[oneRow['fund_id']] && noteObjs[oneRow['fund_id']]['full_comments'] && noteObjs[oneRow['fund_id']]['full_comments'].length > 0">
+                  <div style="position: relative;--tooltip-left:0rem;--tooltip-top:1.5rem;cursor: pointer;display:flex;align-items:center;justify-content:start;flex-wrap:nowrap;padding-top:5px;padding-bottom:5px;"
+                       v-bind:data-title="noteObjs[oneRow['fund_id']]['full_comments']" data-float-no-pos-sm="" @click.stop="switchWriteNote(oneRow)">
+                    <template v-if="noteObjs && noteObjs[oneRow['fund_id']] && noteObjs[oneRow['fund_id']]['note_objs'] && noteObjs[oneRow['fund_id']]['note_objs'].length > 0">
+                          <span style="font-weight:bold;color:red;border:solid 1px red;border-radius:5px; padding:0 5px 0 3px;font-size:0.9rem;margin-left:0.2rem;margin-right:0.2rem;">
+                          {{noteObjs[oneRow['fund_id']]['note_objs'].length}}
+                          </span>
+                    </template>
+                    <span style="display:inline-block;max-width:10rem;white-space:nowrap;text-overflow:ellipsis;overflow:hidden;">
+                      {{ oneRow.fund_name }}
+                    </span>
+                  </div>
+                </template>
+                <template v-else>
+                  <div style="cursor:pointer;padding-top:5px;padding-bottom:5px;text-wrap:nowrap;" @click.stop="switchWriteNote(oneRow)">
+                    <span style="display:inline-block;max-width:12rem;white-space:nowrap;text-overflow:ellipsis;overflow:hidden;">
+                      {{ oneRow.fund_name }}
+                    </span>
+                  </div>
+                </template>
+                <div>净值日:&nbsp;<span class="text-bg-warning">{{ oneRow.statistics?.latest_price_date }}</span></div>
               </div>
-              <template v-if="noteObjs[oneRow['fund_id']] && noteObjs[oneRow['fund_id']]['full_comments'] && noteObjs[oneRow['fund_id']]['full_comments'].length > 0">
-                <div style="position: relative;--tooltip-left:0rem;--tooltip-top:1.5rem;cursor: pointer;"
-                     v-bind:data-title="noteObjs[oneRow['fund_id']]['full_comments']" data-float-no-pos-sm="" @click.stop="switchWriteNote(oneRow)">{{ oneRow.fund_name }}
-                  <template v-if="noteObjs && noteObjs[oneRow['fund_id']] && noteObjs[oneRow['fund_id']]['note_objs'] && noteObjs[oneRow['fund_id']]['note_objs'].length > 0">
-                        <span style="font-weight:bold;color:red;border:solid 1px red;border-radius:5px; padding:0 5px 0 3px;font-size:0.9rem;margin-left:0.2rem;margin-right:0.2rem;">
-                        {{noteObjs[oneRow['fund_id']]['note_objs'].length}}
-                        </span>
-                  </template>
-                </div>
-              </template>
-              <template v-else>
-                <div style="cursor: pointer;" @click.stop="switchWriteNote(oneRow)">
-                  {{ oneRow.fund_name }}
-                </div>
-              </template>
-              <div>净值日:&nbsp;<span class="text-bg-warning">{{ oneRow.statistics?.latest_price_date }}</span></div>
-              <div style="margin-top: 5px;padding-top:5px;border-top:solid 1px;line-height:1.2;">
+
+              <div style="margin-top: 5px;padding-top:5px;line-height:1.2;">
                 <template v-if="!onlyShowLatest">
                   <div>
                     <template v-if="oneRow['statistics'] && oneRow['statistics']['tot_exchange_days_natural']">
@@ -241,24 +249,66 @@
             </td>
             <td v-bind:class="{ sel_row: oneRow['currSelected'] }">
               <template v-if="zskbViewObjs && zskbViewObjs[oneRow.fund_id]">
-                <div>
-                  {{ zskbViewObjs[oneRow.fund_id]['statistics']['min_earn_str'] }}&nbsp;
-                  {{ zskbViewObjs[oneRow.fund_id]['statistics']['avg_earn_str'] }}&nbsp;
-                  {{ zskbViewObjs[oneRow.fund_id]['statistics']['max_earn_str'] }}
-                </div>
-                <div>
-                  {{ zskbViewObjs[oneRow.fund_id]['statistics']['min_earn_aux_str'] }}&nbsp;
-                  {{ zskbViewObjs[oneRow.fund_id]['statistics']['avg_earn_aux_str'] }}&nbsp;
-                  {{ zskbViewObjs[oneRow.fund_id]['statistics']['max_earn_aux_str'] }}
-                </div>
-                <div>
-                  {{ zskbViewObjs[oneRow.fund_id]['statistics']['min_earn_tri_str'] }}&nbsp;
-                  {{ zskbViewObjs[oneRow.fund_id]['statistics']['avg_earn_tri_str'] }}&nbsp;
-                  {{ zskbViewObjs[oneRow.fund_id]['statistics']['max_earn_tri_str'] }}
+                <div style="height:5rem;line-height:1.7;">
+                  <div>
+                    {{ zskbViewObjs[oneRow.fund_id]['statistics']['min_earn_str'] }}&nbsp;
+                    {{ zskbViewObjs[oneRow.fund_id]['statistics']['avg_earn_str'] }}&nbsp;
+                    {{ zskbViewObjs[oneRow.fund_id]['statistics']['max_earn_str'] }}
+                  </div>
+                  <div>
+                    {{ zskbViewObjs[oneRow.fund_id]['statistics']['min_earn_aux_str'] }}&nbsp;
+                    {{ zskbViewObjs[oneRow.fund_id]['statistics']['avg_earn_aux_str'] }}&nbsp;
+                    {{ zskbViewObjs[oneRow.fund_id]['statistics']['max_earn_aux_str'] }}
+                  </div>
+                  <div>
+                    {{ zskbViewObjs[oneRow.fund_id]['statistics']['min_earn_tri_str'] }}&nbsp;
+                    {{ zskbViewObjs[oneRow.fund_id]['statistics']['avg_earn_tri_str'] }}&nbsp;
+                    {{ zskbViewObjs[oneRow.fund_id]['statistics']['max_earn_tri_str'] }}
+                  </div>
                 </div>
                 <template v-if="fundBuyWeight.hasOwnProperty(oneRow.fund_id)">
-                  <div style="border-top:solid 1px darkgrey;margin-top:5px;padding-top:8px;text-align:right;">
-                    权重:&nbsp;
+                  <div style="margin-top:5px;padding-top:5px;text-align:right;display:flex;align-items:center;justify-content:end;flex-wrap:nowrap;text-wrap:nowrap;column-gap:3px;">
+                    <template v-if="oneRow['tranStateObj'] && oneRow['tranStateObj']['compose_plan'] && oneRow['tranStateObj']['compose_plan'] === 'ovtree'">
+                      <span class="badge bg-primary text-bg-success big_badge stack_2_info">
+                        橄榄树
+                      </span>
+                    </template>
+                    <template v-else-if="oneRow['tranStateObj'] && oneRow['tranStateObj']['compose_plan'] && oneRow['tranStateObj']['compose_plan'] === 'flyhorse'">
+                      <span class="badge bg-secondary text-bg-success big_badge stack_2_info">
+                        飞马
+                      </span>
+                    </template>
+                    <template v-else-if="oneRow['tranStateObj'] && oneRow['tranStateObj']['compose_plan'] && oneRow['tranStateObj']['compose_plan'] === 'medusa'">
+                      <span class="badge text-bg-success big_badge stack_2_info" style="background-color:purple !important;">
+                        美杜莎
+                      </span>
+                    </template>                                            
+                    <template v-else-if="oneRow['tranStateObj'] && oneRow['tranStateObj']['compose_plan'] && oneRow['tranStateObj']['compose_plan'] === 'dolphin'">
+                        <span class="badge bg-info text-bg-success big_badge stack_2_info">
+                          海豚
+                        </span>
+                    </template>
+                    <template v-else-if="oneRow['tranStateObj'] && oneRow['tranStateObj']['compose_plan'] && oneRow['tranStateObj']['compose_plan'] === 'trident'">
+                        <span class="badge bg-success text-bg-success big_badge stack_2_info">
+                          三叉戟
+                        </span>
+                    </template>
+                    <template v-else-if="oneRow['tranStateObj'] && oneRow['tranStateObj']['compose_plan'] && oneRow['tranStateObj']['compose_plan'] === 'gdngoat'">
+                        <span class="badge bg-danger text-bg-success big_badge stack_2_info">
+                          金毛羊
+                        </span>
+                    </template>
+                    <template v-else-if="oneRow['tranStateObj'] && oneRow['tranStateObj']['compose_plan'] && oneRow['tranStateObj']['compose_plan'] === 'bigpool'">
+                        <span class="badge bg-warning text-bg-success big_badge stack_2_info">
+                          大池
+                        </span>
+                    </template>
+                    <template v-else>
+                        <span class="badge bg-dark text-bg-success big_badge para_info" style="font-size:0.7rem !important;padding:1px 12px !important;">
+                          无
+                        </span>
+                    </template>                  
+                    <span style="font-size:0.9rem;text-wrap:nowrap;">权重:</span>
                     <!--
                     <span :style="{
                     'color': fundBuyWeight[oneRow.fund_id] > 100? 'red' : fundBuyWeight[oneRow.fund_id] < 100? 'darkgreen' : 'black', 
@@ -266,7 +316,7 @@
                     {{fundBuyWeight[oneRow.fund_id]}}
                     </span>
                     -->
-                    <input type="number" style="width: 5rem; border-radius: 5px;" 
+                    <input type="number" style="width:4rem;border-radius:5px;" 
                     :style="{
                     'color': fundBuyWeight[oneRow.fund_id] > 100? 'red' : fundBuyWeight[oneRow.fund_id] < 100? 'darkgreen' : 'black', 
                     'font-weight': fundBuyWeight[oneRow.fund_id] != 100? 'bold' : 'normal'}"
@@ -275,22 +325,28 @@
                 </template>
                 <!--
                 <div style="display:flex;margin-top:5px;column-gap:8px;">
-                  <button type="button" class="btn btn-danger" style="font-size:0.9rem !important;padding-left:2px;padding-right:2px;" 
+                  <button type="button" class="btn btn-outline-danger" style="font-size:0.9rem !important;padding-left:2px;padding-right:2px;" 
                   @click="setFundWeightFromUI(oneRow, 'inc', fundBuyWeight[oneRow.fund_id])">
                     增加权重
                   </button>
-                  <button type="button" class="btn btn-primary" style="font-size:0.9rem !important;padding-left:2px;padding-right:2px;" 
+                  <button type="button" class="btn btn-outline-primary" style="font-size:0.9rem !important;padding-left:2px;padding-right:2px;" 
                   @click="setFundWeightFromUI(oneRow, 'dec', fundBuyWeight[oneRow.fund_id])">
                     减小权重
                   </button>
                 </div>
                 -->
                 <div style="display:flex;margin-top:5px;column-gap:8px;align-items:center;justify-content:end;">
-                  <button type="button" class="btn btn-primary" style="font-size:0.9rem !important;padding-left:2px;padding-right:2px;" 
+                  <button type="button" class="btn btn-outline-primary" style="font-size:0.9rem !important;padding-left:2px;padding-right:2px;"
+                  :style="{
+                  'font-weight': (fundBuyWeightTest.hasOwnProperty(oneRow.fund_id) && fundBuyWeightTest[oneRow.fund_id])? 'bold': ''
+                  }" 
                   @click="setFundWeightFromUI(oneRow, 'test', fundBuyWeight[oneRow.fund_id])">
                     测试权重
+                    <template v-if="fundBuyWeightTest.hasOwnProperty(oneRow.fund_id) && fundBuyWeightTest[oneRow.fund_id]">
+                    *
+                    </template>
                   </button>                
-                  <button type="button" class="btn btn-danger" style="font-size:0.9rem !important;padding-left:2px;padding-right:2px;" 
+                  <button type="button" class="btn btn-outline-danger" style="font-size:0.9rem !important;padding-left:2px;padding-right:2px;" 
                   @click="setFundWeightFromUI(oneRow, 'set', fundBuyWeight[oneRow.fund_id])">
                     设置权重
                   </button>
@@ -298,12 +354,16 @@
               </template>
             </td>
             <td v-bind:class="{ sel_row: oneRow['currSelected'] }">
-              <!--<div style="height: 6rem;">-->
+              <!--
+              <div style="height: 7rem; overflow: hidden; text-overflow: ellipsis; word-break: break-all;">
+              -->
                 <div>起:&nbsp;{{ oneRow.statistics?.buy_first_day }}</div>
                 <div>止:&nbsp;{{ oneRow.statistics?.buy_last_day }}</div>
                 <div>计:&nbsp;{{ oneRow.statistics?.tot_exchange_days }}天</div>
                 <div>共:&nbsp;{{ oneRow.statistics?.tot_hold_days }}天</div>
-              <!--</div>-->              
+              <!--
+              </div>
+              -->             
               <!--
               <template v-if="oneRow.statistics && oneRow.statistics.rate_from_last_sold">
                 <div style="border-top: solid 1px gray; margin-top: 0.5rem; padding-top: 0.5rem; line-height: 1.2rem;">
@@ -317,41 +377,57 @@
               </template>
               -->
             </td>
-            <td style="line-height: 1.2rem;" v-bind:class="{ sel_row: oneRow['currSelected'] }">
-              <div style="height: 6rem; overflow: hidden; text-overflow: ellipsis; word-break: break-all;">
-                <template v-if="oneRow.soldHistoryWrapper_reverse" :key="one_sold.date_str">
-                  <template v-for="(one_sold, index) in oneRow.soldHistoryWrapper_reverse">
-                    <span v-if="index === 0 && oneRow.soldHistoryWrapper_reverse.length > 1" class="text-bg-warning">
-                      {{ one_sold?.date_str }}<span v-if="oneRow.statistics && oneRow.statistics.rate_from_last_sold">
-                        ({{oneRow.statistics.days_from_last_sold}})</span>
-                    </span>
-                    <span v-else-if="index === 0 && oneRow.soldHistoryWrapper_reverse.length === 1" class="text-bg-warning">
-                      {{ one_sold?.date_str }}<span v-if="oneRow.statistics && oneRow.statistics.rate_from_last_sold">
-                        ({{oneRow.statistics.days_from_last_sold}})</span>
-                    </span>
-                    <span v-else-if="index !== oneRow.soldHistoryWrapper_reverse.length - 1">
-                      &nbsp;{{ one_sold?.date_str }}&nbsp;
-                    </span>
-                    <span v-else>
-                      &nbsp;{{ one_sold?.date_str }}&nbsp;
-                    </span>
+            <td style="line-height:1.2rem;position:relative;" v-bind:class="{ sel_row: oneRow['currSelected'] }">
+              <div style="display:flex;flex-direction:column;position:absolute;top:5px;left:5px;bottom:5px;right:5px;justify-content:space-between;">
+                <div style="overflow: hidden; text-overflow: ellipsis; word-break: break-all;">
+                  <template v-if="oneRow.soldHistoryWrapper_reverse" :key="one_sold.date_str">
+                    <template v-for="(one_sold, index) in oneRow.soldHistoryWrapper_reverse">
+                      <span v-if="index === 0 && oneRow.soldHistoryWrapper_reverse.length > 1" class="text-bg-warning">
+                        {{ one_sold?.date_str }}<span v-if="oneRow.statistics && oneRow.statistics.rate_from_last_sold">
+                          ({{oneRow.statistics.days_from_last_sold}})</span>
+                      </span>
+                      <span v-else-if="index === 0 && oneRow.soldHistoryWrapper_reverse.length === 1" class="text-bg-warning">
+                        {{ one_sold?.date_str }}<span v-if="oneRow.statistics && oneRow.statistics.rate_from_last_sold">
+                          ({{oneRow.statistics.days_from_last_sold}})</span>
+                      </span>
+                      <span v-else-if="index !== oneRow.soldHistoryWrapper_reverse.length - 1">
+                        &nbsp;{{ one_sold?.date_str }}&nbsp;
+                      </span>
+                      <span v-else>
+                        &nbsp;{{ one_sold?.date_str }}&nbsp;
+                      </span>
+                    </template>
                   </template>
+                </div>
+                <template v-if="!oneRow['soldList4draw'] || oneRow['soldList4draw'].length === 0">
+                  <div style="display:flex;align-items:center;justify-content:space-around;">
+                    <button type="button" class="btn btn-primary" style="font-size: 0.8rem;padding-left:5px;padding-right:5px;"
+                      @click.stop="switchWriteNote(oneRow)">
+                      笔记<template v-if="noteObjs && noteObjs[oneRow['fund_id']] && noteObjs[oneRow['fund_id']]['note_objs'] && noteObjs[oneRow['fund_id']]['note_objs'].length > 0">
+                        ({{noteObjs[oneRow['fund_id']]['note_objs'].length}})
+                      </template>
+                    </button>                
+                  </div>
+                </template>
+                <template v-else>
+                <!-- template v-if="oneRow.statistics && oneRow.statistics.rate_from_last_sold" -->
+                  <div style="display:flex;align-items:center;justify-content:space-evenly;">
+                    <span v-if="oneRow.statistics && oneRow.statistics.rate_from_last_sold != null 
+                    && oneRow.statistics.rate_from_last_sold >= 0" class="text-bg-danger">
+                      &nbsp;计:&nbsp;{{oneRow?.statistics?.rate_from_last_sold_str}}&nbsp;
+                    </span>
+                    <span v-else style="color: white; background-color: darkgreen;">
+                      &nbsp;计:&nbsp;{{oneRow?.statistics?.rate_from_last_sold_str}}&nbsp;
+                    </span>
+                    <button type="button" class="btn btn-primary" style="font-size: 0.8rem;padding-left:5px;padding-right:5px;"
+                      @click.stop="switchWriteNote(oneRow)">
+                      笔记<template v-if="noteObjs && noteObjs[oneRow['fund_id']] && noteObjs[oneRow['fund_id']]['note_objs'] && noteObjs[oneRow['fund_id']]['note_objs'].length > 0">
+                        ({{noteObjs[oneRow['fund_id']]['note_objs'].length}})
+                      </template>
+                    </button>
+                  </div>
                 </template>
               </div>
-              <template v-if="!oneRow['soldList4draw'] || oneRow['soldList4draw'].length === 0">
-              </template>
-              <template v-else>
-              <!-- template v-if="oneRow.statistics && oneRow.statistics.rate_from_last_sold" -->
-                <div style="border-top: solid 1px gray; margin-top: 0.5rem; padding-top: 0.5rem; text-align: center;">
-                  <span v-if="oneRow.statistics && oneRow.statistics.rate_from_last_sold != null 
-                  && oneRow.statistics.rate_from_last_sold >= 0" class="text-bg-danger">
-                    &nbsp;计:&nbsp;{{oneRow?.statistics?.rate_from_last_sold_str}}&nbsp;
-                  </span>
-                  <span v-else style="color: white; background-color: darkgreen;">
-                    &nbsp;计:&nbsp;{{oneRow?.statistics?.rate_from_last_sold_str}}&nbsp;
-                  </span>
-                </div>
-              </template>
             </td>
             <td v-bind:class="{ sel_row: oneRow['currSelected'] }">
               <div>买:&nbsp;{{ oneRow.statistics?.buy_times }}</div>
@@ -575,37 +651,37 @@
                   </div>
                   <div class="para_info">
                     <div>
-                      <template v-if="oneRow['tranStateObj']['compose_plan'] === 'ovtree'">
+                      <template v-if="oneRow['tranStateObj'] && oneRow['tranStateObj']['compose_plan'] && oneRow['tranStateObj']['compose_plan'] === 'ovtree'">
                         <span class="badge bg-primary text-bg-success big_badge stack_2_info">
                           橄榄树
                         </span>
                       </template>
-                      <template v-else-if="oneRow['tranStateObj']['compose_plan'] === 'flyhorse'">
+                      <template v-else-if="oneRow['tranStateObj'] && oneRow['tranStateObj']['compose_plan'] && oneRow['tranStateObj']['compose_plan'] === 'flyhorse'">
                         <span class="badge bg-secondary text-bg-success big_badge stack_2_info">
                           飞马
                         </span>
                       </template>
-                      <template v-else-if="oneRow['tranStateObj']['compose_plan'] === 'medusa'">
+                      <template v-else-if="oneRow['tranStateObj'] && oneRow['tranStateObj']['compose_plan'] && oneRow['tranStateObj']['compose_plan'] === 'medusa'">
                         <span class="badge text-bg-success big_badge stack_2_info" style="background-color:purple !important;">
                           美杜莎
                         </span>
                       </template>                                            
-                      <template v-else-if="oneRow['tranStateObj']['compose_plan'] === 'dolphin'">
+                      <template v-else-if="oneRow['tranStateObj'] && oneRow['tranStateObj']['compose_plan'] && oneRow['tranStateObj']['compose_plan'] === 'dolphin'">
                           <span class="badge bg-info text-bg-success big_badge stack_2_info">
                             海豚
                           </span>
                       </template>
-                      <template v-else-if="oneRow['tranStateObj']['compose_plan'] === 'trident'">
+                      <template v-else-if="oneRow['tranStateObj'] && oneRow['tranStateObj']['compose_plan'] && oneRow['tranStateObj']['compose_plan'] === 'trident'">
                           <span class="badge bg-success text-bg-success big_badge stack_2_info">
                             三叉戟
                           </span>
                       </template>
-                      <template v-else-if="oneRow['tranStateObj']['compose_plan'] === 'gdngoat'">
+                      <template v-else-if="oneRow['tranStateObj'] && oneRow['tranStateObj']['compose_plan'] && oneRow['tranStateObj']['compose_plan'] === 'gdngoat'">
                           <span class="badge bg-danger text-bg-success big_badge stack_2_info">
                             金毛羊
                           </span>
                       </template>
-                      <template v-else-if="oneRow['tranStateObj']['compose_plan'] === 'bigpool'">
+                      <template v-else-if="oneRow['tranStateObj'] && oneRow['tranStateObj']['compose_plan'] && oneRow['tranStateObj']['compose_plan'] === 'bigpool'">
                           <span class="badge bg-warning text-bg-success big_badge stack_2_info">
                             大池
                           </span>
@@ -730,7 +806,7 @@ const zskbStore = useZskbStore()
 const { zskbObjs } = storeToRefs(zskbStore)
 
 const reportStore = useReportStore()
-const { dynRecordObjs_full, dynRecordObjs_latest, dynRecordObjs, onlyShowLatest, report_select, reportObjsReloaded, fundBuyWeight } = storeToRefs(reportStore)
+const { dynRecordObjs_full, dynRecordObjs_latest, dynRecordObjs, onlyShowLatest, report_select, reportObjsReloaded, fundBuyWeight, fundBuyWeightTest } = storeToRefs(reportStore)
 const { requireDynValues, getRecordsAndRates, removeLocalDynvalue, getBigPoolFixedHold, getIndexRtRate, removeDate4Report, syncServerData, getFundBuyWeight, setFundBuyWeight } = reportStore
 
 const composeStore = useComposeStore()
@@ -765,7 +841,9 @@ const report_select_option = [
   { 'source_name': '海豚', 'source_val': 'only_dolphin' },
   { 'source_name': '三叉戟', 'source_val': 'only_trident' },
   { 'source_name': '金毛羊', 'source_val': 'only_gdngoat' },
-  { 'source_name': '其它', 'source_val': 'only_others' }
+  { 'source_name': '其它', 'source_val': 'only_others' },
+  { 'source_name': '>持1年', 'source_val': 'hold_lt_1year' },
+  { 'source_name': '>卖3次', 'source_val': 'sold_lt_3times' }
 ]
 
 // getBigPoolFixedHold()

@@ -28,6 +28,7 @@ export const useReportStore = defineStore('report-store', () => {
     const latest_sold_stat_obj = ref(null)
     const objsTransFlag = ref(false)
     const fundBuyWeight = ref({})
+    const fundBuyWeightTest = ref({})
 
     // action
     async function requireDynValues(_fund_ids) {
@@ -562,7 +563,10 @@ export const useReportStore = defineStore('report-store', () => {
                     const comp_func = comp_obj => comp_obj['fund_id'] === fund_id
                     let _comp_idx = _one_comp['compose_objs'].findIndex(comp_func)
                     if (_comp_idx !== -1) {
-                        _tranStateObj['compose_plan'] = _one_comp['compose_name']
+                        _tranStateObj['compose_plan'] = 'noplan'
+                        if (_one_comp['compose_name']) {
+                            _tranStateObj['compose_plan'] = _one_comp['compose_name']
+                        }
                         _tranStateObj['money'] = _one_comp['compose_objs'][_comp_idx]['money']
                         _found_in_compose = true
                         break
@@ -810,6 +814,28 @@ export const useReportStore = defineStore('report-store', () => {
                     ));
                 dynRecordObjs.value = _filterObjs
             }
+        } else if (report_select.value === 'hold_lt_1year') {
+            if (onlyShowLatest.value) {
+                let _filterObjs = dynRecordObjs_latest.value.filter((elem) => elem['statistics'] && 
+                    elem['statistics']['tot_exchange_days_natural'] && 
+                    elem['statistics']['tot_exchange_days_natural'] >=  360);
+                dynRecordObjs.value = _filterObjs
+            } else {
+                let _filterObjs = dynRecordObjs_full.value.filter((elem) => elem['statistics'] && 
+                    elem['statistics']['tot_exchange_days_natural'] && 
+                    elem['statistics']['tot_exchange_days_natural'] >=  360);
+                dynRecordObjs.value = _filterObjs
+            }            
+        } else if (report_select.value === 'sold_lt_3times') {
+            if (onlyShowLatest.value) {
+                let _filterObjs = dynRecordObjs_latest.value.filter((elem) => elem['real_sold_times'] && 
+                    elem['real_sold_times'] >=  3);
+                dynRecordObjs.value = _filterObjs
+            } else {
+                let _filterObjs = dynRecordObjs_full.value.filter((elem) => elem['real_sold_times'] && 
+                    elem['real_sold_times'] >=  3);
+                dynRecordObjs.value = _filterObjs
+            }   
         }
         reportObjsReloaded.value = true;
     })
@@ -822,15 +848,18 @@ export const useReportStore = defineStore('report-store', () => {
                 if (_temp_arr_objs && _temp_arr_objs.length > 0) {
                     _temp_arr_objs.forEach(elem => {
                         fundBuyWeight.value[elem['fund_id']] = elem['buy_weight']
+                        fundBuyWeightTest.value[elem['fund_id']] = elem['buy_weight_test']
                     })
                 }
             } else {
                 console.error("axios get fund buy weight failed: ", response)
                 fundBuyWeight.value = {}
+                fundBuyWeightTest.value = {}
             }
         } catch (error) {
             console.log("axios get fund buy weight error: ", error)
             fundBuyWeight.value = {}
+            fundBuyWeightTest.value = {}
         }
     }
 
@@ -872,6 +901,7 @@ export const useReportStore = defineStore('report-store', () => {
         requireDynValues,
         latest_sold_stat_obj,
         fundBuyWeight,
+        fundBuyWeightTest,
         getRecordsAndRates,
         getRecordsAndRatesFromWorker,
         getRetroFunds,

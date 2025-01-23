@@ -451,37 +451,37 @@
                         </div>
                       </template>
                       <div style="text-align: center;">
-                        <template v-if="oneRow['compose_plan'] === 'ovtree'">
+                        <template v-if="oneRow['compose_plan'] && oneRow['compose_plan'] === 'ovtree'">
                           <span class="badge bg-primary text-bg-success big_badge"
                           :class="{'half_badge': oneRow['refer_compose_name'] && oneRow['refer_compose_name'] != ''}">
                             橄榄树
                           </span>
                         </template>
-                        <template v-else-if="oneRow['compose_plan'] === 'flyhorse'">
+                        <template v-else-if="oneRow['compose_plan'] && oneRow['compose_plan'] === 'flyhorse'">
                           <span class="badge bg-secondary text-bg-success big_badge"
                           :class="{'half_badge': oneRow['refer_compose_name'] && oneRow['refer_compose_name'] != ''}">
                             飞马
                           </span>
                         </template>
-                        <template v-else-if="oneRow['compose_plan'] === 'medusa'">
+                        <template v-else-if="oneRow['compose_plan'] && oneRow['compose_plan'] === 'medusa'">
                           <span class="badge text-bg-success big_badge" style="background-color:purple !important;"
                           :class="{'half_badge': oneRow['refer_compose_name'] && oneRow['refer_compose_name'] != ''}">
                             美杜莎
                           </span>
                         </template>                         
-                        <template v-else-if="oneRow['compose_plan'] === 'dolphin'">
+                        <template v-else-if="oneRow['compose_plan'] && oneRow['compose_plan'] === 'dolphin'">
                           <span class="badge bg-info text-bg-success big_badge"
                           :class="{'half_badge': oneRow['refer_compose_name'] && oneRow['refer_compose_name'] != ''}">
                             海豚
                           </span>
                         </template>
-                        <template v-else-if="oneRow['compose_plan'] === 'trident'">
+                        <template v-else-if="oneRow['compose_plan'] && oneRow['compose_plan'] === 'trident'">
                           <span class="badge bg-success text-bg-success big_badge"
                           :class="{'half_badge': oneRow['refer_compose_name'] && oneRow['refer_compose_name'] != ''}">
                             三叉戟
                           </span>
                         </template>
-                        <template v-else-if="oneRow['compose_plan'] === 'gdngoat'">
+                        <template v-else-if="oneRow['compose_plan'] && oneRow['compose_plan'] === 'gdngoat'">
                           <span class="badge bg-danger text-bg-success big_badge"
                           :class="{'half_badge': oneRow['refer_compose_name'] && oneRow['refer_compose_name'] != ''}">
                             金毛羊
@@ -1037,17 +1037,29 @@ function sortByField(_field) {
   } else if (_field === 'compose_plan') {
     if (sortFieldFlag.value) {
       convgViewObjs.value.sort((a, b) => {
-        let _a_compose = a['compose_plan']
+        let _a_compose = 'noplan'
+        if (a['compose_plan']) {
+          _a_compose = a['compose_plan']
+        }
         let _a_val = (_a_compose === 'noplan') ? 100 : (_a_compose === 'ovtree') ? 0 : (_a_compose === 'dolphin') ? 1 : (_a_compose === 'trident') ? 2 : (_a_compose === 'gdngoat') ? 3 : (_a_compose === 'flyhorse') ? 4 : (_a_compose === 'medusa') ? 5 : 6
-        let _b_compose = b['compose_plan']
+        let _b_compose = 'noplan' 
+        if (b['compose_plan']) {
+          _b_compose = b['compose_plan']
+        }
         let _b_val = (_b_compose === 'noplan') ? 100 : (_b_compose === 'ovtree') ? 0 : (_b_compose === 'dolphin') ? 1 : (_b_compose === 'trident') ? 2 : (_b_compose === 'gdngoat') ? 3 : (_a_compose === 'flyhorse') ? 4 : (_a_compose === 'medusa') ? 5 : 6
         return _a_val - _b_val
       });
     } else {
       convgViewObjs.value.sort((a, b) => {
-        let _a_compose = a['compose_plan']
+        let _a_compose = 'noplan' 
+        if (a['compose_plan']) {
+          _a_compose = a['compose_plan']
+        }
         let _a_val = (_a_compose === 'noplan') ? 100 : (_a_compose === 'ovtree') ? 0 : (_a_compose === 'dolphin') ? 1 : (_a_compose === 'trident') ? 2 : (_a_compose === 'gdngoat') ? 3 : (_a_compose === 'flyhorse') ? 4 : (_a_compose === 'medusa') ? 5 : 6
-        let _b_compose = b['compose_plan']
+        let _b_compose = 'noplan'
+        if (b['compose_plan']) {
+          _b_compose = b['compose_plan']
+        }
         let _b_val = (_b_compose === 'noplan') ? 100 : (_b_compose === 'ovtree') ? 0 : (_b_compose === 'dolphin') ? 1 : (_b_compose === 'trident') ? 2 : (_b_compose === 'gdngoat') ? 3 : (_a_compose === 'flyhorse') ? 4 : (_a_compose === 'medusa') ? 5 : 6
         return _b_val - _a_val
       });

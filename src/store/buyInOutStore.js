@@ -256,10 +256,10 @@ export const useBuyInOutStore = defineStore('buyInOut-store', () => {
                         elem['plan_buyin_money'] = elem['plan_buyin_money'] * 0.8
                     }
                 } else {
-                    console.error("zskb page has no statistics/min_sort_tot_earn for elem: ", elem);
+                    console.warn("zskb page has no statistics/min_sort_tot_earn for elem: ", elem);
                 }
             } else {
-                console.error("zskb page has no statistics/min_sort_tot_earn for elem: ", elem);
+                console.warn("zskb page has no statistics/min_sort_tot_earn for elem: ", elem);
             }
 
             if (elem.hasOwnProperty('size') && elem['size'] < 1100) {
@@ -318,10 +318,10 @@ export const useBuyInOutStore = defineStore('buyInOut-store', () => {
                         elem['plan_buyin_money'] = elem['plan_buyin_money'] * 0.8
                     }
                 } else {
-                    console.error("aggressive page has no statistics/min_sort_tot_earn for elem: ", elem);
+                    console.warn("aggressive page has no statistics/min_sort_tot_earn for elem: ", elem);
                 }
             } else {
-                console.error("aggressive page has no statistics/min_sort_tot_earn for elem: ", elem);
+                console.warn("aggressive page has no statistics/min_sort_tot_earn for elem: ", elem);
             }
 
             if (!elem['p50_convg_dur_rank'] || !elem['p65_convg_dur_rank'] || !elem['p80_convg_dur_rank']) {
@@ -385,10 +385,10 @@ export const useBuyInOutStore = defineStore('buyInOut-store', () => {
                         elem['plan_buyin_money'] = elem['plan_buyin_money'] * 0.8
                     }
                 } else {
-                    console.error("dtconvg page has no statistics/min_sort_tot_earn for elem: ", elem);
+                    console.warn("dtconvg page has no statistics/min_sort_tot_earn for elem: ", elem);
                 }
             } else {
-                console.error("dtconvg page has no statistics/min_sort_tot_earn for elem: ", elem);
+                console.warn("dtconvg page has no statistics/min_sort_tot_earn for elem: ", elem);
             }
 
             if (elem['size'] && elem['size'] < 1100) {
@@ -444,10 +444,10 @@ export const useBuyInOutStore = defineStore('buyInOut-store', () => {
                             elem['plan_buyin_money'] = elem['plan_buyin_money'] * 0.8
                         }
                     } else {
-                        console.error("compose page/gdngoat has no statistics/min_sort_tot_earn for elem: ", elem);
+                        console.warn("compose page/gdngoat has no statistics/min_sort_tot_earn for elem: ", elem);
                     }
                 } else {
-                    console.error("compose page/gdngoat has no statistics/min_sort_tot_earn for elem: ", elem);
+                    console.warn("compose page/gdngoat has no statistics/min_sort_tot_earn for elem: ", elem);
                 }
 
                 if (elem['kbObj'] && (!elem['kbObj']['p50_convg_dur_rank'] || !elem['kbObj']['p65_convg_dur_rank'] || !elem['kbObj']['p80_convg_dur_rank'])) {
@@ -570,10 +570,10 @@ export const useBuyInOutStore = defineStore('buyInOut-store', () => {
                             elem['plan_buyin_money'] = elem['plan_buyin_money'] * 0.8
                         }
                     } else {
-                        console.error("compose page/dolphin has no statistics/min_sort_tot_earn for elem: ", elem);
+                        console.warn("compose page/dolphin has no statistics/min_sort_tot_earn for elem: ", elem);
                     }
                 } else {
-                    console.error("compose page/dolphin has no statistics/min_sort_tot_earn for elem: ", elem);
+                    console.warn("compose page/dolphin has no statistics/min_sort_tot_earn for elem: ", elem);
                 }
 
                 if (elem['kbObj'] && elem['kbObj']['statistics'] && elem['kbObj']['statistics']['fund_perc_len'] && elem['kbObj']['statistics']['fund_perc_len'] < 1100) {
