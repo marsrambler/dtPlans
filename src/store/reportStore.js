@@ -836,6 +836,24 @@ export const useReportStore = defineStore('report-store', () => {
                     elem['real_sold_times'] >=  3);
                 dynRecordObjs.value = _filterObjs
             }   
+        } else if (report_select.value === 'has_todo') {
+            if (onlyShowLatest.value) {
+                let _filterObjs = dynRecordObjs_latest.value.filter((elem) => {
+                    if (fundBuyWeightTest.value.hasOwnProperty(elem['fund_id']) && fundBuyWeightTest.value[elem['fund_id']]) {
+                        return true;
+                    }
+                    return false;
+                });
+                dynRecordObjs.value = _filterObjs
+            } else {
+                let _filterObjs = dynRecordObjs_full.value.filter((elem) => {
+                    if (fundBuyWeightTest.value.hasOwnProperty(elem['fund_id']) && fundBuyWeightTest.value[elem['fund_id']]) {
+                        return true;
+                    }
+                    return false;                    
+                });
+                dynRecordObjs.value = _filterObjs
+            }   
         }
         reportObjsReloaded.value = true;
     })

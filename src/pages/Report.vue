@@ -44,14 +44,18 @@
         <tr :style="{ 'height': tabHeaderHeight + 'rem' }">
           <th :style="{ 'width': colWidMap['col_1'] + 'rem' }">
             <div class="w50_w_br">
-              <span>名称</span>
-            </div>
-            <div class="w50_w_br" @click="sortByField('update_date')" style="border: none;">
               <template v-if="sortFieldName === 'update_date'">
                 <span v-if="sortFieldFlag"><i class="bi bi-arrow-up"></i></span>
                 <span v-else><i class="bi bi-arrow-down"></i></span>
               </template>
               <span>更新</span>
+            </div>
+            <div class="w50_w_br" @click="sortByField('hold_length')" style="border: none;">
+              <template v-if="sortFieldName === 'hold_length'">
+                <span v-if="sortFieldFlag"><i class="bi bi-arrow-up"></i></span>
+                <span v-else><i class="bi bi-arrow-down"></i></span>
+              </template>
+              <span>持有期</span>
             </div>
           </th>
           <th :style="{ 'width': colWidMap['col_2'] + 'rem' }">
@@ -413,10 +417,10 @@
                 <!-- template v-if="oneRow.statistics && oneRow.statistics.rate_from_last_sold" -->
                   <div style="display:flex;align-items:center;justify-content:space-evenly;">
                     <span v-if="oneRow.statistics && oneRow.statistics.rate_from_last_sold != null 
-                    && oneRow.statistics.rate_from_last_sold >= 0" class="text-bg-danger">
+                    && oneRow.statistics.rate_from_last_sold >= 0" class="text-bg-danger" style="line-height:1.8;">
                       &nbsp;计:&nbsp;{{oneRow?.statistics?.rate_from_last_sold_str}}&nbsp;
                     </span>
-                    <span v-else style="color: white; background-color: darkgreen;">
+                    <span v-else style="color: white; background-color:darkgreen;line-height:1.8;">
                       &nbsp;计:&nbsp;{{oneRow?.statistics?.rate_from_last_sold_str}}&nbsp;
                     </span>
                     <button type="button" class="btn btn-primary" style="font-size: 0.8rem;padding-left:5px;padding-right:5px;"
@@ -843,7 +847,8 @@ const report_select_option = [
   { 'source_name': '金毛羊', 'source_val': 'only_gdngoat' },
   { 'source_name': '其它', 'source_val': 'only_others' },
   { 'source_name': '>持1年', 'source_val': 'hold_lt_1year' },
-  { 'source_name': '>卖3次', 'source_val': 'sold_lt_3times' }
+  { 'source_name': '>卖3次', 'source_val': 'sold_lt_3times' },
+  { 'source_name': '有待办', 'source_val': 'has_todo' }
 ]
 
 // getBigPoolFixedHold()
@@ -2152,6 +2157,30 @@ function sortByField(_field, _new_sort=true) {
         }
         if (fundBuyWeight.value[b.fund_id]) {
           b_val = fundBuyWeight.value[b.fund_id]
+        }
+        return b_val - a_val
+      });    
+    }
+  } else if (_field === 'hold_length') {
+    if (sortFieldFlag.value) {
+      dynRecordObjs.value.sort((a, b) => {
+        let a_val = -1, b_val = -1
+        if (a['statistics'] && a['statistics']['tot_exchange_days_natural']) {
+          a_val = a['statistics']['tot_exchange_days_natural']
+        }
+        if (b['statistics'] && b['statistics']['tot_exchange_days_natural']) {
+          b_val = b['statistics']['tot_exchange_days_natural']
+        }
+        return a_val - b_val      
+      });
+    } else {
+      dynRecordObjs.value.sort((a, b) => {
+        let a_val = -1, b_val = -1
+        if (a['statistics'] && a['statistics']['tot_exchange_days_natural']) {
+          a_val = a['statistics']['tot_exchange_days_natural']
+        }
+        if (b['statistics'] && b['statistics']['tot_exchange_days_natural']) {
+          b_val = b['statistics']['tot_exchange_days_natural']
         }
         return b_val - a_val
       });    

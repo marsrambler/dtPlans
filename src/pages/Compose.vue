@@ -1655,7 +1655,8 @@
       'font-weight': 'bold',
       'padding-left': '0.5rem',
       'letter-spacing': '5px',
-      'line-height': '1.6'}">
+      'line-height': '1.6',
+      'text-wrap': 'nowrap'}">
       {{ composeTipsMapObj[compose_name]['tip'] }}
       <span style="cursor: pointer; margin-left: 1rem; color: blue;" 
       @click="composeTipsMapObj[compose_name]['show_tip'] = false;">关闭</span>
@@ -1825,8 +1826,9 @@ function processLossFlag4Elem(elem) {
   let _accu_money = elem['fixedHoldObj']['hold_objs'][elem['fixedHoldObj']['hold_objs'].length - 1]['accu_money']
   let _accu_pure_profit = elem['fixedHoldObj']['hold_objs'][elem['fixedHoldObj']['hold_objs'].length - 1]['accu_pure_percent']
   if ((_accu_money >= _lossSetting['money_h'] && _accu_pure_profit <= _lossSetting['rate_h'])
-    || (_accu_money >= _lossSetting['money_m'] && _accu_pure_profit <= _lossSetting['rate_m'])
-    || (_accu_money >= _lossSetting['money_l'] && _accu_pure_profit <= _lossSetting['rate_l'])) {
+    || (_accu_money >= _lossSetting['money_m'] && _accu_money < _lossSetting['money_h'] && _accu_pure_profit <= _lossSetting['rate_m'])
+    || (_accu_money >= _lossSetting['money_l'] && _accu_money < _lossSetting['money_m'] && _accu_pure_profit <= _lossSetting['rate_l'])
+    || (_accu_money < _lossSetting['money_l'] && _accu_money >= 200 && _accu_pure_profit <= _lossSetting['rate_0'])) {
     // 达到 设止损 程度
     if (elem['lossFlag']) {
       // 已经 有止损标志 了，什么都不做
@@ -1834,7 +1836,7 @@ function processLossFlag4Elem(elem) {
     } else {
       elem['show_enable_loss_btn'] = true
       elem['show_popup_msg'] = true
-      elem['popup_msg'] = elem['compose_name'] + " " +  elem['fund_id'] + elem['fund_name'] + "," + "需要 '设止损'"
+      elem['popup_msg'] = elem['compose_name'] + " " +  elem['fund_id'] + elem['fund_name'] + "," + "需要 '设止损'，定投金额需要置 '-2'"
       console.warn("$$$$ ", elem['popup_msg'])
     }
   } else {
@@ -1845,7 +1847,7 @@ function processLossFlag4Elem(elem) {
     } else {
       elem['show_disable_loss_btn'] = true
       elem['show_popup_msg'] = true
-      elem['popup_msg'] = elem['compose_name'] + " " +  elem['fund_id'] + elem['fund_name'] + "," + "需要 '去止损'"
+      elem['popup_msg'] = elem['compose_name'] + " " +  elem['fund_id'] + elem['fund_name'] + "," + "需要 '去止损'，定投金额需要置 '-1'"
       console.warn("$$$$ ", elem['popup_msg'])
     }
   }
@@ -2370,7 +2372,7 @@ watch([composeObjs, compose_name, fixedHoldObjs, buyoutRecords, noteObjs, show4S
         console.warn("#### gdngoat卖出不足3日，无须增大金额，不弹窗告警")
       }
     }
-  } else if (tot_plan_money_gdngoat.value < tot_set_money_gdngoat.value) {
+  } else if (tot_plan_money_gdngoat.value < tot_set_money_gdngoat.value && tot_set_money_gdngoat.value >= 50) {
     if ((tot_set_money_gdngoat.value - tot_plan_money_gdngoat.value) / tot_set_money_gdngoat.value >= 0.1
         || (tot_set_money_gdngoat.value - tot_plan_money_gdngoat.value >= 20)) {
       _tot_warning_msg += "金毛羊需要缩小金额" + parseInt(tot_set_money_gdngoat.value - tot_plan_money_gdngoat.value).toString() + 
@@ -2397,7 +2399,7 @@ watch([composeObjs, compose_name, fixedHoldObjs, buyoutRecords, noteObjs, show4S
             console.warn("#### ovtree卖出不足3日，无须增大金额，不弹窗告警")
           }
       }
-    } else if (tot_plan_money_ovtree.value < tot_set_money_ovtree.value) {
+    } else if (tot_plan_money_ovtree.value < tot_set_money_ovtree.value && tot_set_money_ovtree.value >= 50) {
       if ((tot_set_money_ovtree.value - tot_plan_money_ovtree.value) / tot_set_money_ovtree.value >= 0.1
           || (tot_set_money_ovtree.value - tot_plan_money_ovtree.value >= 20)) {
         _tot_warning_msg += "橄榄树需要缩小金额" + parseInt(tot_set_money_ovtree.value - tot_plan_money_ovtree.value).toString() 
@@ -2425,7 +2427,7 @@ watch([composeObjs, compose_name, fixedHoldObjs, buyoutRecords, noteObjs, show4S
             console.warn("#### flyhorse卖出不足3日，无须增大金额，不弹窗告警")
           }
       }
-    } else if (tot_plan_money_flyhorse.value < tot_set_money_flyhorse.value) {
+    } else if (tot_plan_money_flyhorse.value < tot_set_money_flyhorse.value && tot_set_money_flyhorse.value >= 50) {
       if ((tot_set_money_flyhorse.value - tot_plan_money_flyhorse.value) / tot_set_money_flyhorse.value >= 0.1
           || (tot_set_money_flyhorse.value - tot_plan_money_flyhorse.value >= 20)) {
         _tot_warning_msg += "飞马需要缩小金额" + parseInt(tot_set_money_flyhorse.value - tot_plan_money_flyhorse.value).toString() 
@@ -2453,7 +2455,7 @@ watch([composeObjs, compose_name, fixedHoldObjs, buyoutRecords, noteObjs, show4S
             console.warn("#### medusa卖出不足3日，无须增大金额，不弹窗告警")
           }
       }
-    } else if (tot_plan_money_medusa.value < tot_set_money_medusa.value) {
+    } else if (tot_plan_money_medusa.value < tot_set_money_medusa.value && tot_set_money_medusa.value >= 50) {
       if ((tot_set_money_medusa.value - tot_plan_money_medusa.value) / tot_set_money_medusa.value >= 0.1
           || (tot_set_money_medusa.value - tot_plan_money_medusa.value >= 20)) {
         _tot_warning_msg += "美杜莎需要缩小金额" + parseInt(tot_set_money_medusa.value - tot_plan_money_medusa.value).toString() 
@@ -2481,7 +2483,7 @@ watch([composeObjs, compose_name, fixedHoldObjs, buyoutRecords, noteObjs, show4S
             console.warn("#### dolphin卖出不足3日，无须增大金额，不弹窗告警")
           }
       }
-    } else if (tot_plan_money_dolphin.value < tot_set_money_dolphin.value) {
+    } else if (tot_plan_money_dolphin.value < tot_set_money_dolphin.value && tot_set_money_dolphin.value >= 50) {
       if ((tot_set_money_dolphin.value - tot_plan_money_dolphin.value) / tot_set_money_dolphin.value >= 0.1
           || (tot_set_money_dolphin.value - tot_plan_money_dolphin.value >= 20)) {
         _tot_warning_msg += "海豚需要缩小金额" + parseInt(tot_set_money_dolphin.value - tot_plan_money_dolphin.value).toString() 
@@ -2509,7 +2511,7 @@ watch([composeObjs, compose_name, fixedHoldObjs, buyoutRecords, noteObjs, show4S
             console.warn("#### trident卖出不足3日，无须增大金额，不弹窗告警")
           }
       }
-    } else if (tot_plan_money_trident.value < tot_set_money_trident.value) {
+    } else if (tot_plan_money_trident.value < tot_set_money_trident.value && tot_set_money_trident.value >= 50) {
       if ((tot_set_money_trident.value - tot_plan_money_trident.value) / tot_set_money_trident.value >= 0.1
           || (tot_set_money_trident.value - tot_plan_money_trident.value >= 20)) {
         _tot_warning_msg += "三叉戟需要缩小金额" + parseInt(tot_set_money_trident.value - tot_plan_money_trident.value).toString() 
