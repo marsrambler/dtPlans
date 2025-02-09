@@ -857,11 +857,29 @@ function sortByField(_field) {
   if (_field === 'perc_not_update_days') {
     if (sortFieldFlag.value) {
       aggressiveViewObjs.value.sort((a, b) => {
-        return a['statistics']['perc_not_update_days'] - b['statistics']['perc_not_update_days'];
+        let a_val = 999
+        let b_val = 999
+        if (a['statistics'] && a['statistics'].hasOwnProperty('perc_not_update_days')) {
+          a_val = a['statistics']['perc_not_update_days']
+        }
+        if (b['statistics'] && b['statistics'].hasOwnProperty('perc_not_update_days')) {
+          b_val = b['statistics']['perc_not_update_days']
+        }
+        return a_val - b_val;
+        //return a['statistics']['perc_not_update_days'] - b['statistics']['perc_not_update_days'];
       });
     } else {
       aggressiveViewObjs.value.sort((a, b) => {
-        return b['statistics']['perc_not_update_days'] - a['statistics']['perc_not_update_days'];
+        let a_val = 999
+        let b_val = 999
+        if (a['statistics'] && a['statistics'].hasOwnProperty('perc_not_update_days')) {
+          a_val = a['statistics']['perc_not_update_days']
+        }
+        if (b['statistics'] && b['statistics'].hasOwnProperty('perc_not_update_days')) {
+          b_val = b['statistics']['perc_not_update_days']
+        }
+        return b_val - a_val;
+        //return b['statistics']['perc_not_update_days'] - a['statistics']['perc_not_update_days'];
       });
     }
   } else if (_field === 'cluster_id') {
@@ -887,67 +905,209 @@ function sortByField(_field) {
   } else if (_field === 'min_earn') {
     if (sortFieldFlag.value) {
       aggressiveViewObjs.value.sort((a, b) => {
-        return a['statistics']['min_sort_tot_earn'] - b['statistics']['min_sort_tot_earn'];
+        let a_val = -999
+        let b_val = -999
+        if (a['statistics'] && a['statistics'].hasOwnProperty('min_sort_tot_earn')) {
+          a_val = a['statistics']['min_sort_tot_earn']
+        }
+        if (b['statistics'] && b['statistics'].hasOwnProperty('min_sort_tot_earn')) {
+          b_val = b['statistics']['min_sort_tot_earn']
+        }
+        return a_val - b_val;
+        //return a['statistics']['min_sort_tot_earn'] - b['statistics']['min_sort_tot_earn'];
       });
     } else {
       aggressiveViewObjs.value.sort((a, b) => {
-        return b['statistics']['min_sort_tot_earn'] - a['statistics']['min_sort_tot_earn'];
+        let a_val = -999
+        let b_val = -999
+        if (a['statistics'] && a['statistics'].hasOwnProperty('min_sort_tot_earn')) {
+          a_val = a['statistics']['min_sort_tot_earn']
+        }
+        if (b['statistics'] && b['statistics'].hasOwnProperty('min_sort_tot_earn')) {
+          b_val = b['statistics']['min_sort_tot_earn']
+        }
+        return b_val - a_val;
+        //return b['statistics']['min_sort_tot_earn'] - a['statistics']['min_sort_tot_earn'];
       });
     }
   } else if (_field === 'avg_earn') {
     if (sortFieldFlag.value) {
       aggressiveViewObjs.value.sort((a, b) => {
-        return a['statistics']['avg_sort_tot_earn'] - b['statistics']['avg_sort_tot_earn'];
+        let a_val = -999
+        let b_val = -999
+        if (a['statistics'] && a['statistics'].hasOwnProperty('avg_sort_tot_earn')) {
+          a_val = a['statistics']['avg_sort_tot_earn']
+        }
+        if (b['statistics'] && b['statistics'].hasOwnProperty('avg_sort_tot_earn')) {
+          b_val = b['statistics']['avg_sort_tot_earn']
+        }
+        return a_val - b_val;
+        //return a['statistics']['avg_sort_tot_earn'] - b['statistics']['avg_sort_tot_earn'];
       });
     } else {
       aggressiveViewObjs.value.sort((a, b) => {
-        return b['statistics']['avg_sort_tot_earn'] - a['statistics']['avg_sort_tot_earn'];
+        let a_val = -999
+        let b_val = -999
+        if (a['statistics'] && a['statistics'].hasOwnProperty('avg_sort_tot_earn')) {
+          a_val = a['statistics']['avg_sort_tot_earn']
+        }
+        if (b['statistics'] && b['statistics'].hasOwnProperty('avg_sort_tot_earn')) {
+          b_val = b['statistics']['avg_sort_tot_earn']
+        }
+        return b_val - a_val;
+        //return b['statistics']['avg_sort_tot_earn'] - a['statistics']['avg_sort_tot_earn'];
       });
     }
   } else if (_field === 'max_earn') {
     if (sortFieldFlag.value) {
       aggressiveViewObjs.value.sort((a, b) => {
-        return a['statistics']['max_sort_tot_earn'] - b['statistics']['max_sort_tot_earn'];
+        let a_val = -999
+        let b_val = -999
+        if (a['statistics'] && a['statistics'].hasOwnProperty('max_sort_tot_earn')) {
+          a_val = a['statistics']['max_sort_tot_earn']
+        }
+        if (b['statistics'] && b['statistics'].hasOwnProperty('max_sort_tot_earn')) {
+          b_val = b['statistics']['max_sort_tot_earn']
+        }
+        return a_val - b_val;
+        //return a['statistics']['max_sort_tot_earn'] - b['statistics']['max_sort_tot_earn'];
       });
     } else {
       aggressiveViewObjs.value.sort((a, b) => {
-        return b['statistics']['max_sort_tot_earn'] - a['statistics']['max_sort_tot_earn'];
+        let a_val = -999
+        let b_val = -999
+        if (a['statistics'] && a['statistics'].hasOwnProperty('max_sort_tot_earn')) {
+          a_val = a['statistics']['max_sort_tot_earn']
+        }
+        if (b['statistics'] && b['statistics'].hasOwnProperty('max_sort_tot_earn')) {
+          b_val = b['statistics']['max_sort_tot_earn']
+        }
+        return b_val - a_val;
+        //return b['statistics']['max_sort_tot_earn'] - a['statistics']['max_sort_tot_earn'];
       });
     }
   } else if (_field === 'positive') {
     if (sortFieldFlag.value) {
       aggressiveViewObjs.value.sort((a, b) => {
-        if (a['positive']['positive_reach_len'] != b['positive']['positive_reach_len']) {
-          return a['positive']['positive_reach_len'] - b['positive']['positive_reach_len'];
-        } else {
-          return b['negative']['negative_reach_len'] - a['negative']['negative_reach_len'];
+        let a_val = -999
+        let b_val = -999
+        if (a['positive'] && a['positive'].hasOwnProperty('positive_reach_len')) {
+          a_val = a['positive']['positive_reach_len']
         }
+        if (b['positive'] && b['positive'].hasOwnProperty('positive_reach_len')) {
+          b_val = b['positive']['positive_reach_len']
+        }
+
+        if (a_val != b_val) {
+          return a_val - b_val;
+        } else {
+          let a_val = -999
+          let b_val = -999
+          if (a['negative'] && a['negative'].hasOwnProperty('negative_reach_len')) {
+            a_val = a['negative']['negative_reach_len']
+          }
+          if (b['negative'] && b['negative'].hasOwnProperty('negative_reach_len')) {
+            b_val = b['negative']['negative_reach_len']
+          }
+          return b_val - a_val;
+        }        
+        // if (a['positive']['positive_reach_len'] != b['positive']['positive_reach_len']) {
+        //   return a['positive']['positive_reach_len'] - b['positive']['positive_reach_len'];
+        // } else {
+        //   return b['negative']['negative_reach_len'] - a['negative']['negative_reach_len'];
+        // }
       });
     } else {
       aggressiveViewObjs.value.sort((a, b) => {
-        if (a['positive']['positive_reach_len'] != b['positive']['positive_reach_len']) {
-          return b['positive']['positive_reach_len'] - a['positive']['positive_reach_len'];
-        } else {
-          return a['negative']['negative_reach_len'] - b['negative']['negative_reach_len'];
+        let a_val = -999
+        let b_val = -999
+        if (a['positive'] && a['positive'].hasOwnProperty('positive_reach_len')) {
+          a_val = a['positive']['positive_reach_len']
         }
+        if (b['positive'] && b['positive'].hasOwnProperty('positive_reach_len')) {
+          b_val = b['positive']['positive_reach_len']
+        }
+
+        if (a_val != b_val) {
+          return b_val -  a_val;
+        } else {
+          let a_val = -999
+          let b_val = -999
+          if (a['negative'] && a['negative'].hasOwnProperty('negative_reach_len')) {
+            a_val = a['negative']['negative_reach_len']
+          }
+          if (b['negative'] && b['negative'].hasOwnProperty('negative_reach_len')) {
+            b_val = b['negative']['negative_reach_len']
+          }
+          return a_val - b_val;
+        } 
+        // if (a['positive']['positive_reach_len'] != b['positive']['positive_reach_len']) {
+        //   return b['positive']['positive_reach_len'] - a['positive']['positive_reach_len'];
+        // } else {
+        //   return a['negative']['negative_reach_len'] - b['negative']['negative_reach_len'];
+        // }
       });
     }
   } else if (_field === 'negative') {
     if (sortFieldFlag.value) {
       aggressiveViewObjs.value.sort((a, b) => {
-        if (a['negative']['negative_reach_len'] != b['negative']['negative_reach_len']) {
-          return a['negative']['negative_reach_len'] - b['negative']['negative_reach_len'];
-        } else {
-          return b['positive']['positive_reach_len'] - a['positive']['positive_reach_len'];
+        let a_val = -999
+        let b_val = -999
+        if (a['negative'] && a['negative'].hasOwnProperty('negative_reach_len')) {
+          a_val = a['negative']['negative_reach_len']
         }
+        if (b['negative'] && b['negative'].hasOwnProperty('negative_reach_len')) {
+          b_val = b['negative']['negative_reach_len']
+        }
+
+        if (a_val != b_val) {
+          return a_val - b_val;
+        } else {
+          let a_val = -999
+          let b_val = -999
+          if (a['positive'] && a['positive'].hasOwnProperty('positive_reach_len')) {
+            a_val = a['positive']['positive_reach_len']
+          }
+          if (b['positive'] && b['positive'].hasOwnProperty('positive_reach_len')) {
+            b_val = b['positive']['positive_reach_len']
+          }
+          return b_val - a_val;
+        }
+        // if (a['negative']['negative_reach_len'] != b['negative']['negative_reach_len']) {
+        //   return a['negative']['negative_reach_len'] - b['negative']['negative_reach_len'];
+        // } else {
+        //   return b['positive']['positive_reach_len'] - a['positive']['positive_reach_len'];
+        // }
       });
     } else {
       aggressiveViewObjs.value.sort((a, b) => {
-        if (a['negative']['negative_reach_len'] != b['negative']['negative_reach_len']) {
-          return b['negative']['negative_reach_len'] - a['negative']['negative_reach_len'];
-        } else {
-          return a['positive']['positive_reach_len'] - b['positive']['positive_reach_len'];
+        let a_val = -999
+        let b_val = -999
+        if (a['negative'] && a['negative'].hasOwnProperty('negative_reach_len')) {
+          a_val = a['negative']['negative_reach_len']
         }
+        if (b['negative'] && b['negative'].hasOwnProperty('negative_reach_len')) {
+          b_val = b['negative']['negative_reach_len']
+        }
+
+        if (a_val != b_val) {
+          return b_val - a_val;
+        } else {
+          let a_val = -999
+          let b_val = -999
+          if (a['positive'] && a['positive'].hasOwnProperty('positive_reach_len')) {
+            a_val = a['positive']['positive_reach_len']
+          }
+          if (b['positive'] && b['positive'].hasOwnProperty('positive_reach_len')) {
+            b_val = b['positive']['positive_reach_len']
+          }
+          return a_val - b_val;
+        }
+        // if (a['negative']['negative_reach_len'] != b['negative']['negative_reach_len']) {
+        //   return b['negative']['negative_reach_len'] - a['negative']['negative_reach_len'];
+        // } else {
+        //   return a['positive']['positive_reach_len'] - b['positive']['positive_reach_len'];
+        // }
       });
     }
   } else if (_field === 'wav_rate') {
@@ -963,21 +1123,57 @@ function sortByField(_field) {
   } else if (_field === 'day_xxx_thres') {
     if (sortFieldFlag.value) {
       aggressiveViewObjs.value.sort((a, b) => {
-        return a['statistics']['day_sort_tot_thres'] - b['statistics']['day_sort_tot_thres'];
+        let a_val = -999
+        let b_val = -999
+        if (a['statistics'] && a['statistics'].hasOwnProperty('day_sort_tot_thres')) {
+          a_val = a['statistics']['day_sort_tot_thres']
+        }
+        if (b['statistics'] && b['statistics'].hasOwnProperty('day_sort_tot_thres')) {
+          b_val = b['statistics']['day_sort_tot_thres']
+        }
+        return a_val - b_val;
+        //return a['statistics']['day_sort_tot_thres'] - b['statistics']['day_sort_tot_thres'];
       });
     } else {
       aggressiveViewObjs.value.sort((a, b) => {
-        return b['statistics']['day_sort_tot_thres'] - a['statistics']['day_sort_tot_thres'];
+        let a_val = -999
+        let b_val = -999
+        if (a['statistics'] && a['statistics'].hasOwnProperty('day_sort_tot_thres')) {
+          a_val = a['statistics']['day_sort_tot_thres']
+        }
+        if (b['statistics'] && b['statistics'].hasOwnProperty('day_sort_tot_thres')) {
+          b_val = b['statistics']['day_sort_tot_thres']
+        }
+        return b_val - a_val;
+        //return b['statistics']['day_sort_tot_thres'] - a['statistics']['day_sort_tot_thres'];
       });
     }
   } else if (_field === 'fund_len') {
     if (sortFieldFlag.value) {
       aggressiveViewObjs.value.sort((a, b) => {
-        return a['statistics']['fund_perc_len'] - b['statistics']['fund_perc_len'];
+        let a_val = 9999
+        let b_val = 9999
+        if (a['statistics'] && a['statistics'].hasOwnProperty('fund_perc_len')) {
+          a_val = a['statistics']['fund_perc_len']
+        }
+        if (b['statistics'] && b['statistics'].hasOwnProperty('fund_perc_len')) {
+          b_val = b['statistics']['fund_perc_len']
+        }
+        return a_val - b_val;
+        //return a['statistics']['fund_perc_len'] - b['statistics']['fund_perc_len'];
       });
     } else {
       aggressiveViewObjs.value.sort((a, b) => {
-        return b['statistics']['fund_perc_len'] - a['statistics']['fund_perc_len'];
+        let a_val = 9999
+        let b_val = 9999
+        if (a['statistics'] && a['statistics'].hasOwnProperty('fund_perc_len')) {
+          a_val = a['statistics']['fund_perc_len']
+        }
+        if (b['statistics'] && b['statistics'].hasOwnProperty('fund_perc_len')) {
+          b_val = b['statistics']['fund_perc_len']
+        }
+        return b_val - a_val;
+        //return b['statistics']['fund_perc_len'] - a['statistics']['fund_perc_len'];
       });
     }
   } else if (_field === 'esti_pe_ding') {

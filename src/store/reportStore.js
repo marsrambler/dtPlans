@@ -80,10 +80,11 @@ export const useReportStore = defineStore('report-store', () => {
                 });            
             });            
         });
-        alert("后台开始加载数据，需要等待一段时间")
+        useApiStore().pop_alert_msg("后台开始加载数据，需要等待一段时间");
         await getRecordsAndRates('refresh');
         sync_in_progress.value = false;
-        useApiStore().pop_alert_msg("请手动刷新浏览器，获取更新数据");    
+        useApiStore().pop_alert_msg("请手动刷新浏览器，获取更新数据");
+        alert("后台加载数据完成，点击'确认'，并刷新浏览器，才可继续操作")
     }
 
     function get_today_str() {
