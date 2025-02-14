@@ -148,20 +148,27 @@
             </div>
           </th>
           <th :style="{ 'width': colWidMap['col_8'] + 'rem' }">
-            <div class="w50_w_br" @click="sortByField('buy_money')">
+            <div class="w33_w_br" @click="sortByField('buy_money')">
               <template v-if="sortFieldName === 'buy_money'">
                 <span v-if="sortFieldFlag"><i class="bi bi-arrow-up"></i></span>
                 <span v-else><i class="bi bi-arrow-down"></i></span>
               </template>
-              <span>购入</span>
+              <span style="font-size:0.9rem;">设定</span>
             </div>
-            <div class="w50_w_br" @click="sortByField('set_money')" style="border: none;">
+            <div class="w33_w_br" @click="sortByField('set_money')">
               <template v-if="sortFieldName === 'set_money'">
                 <span v-if="sortFieldFlag"><i class="bi bi-arrow-up"></i></span>
                 <span v-else><i class="bi bi-arrow-down"></i></span>
               </template>
-              <span>设定</span>
+              <span style="font-size:0.9rem;">调整</span>
             </div>
+            <div class="w33_w_br" @click="sortByField('set_date')" style="border: none;">
+              <template v-if="sortFieldName === 'set_date'">
+                <span v-if="sortFieldFlag"><i class="bi bi-arrow-up"></i></span>
+                <span v-else><i class="bi bi-arrow-down"></i></span>
+              </template>
+              <span style="font-size:0.9rem;">日期</span>
+            </div>            
           </th>
           <th :style="{ 'width': colWidMap['col_9'] + 'rem' }">
             <div class="w50_w_br" @click="sortByField('cont_start')">
@@ -523,8 +530,14 @@
                   </template>
                 </div>
                 <div style="text-wrap:nowrap;">
-                  <span style="font-size: 1rem; font-style: italic;text-decoration: underline;">{{
-                    oneRow['last_adjust_money_date'] }}</span>&nbsp;
+                  <template v-if="oneRow['last_adjust_money_date'] == today_date_str">
+                    <span style="font-size: 1rem; font-style: italic;text-decoration: underline;">{{
+                      oneRow['last_adjust_money_date'] }}</span>&nbsp;                  
+                  </template>
+                  <template v-else>
+                    <span style="font-size: 1rem;font-weight: bold;color:hotpink;font-family:fangsong;">{{
+                      oneRow['last_adjust_money_date'] }}</span>&nbsp;                      
+                  </template>
                   <input class="btn btn-outline-danger btn-sm" style="width:3.5rem;" type="button" value="保存"
                     @click.stop="setComposeProperty_wrapper(oneRow['fund_id'], oneRow['fund_name'], oneRow['compose_name'], parseInt(oneRow['money']), oneRow['buyin_source'], oneRow['lossFlag'], oneRow['fixed_buyin_date'])">
                 </div>
@@ -1245,8 +1258,14 @@
                   </template>
                 </div>
                 <div style="height: 1.8rem;text-wrap:nowrap;">
-                  <span style="font-size: 1rem; font-style: italic;text-decoration: underline;">{{
-                    oneRow['last_adjust_money_date'] }}</span>&nbsp;
+                  <template v-if="oneRow['last_adjust_money_date'] == today_date_str">
+                    <span style="font-size: 1rem; font-style: italic;text-decoration: underline;">{{
+                      oneRow['last_adjust_money_date'] }}</span>&nbsp;
+                  </template>
+                  <template v-else>
+                    <span style="font-size: 1rem;font-weight: bold;color:hotpink;font-family:fangsong;">{{
+                      oneRow['last_adjust_money_date'] }}</span>&nbsp;
+                  </template>                  
                   <input class="btn btn-outline-danger btn-sm" style="width:3.5rem;" type="button" value="保存"
                     @click.stop="setComposeProperty_wrapper(oneRow['fund_id'], oneRow['fund_name'], oneRow['compose_name'], parseInt(oneRow['money']), oneRow['buyin_source'], oneRow['lossFlag'], oneRow['fixed_buyin_date'])">
                 </div>
@@ -1769,6 +1788,8 @@ const colWidMapSub = {
   'col_12': 4
 }
 
+const today_date_str = getTodayStr()
+
 //const compose_name = ref('all')
 
 watch([compose_name, composeObjs, fixedHoldObjs_full], () => {
@@ -1880,7 +1901,7 @@ watch([composeObjs, compose_name, fixedHoldObjs, buyoutRecords, noteObjs, show4S
     if (elem['compose_objs'] && elem['compose_objs'].length > 0) {
       elem['compose_objs'].forEach(_obj => {
         _obj['show_temp_quant_tip'] = false
-        _obj['write_note_date'] = getTodayStr()
+        _obj['write_note_date'] = today_date_str
         _obj['write_note_perc'] = ''
         _obj['write_note_comments'] = ''
         _obj['note_objs'] = []
@@ -2293,7 +2314,7 @@ watch([composeObjs, compose_name, fixedHoldObjs, buyoutRecords, noteObjs, show4S
     console.log("$$$$$$ tot_plan_money_trident.value: ", tot_plan_money_trident.value, " tot_set_money_trident: ", tot_set_money_trident.value)                
     console.log("$$$$$$ recalc plan_buyin_money end $$$$$$")
 
-    let _today_str_4_adj = getTodayStr()
+    let _today_str_4_adj = today_date_str
 
     composeViewObjs.value.forEach(elem => {
       if (!_need_special_logic) {
@@ -3116,6 +3137,32 @@ if (_field === 'day_xxx_thres') {
         return _b - _a
       });
     }
+  } else if (_field === 'set_date') {
+    if (sortFieldFlag.value) {
+      composeViewObjs.value.sort((a, b) => {
+        let _a = (a.hasOwnProperty('last_adjust_money_date') && a['last_adjust_money_date'] !== null) ? a['last_adjust_money_date'] : '2050-01-01'
+        let _b = (b.hasOwnProperty('last_adjust_money_date') && b['last_adjust_money_date'] !== null) ? b['last_adjust_money_date'] : '2050-01-01'
+        if (_a.trim() === '') {
+          _a = '2050-01-01'
+        }
+        if (_b.trim() === '') {
+          _b = '2050-01-01'
+        }        
+        return new Date(_a) - new Date(_b)
+      });
+    } else {
+      composeViewObjs.value.sort((a, b) => {
+        let _a = (a.hasOwnProperty('last_adjust_money_date') && a['last_adjust_money_date'] !== null) ? a['last_adjust_money_date'] : '2050-01-01'
+        let _b = (b.hasOwnProperty('last_adjust_money_date') && b['last_adjust_money_date'] !== null) ? b['last_adjust_money_date'] : '2050-01-01'
+        if (_a.trim() === '') {
+          _a = '2050-01-01'
+        }
+        if (_b.trim() === '') {
+          _b = '2050-01-01'
+        }         
+        return new Date(_b) - new Date(_a)
+      });
+    }
   } else if (_field === 'fund_len') {
     if (sortFieldFlag.value) {
       composeViewObjs.value.sort((a, b) => {
@@ -3280,7 +3327,7 @@ function alignWriteNote(oneRowObj) {
   } else {
     oneRowObj['note_objs'] = []
   }
-  let _today_str = getTodayStr()
+  let _today_str = today_date_str
   if (oneRowObj['note_objs'].length > 0) {
     let _last_note = oneRowObj['note_objs'][oneRowObj['note_objs'].length - 1]
     if (_last_note['date_str'] == _today_str) {
@@ -3289,13 +3336,13 @@ function alignWriteNote(oneRowObj) {
       oneRowObj['write_note_comments'] = _last_note['comments']
       oneRowObj['curr_note_idx'] = oneRowObj['note_objs'].length - 1
     } else {
-      oneRowObj['write_note_date'] = getTodayStr()
+      oneRowObj['write_note_date'] = today_date_str
       oneRowObj['write_note_perc'] = ''
       oneRowObj['write_note_comments'] = ''
       oneRowObj['curr_note_idx'] = -1
     }
   } else {
-    oneRowObj['write_note_date'] = getTodayStr()
+    oneRowObj['write_note_date'] = today_date_str
     oneRowObj['write_note_perc'] = ''
     oneRowObj['write_note_comments'] = ''
     oneRowObj['curr_note_idx'] = -1

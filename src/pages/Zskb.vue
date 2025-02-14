@@ -537,6 +537,20 @@ const colWidMap = {
   'col_12': 5
 }
 
+function processComposeRefer(elem) {
+  if (elem['compose_obj']) {
+    if (elem['compose_obj'].hasOwnProperty('refer_compose_name')) {
+      elem['refer_compose_name'] = elem['compose_obj']['refer_compose_name']
+    }
+    if (elem['compose_obj'].hasOwnProperty('add_compose_refer_date_str')) {
+      elem['add_compose_refer_date_str'] = elem['compose_obj']['add_compose_refer_date_str']
+    }
+    if (elem['compose_obj'].hasOwnProperty('add_compose_refer_days')) {
+      elem['add_compose_refer_days'] = elem['compose_obj']['add_compose_refer_days']
+    }
+  }   
+}
+
 const zskbViewObjs = ref([])
 const wideIdxOnly = ref(true)
 const topicIdxOnly = ref(true)
@@ -602,38 +616,34 @@ watch([zskbObjs, wideIdxOnly, topicIdxOnly, indusIdxOnly, qdiiIdxOnly, mzIdxOnly
       if (_ovtree_fund_ids.indexOf(elem['fund_id']) != -1) {
         elem['compose_plan'] = 'ovtree'
         elem['compose_obj'] = _ovtree_fund_objs.find(_obj => _obj['fund_id'] === elem['fund_id'])
+        processComposeRefer(elem)
       } else if (_flyhorse_fund_ids.indexOf(elem['fund_id']) != -1) {
         elem['compose_plan'] = 'flyhorse'
         elem['compose_obj'] = _flyhorse_fund_objs.find(_obj => _obj['fund_id'] === elem['fund_id'])
-        if (elem['compose_obj']) {
-          if (elem['compose_obj'].hasOwnProperty('refer_compose_name')) {
-            elem['refer_compose_name'] = elem['compose_obj']['refer_compose_name']
-          }
-          if (elem['compose_obj'].hasOwnProperty('add_compose_refer_date_str')) {
-            elem['add_compose_refer_date_str'] = elem['compose_obj']['add_compose_refer_date_str']
-          }
-          if (elem['compose_obj'].hasOwnProperty('add_compose_refer_days')) {
-            elem['add_compose_refer_days'] = elem['compose_obj']['add_compose_refer_days']
-          }
-        }                  
+        processComposeRefer(elem)         
       } else if (_medusa_fund_ids.indexOf(elem['fund_id']) != -1) {
         elem['compose_plan'] = 'medusa'
         elem['compose_obj'] = _medusa_fund_objs.find(_obj => _obj['fund_id'] === elem['fund_id'])
+        processComposeRefer(elem)
       } else if (_dolphin_fund_ids.indexOf(elem['fund_id']) != -1) {
         elem['compose_plan'] = 'dolphin'
         elem['compose_obj'] = _dolphin_fund_objs.find(_obj => _obj['fund_id'] === elem['fund_id'])
+        processComposeRefer(elem)
       } else if (_trident_fund_ids.indexOf(elem['fund_id']) != -1) {
         elem['compose_plan'] = 'trident'
         elem['compose_obj'] = _trident_fund_objs.find(_obj => _obj['fund_id'] === elem['fund_id'])
+        processComposeRefer(elem)
       } else if (_gdngoat_fund_ids.indexOf(elem['fund_id']) != -1) {
         elem['compose_plan'] = 'gdngoat'
         elem['compose_obj'] = _gdngoat_fund_objs.find(_obj => _obj['fund_id'] === elem['fund_id'])
+        processComposeRefer(elem)
       } else {
         //elem['compose_plan'] = 'noplan'
         elem['compose_obj'] = null
         if (elem.hasOwnProperty('compose_plan') && elem['compose_plan'] != 'noplan') {
           console.warn("zskb page get compose_obj failed: ", elem['fund_id'], elem['fund_name']);
         }
+        processComposeRefer(elem)
       }
       calculatePlanMoney('zskb', elem)
     })
