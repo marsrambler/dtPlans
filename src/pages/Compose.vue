@@ -155,19 +155,19 @@
               </template>
               <span style="font-size:0.9rem;">设定</span>
             </div>
-            <div class="w33_w_br" @click="sortByField('set_money')">
-              <template v-if="sortFieldName === 'set_money'">
+            <div class="w33_w_br" @click="sortByField('adj_date')">
+              <template v-if="sortFieldName === 'adj_date'">
                 <span v-if="sortFieldFlag"><i class="bi bi-arrow-up"></i></span>
                 <span v-else><i class="bi bi-arrow-down"></i></span>
               </template>
-              <span style="font-size:0.9rem;">调整</span>
+              <span style="font-size:0.9rem;">调日</span>
             </div>
             <div class="w33_w_br" @click="sortByField('set_date')" style="border: none;">
               <template v-if="sortFieldName === 'set_date'">
                 <span v-if="sortFieldFlag"><i class="bi bi-arrow-up"></i></span>
                 <span v-else><i class="bi bi-arrow-down"></i></span>
               </template>
-              <span style="font-size:0.9rem;">日期</span>
+              <span style="font-size:0.9rem;">设日</span>
             </div>            
           </th>
           <th :style="{ 'width': colWidMap['col_9'] + 'rem' }">
@@ -529,16 +529,32 @@
                     </template>
                   </template>
                 </div>
-                <div style="text-wrap:nowrap;">
-                  <template v-if="oneRow['last_adjust_money_date'] == today_date_str">
-                    <span style="font-size: 1rem; font-style: italic;text-decoration: underline;">{{
-                      oneRow['last_adjust_money_date'] }}</span>&nbsp;                  
-                  </template>
-                  <template v-else>
-                    <span style="font-size: 1rem;font-weight: bold;color:hotpink;font-family:fangsong;">{{
-                      oneRow['last_adjust_money_date'] }}</span>&nbsp;                      
-                  </template>
-                  <input class="btn btn-outline-danger btn-sm" style="width:3.5rem;" type="button" value="保存"
+                <div style="text-wrap:nowrap; display: flex; align-items: center;">
+                  <div style="line-height: 0.9; min-width: 4rem;">
+                    <div style="margin-top: 5px;">
+                      <span style="font-size:0.8rem;">设:</span>
+                      <template v-if="oneRow['last_adjust_money_date_set'] && oneRow['last_adjust_money_date_set'] == today_date_str">
+                        <span style="font-size: 0.9rem; font-style: italic;text-decoration: underline;">{{
+                          oneRow['last_adjust_money_date_set'] }}</span>&nbsp;                  
+                      </template>
+                      <template v-else-if="oneRow['last_adjust_money_date_set']">
+                        <span style="font-size: 0.9rem;font-weight: bold;color:hotpink;">{{
+                          oneRow['last_adjust_money_date_set'] }}</span>&nbsp;                      
+                      </template>
+                    </div>                    
+                    <div style="margin-top: 5px;">
+                      <span style="font-size:0.8rem;">调:</span>
+                      <template v-if="oneRow['last_adjust_money_date'] && oneRow['last_adjust_money_date'] == today_date_str">
+                        <span style="font-size: 0.9rem; font-style: italic;text-decoration: underline;">{{
+                          oneRow['last_adjust_money_date'] }}</span>&nbsp;                  
+                      </template>
+                      <template v-else-if="oneRow['last_adjust_money_date']">
+                        <span style="font-size: 0.9rem;font-weight: bold;color:hotpink;">{{
+                          oneRow['last_adjust_money_date'] }}</span>&nbsp;                      
+                      </template>
+                    </div>
+                  </div>
+                  <input class="btn btn-outline-danger btn-sm" style="margin-left: 0.5rem;" type="button" value="保存"
                     @click.stop="setComposeProperty_wrapper(oneRow['fund_id'], oneRow['fund_name'], oneRow['compose_name'], parseInt(oneRow['money']), oneRow['buyin_source'], oneRow['lossFlag'], oneRow['fixed_buyin_date'])">
                 </div>
               </td>
@@ -1257,16 +1273,32 @@
                     </template>
                   </template>
                 </div>
-                <div style="height: 1.8rem;text-wrap:nowrap;">
-                  <template v-if="oneRow['last_adjust_money_date'] == today_date_str">
-                    <span style="font-size: 1rem; font-style: italic;text-decoration: underline;">{{
-                      oneRow['last_adjust_money_date'] }}</span>&nbsp;
-                  </template>
-                  <template v-else>
-                    <span style="font-size: 1rem;font-weight: bold;color:hotpink;font-family:fangsong;">{{
-                      oneRow['last_adjust_money_date'] }}</span>&nbsp;
-                  </template>                  
-                  <input class="btn btn-outline-danger btn-sm" style="width:3.5rem;" type="button" value="保存"
+                <div style="height: 1.8rem; text-wrap:nowrap; display: flex; align-items: center;">
+                  <div style="line-height: 0.9; min-width: 4rem;">
+                    <div style="margin-top: 5px;">
+                      <span style="font-size:0.8rem;">设:</span>
+                      <template v-if="oneRow['last_adjust_money_date_set'] && oneRow['last_adjust_money_date_set'] == today_date_str">
+                        <span style="font-size: 0.9rem; font-style: italic;text-decoration: underline;">{{
+                          oneRow['last_adjust_money_date_set'] }}</span>&nbsp;
+                      </template>
+                      <template v-else-if="oneRow['last_adjust_money_date_set']">
+                        <span style="font-size: 0.9rem;font-weight: bold;color:hotpink;">{{
+                          oneRow['last_adjust_money_date_set'] }}</span>&nbsp;
+                      </template>
+                    </div>
+                    <div style="margin-top: 5px;">
+                      <span style="font-size:0.8rem;">调:</span>
+                      <template v-if="oneRow['last_adjust_money_date'] && oneRow['last_adjust_money_date'] == today_date_str">
+                        <span style="font-size: 0.9rem; font-style: italic;text-decoration: underline;">{{
+                          oneRow['last_adjust_money_date'] }}</span>&nbsp;
+                      </template>
+                      <template v-else-if="oneRow['last_adjust_money_date']">
+                        <span style="font-size: 0.9rem;font-weight: bold;color:hotpink;">{{
+                          oneRow['last_adjust_money_date'] }}</span>&nbsp;
+                      </template>
+                    </div>
+                  </div>                  
+                  <input class="btn btn-outline-danger btn-sm" style="margin-left: 0.5rem;" type="button" value="保存"
                     @click.stop="setComposeProperty_wrapper(oneRow['fund_id'], oneRow['fund_name'], oneRow['compose_name'], parseInt(oneRow['money']), oneRow['buyin_source'], oneRow['lossFlag'], oneRow['fixed_buyin_date'])">
                 </div>
               </td>
@@ -3137,7 +3169,7 @@ if (_field === 'day_xxx_thres') {
         return _b - _a
       });
     }
-  } else if (_field === 'set_date') {
+  } else if (_field === 'adj_date') {
     if (sortFieldFlag.value) {
       composeViewObjs.value.sort((a, b) => {
         let _a = (a.hasOwnProperty('last_adjust_money_date') && a['last_adjust_money_date'] !== null) ? a['last_adjust_money_date'] : '2050-01-01'
@@ -3154,6 +3186,32 @@ if (_field === 'day_xxx_thres') {
       composeViewObjs.value.sort((a, b) => {
         let _a = (a.hasOwnProperty('last_adjust_money_date') && a['last_adjust_money_date'] !== null) ? a['last_adjust_money_date'] : '2050-01-01'
         let _b = (b.hasOwnProperty('last_adjust_money_date') && b['last_adjust_money_date'] !== null) ? b['last_adjust_money_date'] : '2050-01-01'
+        if (_a.trim() === '') {
+          _a = '2050-01-01'
+        }
+        if (_b.trim() === '') {
+          _b = '2050-01-01'
+        }         
+        return new Date(_b) - new Date(_a)
+      });
+    }
+  } else if (_field === 'set_date') {
+    if (sortFieldFlag.value) {
+      composeViewObjs.value.sort((a, b) => {
+        let _a = (a.hasOwnProperty('last_adjust_money_date_set') && a['last_adjust_money_date_set'] !== null) ? a['last_adjust_money_date_set'] : '2050-01-01'
+        let _b = (b.hasOwnProperty('last_adjust_money_date_set') && b['last_adjust_money_date_set'] !== null) ? b['last_adjust_money_date_set'] : '2050-01-01'
+        if (_a.trim() === '') {
+          _a = '2050-01-01'
+        }
+        if (_b.trim() === '') {
+          _b = '2050-01-01'
+        }        
+        return new Date(_a) - new Date(_b)
+      });
+    } else {
+      composeViewObjs.value.sort((a, b) => {
+        let _a = (a.hasOwnProperty('last_adjust_money_date_set') && a['last_adjust_money_date_set'] !== null) ? a['last_adjust_money_date_set'] : '2050-01-01'
+        let _b = (b.hasOwnProperty('last_adjust_money_date_set') && b['last_adjust_money_date_set'] !== null) ? b['last_adjust_money_date_set'] : '2050-01-01'
         if (_a.trim() === '') {
           _a = '2050-01-01'
         }
