@@ -199,6 +199,10 @@ export const useReportStore = defineStore('report-store', () => {
                             elem['soldHistoryWrapper_reverse'] = []
                         }
                     })
+
+                    tranReportObjs(_single_latest, retroFundObj, fixedFundObjs, composeObjs, fixedHoldObjs, fixed_status_data_obj, indexRtRateObjs);
+                    tranReportObjs(_single_full,   retroFundObj, fixedFundObjs, composeObjs, fixedHoldObjs, fixed_status_data_obj, indexRtRateObjs);
+
                     let _single_full_one = _single_full[0]
                     let _single_latest_one = _single_latest[0]
 
@@ -217,6 +221,11 @@ export const useReportStore = defineStore('report-store', () => {
                     } else {
                         _temp_latest_objs.splice(_idx_latest, 1, _single_latest_one)
                     }
+                    
+                    // trigger tranReportObjs 1 time
+                    //if (objsTransFlag.value) {
+                    //    objsTransFlag.value = false
+                    //}
 
                     dynRecordObjs_full.value = _temp_full_objs
                     dynRecordObjs_latest.value = _temp_latest_objs
@@ -228,11 +237,16 @@ export const useReportStore = defineStore('report-store', () => {
                     }
                     let _raw_objs = JSON.parse(JSON.stringify(_ret_objs));
                     add_in_db(_raw_objs, _storage_name);
+
                 } else {
-                    dynRecordObjs_full.value = _response['full']
-                    dynRecordObjs_latest.value = _response['latest']
-                    if (dynRecordObjs_full.value.length > 0) {
-                        dynRecordObjs_full.value.forEach(elem => {
+
+                    // dynRecordObjs_full.value = _response['full']
+                    // dynRecordObjs_latest.value = _response['latest']
+                    let _temp_full_objs = _response['full']
+                    let _temp_latest_objs = _response['latest'] 
+
+                    if (_temp_full_objs.length > 0) {
+                        _temp_full_objs.forEach(elem => {
                             if (elem['soldHistoryWrapper'] && elem['soldHistoryWrapper'].length > 0) {
                                 let _soldHistoryWrapper = [...elem['soldHistoryWrapper']] //JSON.parse(JSON.stringify(elem['soldHistoryWrapper']))
                                 elem['soldHistoryWrapper_reverse'] = _soldHistoryWrapper.reverse()
@@ -241,8 +255,8 @@ export const useReportStore = defineStore('report-store', () => {
                             }
                         })
                     }
-                    if (dynRecordObjs_latest.value.length > 0) {
-                        dynRecordObjs_latest.value.forEach(elem => {
+                    if (_temp_latest_objs.length > 0) {
+                        _temp_latest_objs.forEach(elem => {
                             if (elem['soldHistoryWrapper'] && elem['soldHistoryWrapper'].length > 0) {
                                 let _soldHistoryWrapper = [...elem['soldHistoryWrapper']] //JSON.parse(JSON.stringify(elem['soldHistoryWrapper']))
                                 elem['soldHistoryWrapper_reverse'] = _soldHistoryWrapper.reverse()
@@ -251,6 +265,14 @@ export const useReportStore = defineStore('report-store', () => {
                             }
                         })
                     }
+
+                    // trigger tranReportObjs 1 time
+                    if (objsTransFlag.value) {
+                        objsTransFlag.value = false
+                    }
+
+                    dynRecordObjs_full.value = _temp_full_objs
+                    dynRecordObjs_latest.value = _temp_latest_objs                  
                 }
             } else {
                 console.error("axios get records and rates failed: ", response)
@@ -526,7 +548,7 @@ export const useReportStore = defineStore('report-store', () => {
     }
 
     function tranReportObjs(dynRecordObjs, retroFundObj, fixedFundObjs, composeObjs, fixedHoldObjs, fixed_status_data_obj, indexRtRateObjs/*, removedDateObjs*/) {
-        dynRecordObjs.value.forEach(elem => {
+        dynRecordObjs.forEach(elem => {
             elem['show_summ_tip'] = false;
             let _tranStateObj = new Object
             elem['tranStateObj'] = _tranStateObj
@@ -606,6 +628,7 @@ export const useReportStore = defineStore('report-store', () => {
 
     watch ([onlyShowLatest, report_select, dynRecordObjs_latest, dynRecordObjs_full, 
         retroFundObj, fixedFundObjs, composeObjs, fixedHoldObjs, fixed_status_data_obj, indexRtRateObjs/*, removedDateObjs*/], () => {
+
         if (!dynRecordObjs_latest.value || dynRecordObjs_latest.value.length === 0) {
             console.warn("*** reportStore *** bypass as dynRecordObjs_latest is null, load from indexDB is inprogress?")
             return
@@ -652,8 +675,8 @@ export const useReportStore = defineStore('report-store', () => {
         })
 
         if (!objsTransFlag.value) {
-            tranReportObjs(dynRecordObjs_latest, retroFundObj, fixedFundObjs, composeObjs, fixedHoldObjs, fixed_status_data_obj, indexRtRateObjs);
-            tranReportObjs(dynRecordObjs_full,   retroFundObj, fixedFundObjs, composeObjs, fixedHoldObjs, fixed_status_data_obj, indexRtRateObjs);
+            tranReportObjs(dynRecordObjs_latest.value, retroFundObj, fixedFundObjs, composeObjs, fixedHoldObjs, fixed_status_data_obj, indexRtRateObjs);
+            tranReportObjs(dynRecordObjs_full.value,   retroFundObj, fixedFundObjs, composeObjs, fixedHoldObjs, fixed_status_data_obj, indexRtRateObjs);
             objsTransFlag.value = true
         }
 

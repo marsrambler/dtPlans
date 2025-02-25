@@ -3184,13 +3184,13 @@ if (_field === 'day_xxx_thres') {
       });
     } else {
       composeViewObjs.value.sort((a, b) => {
-        let _a = (a.hasOwnProperty('last_adjust_money_date') && a['last_adjust_money_date'] !== null) ? a['last_adjust_money_date'] : '2050-01-01'
-        let _b = (b.hasOwnProperty('last_adjust_money_date') && b['last_adjust_money_date'] !== null) ? b['last_adjust_money_date'] : '2050-01-01'
+        let _a = (a.hasOwnProperty('last_adjust_money_date') && a['last_adjust_money_date'] !== null) ? a['last_adjust_money_date'] : '2000-01-01'
+        let _b = (b.hasOwnProperty('last_adjust_money_date') && b['last_adjust_money_date'] !== null) ? b['last_adjust_money_date'] : '2000-01-01'
         if (_a.trim() === '') {
-          _a = '2050-01-01'
+          _a = '2000-01-01'
         }
         if (_b.trim() === '') {
-          _b = '2050-01-01'
+          _b = '2000-01-01'
         }         
         return new Date(_b) - new Date(_a)
       });
@@ -3210,13 +3210,13 @@ if (_field === 'day_xxx_thres') {
       });
     } else {
       composeViewObjs.value.sort((a, b) => {
-        let _a = (a.hasOwnProperty('last_adjust_money_date_set') && a['last_adjust_money_date_set'] !== null) ? a['last_adjust_money_date_set'] : '2050-01-01'
-        let _b = (b.hasOwnProperty('last_adjust_money_date_set') && b['last_adjust_money_date_set'] !== null) ? b['last_adjust_money_date_set'] : '2050-01-01'
+        let _a = (a.hasOwnProperty('last_adjust_money_date_set') && a['last_adjust_money_date_set'] !== null) ? a['last_adjust_money_date_set'] : '2000-01-01'
+        let _b = (b.hasOwnProperty('last_adjust_money_date_set') && b['last_adjust_money_date_set'] !== null) ? b['last_adjust_money_date_set'] : '2000-01-01'
         if (_a.trim() === '') {
-          _a = '2050-01-01'
+          _a = '2000-01-01'
         }
         if (_b.trim() === '') {
-          _b = '2050-01-01'
+          _b = '2000-01-01'
         }         
         return new Date(_b) - new Date(_a)
       });
