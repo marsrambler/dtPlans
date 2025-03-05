@@ -43,19 +43,19 @@
       <thead style="">
         <tr :style="{ 'height': tabHeaderHeight + 'rem' }">
           <th :style="{ 'width': colWidMap['col_1'] + 'rem' }">
-            <div class="w50_w_br">
+            <div class="w50_w_br" @click="sortByField('update_date')">
               <template v-if="sortFieldName === 'update_date'">
                 <span v-if="sortFieldFlag"><i class="bi bi-arrow-up"></i></span>
                 <span v-else><i class="bi bi-arrow-down"></i></span>
               </template>
               <span>更新</span>
             </div>
-            <div class="w50_w_br" @click="sortByField('hold_length')" style="border: none;">
-              <template v-if="sortFieldName === 'hold_length'">
+            <div class="w50_w_br" @click="sortByField('avg_hold_days')" style="border: none;">
+              <template v-if="sortFieldName === 'avg_hold_days'">
                 <span v-if="sortFieldFlag"><i class="bi bi-arrow-up"></i></span>
                 <span v-else><i class="bi bi-arrow-down"></i></span>
               </template>
-              <span>持有期</span>
+              <span style="font-size:0.9rem;">平均持有期</span>
             </div>
           </th>
           <th :style="{ 'width': colWidMap['col_2'] + 'rem' }">
@@ -64,7 +64,7 @@
                 <span v-if="sortFieldFlag"><i class="bi bi-arrow-up"></i></span>
                 <span v-else><i class="bi bi-arrow-down"></i></span>
               </template>
-              <span>收益率</span>
+              <span>回撤</span>
             </div>
             <div class="w50_w_br" @click="sortByField('earn_per_year')" style="border: none;">
               <template v-if="sortFieldName === 'earn_per_year'">
@@ -75,20 +75,20 @@
             </div>            
           </th>
           <th :style="{ 'width': colWidMap['col_3'] + 'rem' }">
-            <div class="w50_w_br" @click="sortByField('buyin_weight')">
+            <div class="w50_w_br" @click="sortByField('hold_length')">
+              <template v-if="sortFieldName === 'hold_length'">
+                <span v-if="sortFieldFlag"><i class="bi bi-arrow-up"></i></span>
+                <span v-else><i class="bi bi-arrow-down"></i></span>
+              </template>
+              <span style="font-size:0.8rem;">总持有期</span>
+            </div> 
+            <div class="w50_w_br" @click="sortByField('buyin_weight')" style="border: none;">
               <template v-if="sortFieldName === 'buyin_weight'">
                 <span v-if="sortFieldFlag"><i class="bi bi-arrow-up"></i></span>
                 <span v-else><i class="bi bi-arrow-down"></i></span>
               </template>
               <span>权重</span>
             </div>
-            <div class="w50_w_br" @click="sortByField('hold_days')" style="border: none;">
-              <template v-if="sortFieldName === 'hold_days'">
-                <span v-if="sortFieldFlag"><i class="bi bi-arrow-up"></i></span>
-                <span v-else><i class="bi bi-arrow-down"></i></span>
-              </template>
-              <span>买入</span>
-            </div> 
           </th>
           <th :style="{ 'width': colWidMap['col_4'] + 'rem' }">
             <div class="w50_w_br" @click="sortByField('last_sold')">
@@ -486,7 +486,7 @@
             </td>
             <td style="text-align: center; padding-top: 0 !important; padding-bottom: 0 !important;" 
             v-bind:class="{ sel_row: oneRow['currSelected'] }">
-              <div class="flex_col"> <!-- style="height: 9rem;" -->
+              <div class="flex_col" style="align-items:end !important;row-gap:5px;"> <!-- style="height: 9rem;" -->
                 <button type="button" class="btn btn-primary" @click="genReport(oneRow)">
                   报告
                 </button>
@@ -503,6 +503,32 @@
                   删除
                 </button>
                 -->
+                <button type="button" class="btn btn-secondary" @click="getFundHistoryStat(oneRow.fund_id, oneRow.fund_name)">
+                  读历史
+                </button>
+                <template v-if="fundHistoryStatMap[oneRow.fund_id] && 
+                (
+                  (
+                  fundHistoryStatMap[oneRow.fund_id]['buy_date_list'] && 
+                  fundHistoryStatMap[oneRow.fund_id]['buy_date_list'].length > 0
+                  ) 
+                  || 
+                  (
+                  fundHistoryStatMap[oneRow.fund_id]['sold_date_list'] && 
+                  fundHistoryStatMap[oneRow.fund_id]['sold_date_list'].length > 0                  
+                  )
+                )">
+                  <input type="text" class=""
+                         style="border-radius:5px;border-width:1px;outline:none;width:90%;"
+                         v-model="fundHistoryStatMap[oneRow.fund_id]['target_date_str']">
+
+                  <template v-if="fundHistoryStatMap[oneRow.fund_id]['target_date_str'] && fundHistoryStatMap[oneRow.fund_id]['target_date_str'].trim() != ''">
+                    <button type="button" class="btn btn-warning" 
+                    @click="removeFundHistoryStatUI(oneRow.fund_id, oneRow.fund_name, fundHistoryStatMap[oneRow.fund_id]['target_date_str'].trim())">
+                      清除历史
+                    </button>                  
+                  </template>
+                </template>                
               </div>
             </td>
           </tr>
@@ -810,8 +836,8 @@ const zskbStore = useZskbStore()
 const { zskbObjs } = storeToRefs(zskbStore)
 
 const reportStore = useReportStore()
-const { dynRecordObjs_full, dynRecordObjs_latest, dynRecordObjs, onlyShowLatest, report_select, reportObjsReloaded, fundBuyWeight, fundBuyWeightTest } = storeToRefs(reportStore)
-const { requireDynValues, getRecordsAndRates, removeLocalDynvalue, getBigPoolFixedHold, getIndexRtRate, removeDate4Report, syncServerData, getFundBuyWeight, setFundBuyWeight } = reportStore
+const { dynRecordObjs_full, dynRecordObjs_latest, dynRecordObjs, onlyShowLatest, report_select, reportObjsReloaded, fundBuyWeight, fundBuyWeightTest, fundHistoryStatMap } = storeToRefs(reportStore)
+const { requireDynValues, getRecordsAndRates, removeLocalDynvalue, getBigPoolFixedHold, getIndexRtRate, removeDate4Report, syncServerData, getFundBuyWeight, setFundBuyWeight, getFundHistoryStat, removeFundHistoryStat } = reportStore
 
 const composeStore = useComposeStore()
 const {noteObjs, noteReportObjs} = storeToRefs(composeStore)
@@ -846,8 +872,10 @@ const report_select_option = [
   { 'source_name': '三叉戟', 'source_val': 'only_trident' },
   { 'source_name': '金毛羊', 'source_val': 'only_gdngoat' },
   { 'source_name': '其它', 'source_val': 'only_others' },
-  { 'source_name': '>持1年', 'source_val': 'hold_lt_1year' },
-  { 'source_name': '>卖3次', 'source_val': 'sold_lt_3times' },
+  { 'source_name': '>持1年', 'source_val': 'hold_gt_1year' },
+  { 'source_name': '<持1年', 'source_val': 'hold_lt_1year' },
+  { 'source_name': '>卖3次', 'source_val': 'sold_gt_3times' },
+  { 'source_name': '<卖3次', 'source_val': 'sold_lt_3times' },
   { 'source_name': '有待办', 'source_val': 'has_todo' }
 ]
 
@@ -1918,26 +1946,26 @@ function sortByField(_field, _new_sort=true) {
       });
     }
   }
-  else if (_field === 'hold_days') {
+  else if (_field === 'avg_hold_days') {
     if (sortFieldFlag.value) {
       dynRecordObjs.value.sort((a, b) => {
         let a_val = 0, b_val = 0
-        if (a['statistics'] && a['statistics']['tot_hold_days']) {
-          a_val = a['statistics']['tot_hold_days']
+        if (a['avg_sold_natural_days']) {
+          a_val = a['avg_sold_natural_days']
         }
-        if (b['statistics'] && b['statistics']['tot_hold_days']) {
-          b_val = b['statistics']['tot_hold_days']
+        if (b['avg_sold_natural_days']) {
+          b_val = b['avg_sold_natural_days']
         }
         return a_val - b_val
       });
     } else {
       dynRecordObjs.value.sort((a, b) => {
         let a_val = 0, b_val = 0
-        if (a['statistics'] && a['statistics']['tot_hold_days']) {
-          a_val = a['statistics']['tot_hold_days']
+        if (a['avg_sold_natural_days']) {
+          a_val = a['avg_sold_natural_days']
         }
-        if (b['statistics'] && b['statistics']['tot_hold_days']) {
-          b_val = b['statistics']['tot_hold_days']
+        if (b['avg_sold_natural_days']) {
+          b_val = b['avg_sold_natural_days']
         }
         return b_val - a_val
       });
@@ -2489,6 +2517,17 @@ function setFundWeightFromUI(oneRowObj, _op_type, _weight) {
   }
   confirm(_cfm_msg, function() {
     setFundBuyWeight(oneRowObj['fund_id'], oneRowObj['fund_name'], oneRowObj['tranStateObj']['compose_plan'], _op_type, _weight)
+  }, function() {})
+}
+
+function removeFundHistoryStatUI(_fund_id, _fund_name, _target_date) {
+  if (isNaN(_target_date) && !isNaN(Date.parse(_target_date))) {
+  } else {
+    alert("目标日期值非法: " + _target_date)
+    return
+  }
+  confirm("要清除 " + _target_date + " 之前的历史买卖数据吗?", function() {
+    removeFundHistoryStat(_fund_id, _fund_name, _target_date)
   }, function() {})
 }
 

@@ -55,7 +55,13 @@ export const axiosSetup = () => {
         (error) => {
             // console.log("###### axios interceptor response reject")
             // console.log("error: ", error)
-            useApiStore().push_error_msg(error.message, error.config.baseURL + error.config.url)
+            if (error && error.response && error.response.data) {
+                useApiStore().push_error_msg(JSON.stringify(error.response.data), error.config.baseURL + error.config.url)
+            } else if (error && error.response && error.response.request && error.response.request.responseText) {
+                useApiStore().push_error_msg(error.response.request.responseText, error.config.baseURL + error.config.url)
+            } else {
+                useApiStore().push_error_msg(error.message, error.config.baseURL + error.config.url)
+            }
             return Promise.reject(error);
         }
     )

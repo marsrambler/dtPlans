@@ -30,6 +30,8 @@ export const useReportStore = defineStore('report-store', () => {
     const fundBuyWeight = ref({})
     const fundBuyWeightTest = ref({})
 
+    const fundHistoryStatMap = ref({})
+
     // action
     async function requireDynValues(_fund_ids) {
         try {
@@ -190,6 +192,7 @@ export const useReportStore = defineStore('report-store', () => {
                         } else {
                             elem['soldHistoryWrapper_reverse'] = []
                         }
+                        elem['remove_asc_or_desc_or_sold_date'] = ''
                     })
                     _single_latest.forEach(elem => {
                         if (elem['soldHistoryWrapper'] && elem['soldHistoryWrapper'].length > 0) {
@@ -198,6 +201,7 @@ export const useReportStore = defineStore('report-store', () => {
                         } else {
                             elem['soldHistoryWrapper_reverse'] = []
                         }
+                        elem['remove_asc_or_desc_or_sold_date'] = ''
                     })
 
                     tranReportObjs(_single_latest, retroFundObj, fixedFundObjs, composeObjs, fixedHoldObjs, fixed_status_data_obj, indexRtRateObjs);
@@ -229,6 +233,7 @@ export const useReportStore = defineStore('report-store', () => {
 
                     dynRecordObjs_full.value = _temp_full_objs
                     dynRecordObjs_latest.value = _temp_latest_objs
+                    reportObjsReloaded.value = true;
 
                     let _storage_name = "fund-report-objs"
                     let _ret_objs = {
@@ -237,7 +242,7 @@ export const useReportStore = defineStore('report-store', () => {
                     }
                     let _raw_objs = JSON.parse(JSON.stringify(_ret_objs));
                     add_in_db(_raw_objs, _storage_name);
-
+                    
                 } else {
 
                     // dynRecordObjs_full.value = _response['full']
@@ -253,6 +258,7 @@ export const useReportStore = defineStore('report-store', () => {
                             } else {
                                 elem['soldHistoryWrapper_reverse'] = []
                             }
+                            elem['remove_asc_or_desc_or_sold_date'] = ''
                         })
                     }
                     if (_temp_latest_objs.length > 0) {
@@ -263,6 +269,7 @@ export const useReportStore = defineStore('report-store', () => {
                             } else {
                                 elem['soldHistoryWrapper_reverse'] = []
                             }
+                            elem['remove_asc_or_desc_or_sold_date'] = ''
                         })
                     }
 
@@ -272,17 +279,20 @@ export const useReportStore = defineStore('report-store', () => {
                     }
 
                     dynRecordObjs_full.value = _temp_full_objs
-                    dynRecordObjs_latest.value = _temp_latest_objs                  
+                    dynRecordObjs_latest.value = _temp_latest_objs
+                    reportObjsReloaded.value = true;                  
                 }
             } else {
                 console.error("axios get records and rates failed: ", response)
                 dynRecordObjs_full.value = []
                 dynRecordObjs_latest.value = []
+                reportObjsReloaded.value = true;
             }
         } catch (error) {
             console.log("axios get records and rates failed: ", error)
             dynRecordObjs_full.value = []
             dynRecordObjs_latest.value = []
+            reportObjsReloaded.value = true;
         }
     }
 
@@ -312,6 +322,7 @@ export const useReportStore = defineStore('report-store', () => {
                     } else {
                         elem['soldHistoryWrapper_reverse'] = []
                     }
+                    elem['remove_asc_or_desc_or_sold_date'] = ''
                 })
                 dynRecordObjs_latest_value.forEach(elem => {
                     if (elem['soldHistoryWrapper'] && elem['soldHistoryWrapper'].length > 0) {
@@ -320,6 +331,7 @@ export const useReportStore = defineStore('report-store', () => {
                     } else {
                         elem['soldHistoryWrapper_reverse'] = []
                     }
+                    elem['remove_asc_or_desc_or_sold_date'] = ''
                 })
 
                 let _latest_sold_stat_obj = new Object
@@ -838,7 +850,7 @@ export const useReportStore = defineStore('report-store', () => {
                     ));
                 dynRecordObjs.value = _filterObjs
             }
-        } else if (report_select.value === 'hold_lt_1year') {
+        } else if (report_select.value === 'hold_gt_1year') {
             if (onlyShowLatest.value) {
                 let _filterObjs = dynRecordObjs_latest.value.filter((elem) => elem['statistics'] && 
                     elem['statistics']['tot_exchange_days_natural'] && 
@@ -850,7 +862,23 @@ export const useReportStore = defineStore('report-store', () => {
                     elem['statistics']['tot_exchange_days_natural'] >=  360);
                 dynRecordObjs.value = _filterObjs
             }            
-        } else if (report_select.value === 'sold_lt_3times') {
+        } else if (report_select.value === 'hold_lt_1year') {
+            if (onlyShowLatest.value) {
+                let _filterObjs = dynRecordObjs_latest.value.filter((elem) => 
+                    (elem['statistics'] && 
+                     elem['statistics']['tot_exchange_days_natural'] && 
+                     elem['statistics']['tot_exchange_days_natural'] <  360) 
+                    || !elem['statistics'] || !elem['statistics']['tot_exchange_days_natural'])
+                dynRecordObjs.value = _filterObjs
+            } else {
+                let _filterObjs = dynRecordObjs_full.value.filter((elem) => 
+                    (elem['statistics'] && 
+                     elem['statistics']['tot_exchange_days_natural'] && 
+                     elem['statistics']['tot_exchange_days_natural'] <  360)
+                    || !elem['statistics'] || !elem['statistics']['tot_exchange_days_natural']);
+                dynRecordObjs.value = _filterObjs
+            }
+        } else if (report_select.value === 'sold_gt_3times') {
             if (onlyShowLatest.value) {
                 let _filterObjs = dynRecordObjs_latest.value.filter((elem) => elem['real_sold_times'] && 
                     elem['real_sold_times'] >=  3);
@@ -858,6 +886,20 @@ export const useReportStore = defineStore('report-store', () => {
             } else {
                 let _filterObjs = dynRecordObjs_full.value.filter((elem) => elem['real_sold_times'] && 
                     elem['real_sold_times'] >=  3);
+                dynRecordObjs.value = _filterObjs
+            }   
+        } else if (report_select.value === 'sold_lt_3times') {
+            if (onlyShowLatest.value) {
+                let _filterObjs = dynRecordObjs_latest.value.filter((elem) => 
+                    (elem['real_sold_times'] && 
+                     elem['real_sold_times'] <  3)
+                    || !elem['real_sold_times'])
+                dynRecordObjs.value = _filterObjs
+            } else {
+                let _filterObjs = dynRecordObjs_full.value.filter((elem) => 
+                    (elem['real_sold_times'] && 
+                     elem['real_sold_times'] <  3)
+                    || !elem['real_sold_times'])
                 dynRecordObjs.value = _filterObjs
             }   
         } else if (report_select.value === 'has_todo') {
@@ -927,6 +969,45 @@ export const useReportStore = defineStore('report-store', () => {
         }
     }
 
+    //
+    async function getFundHistoryStat(_fund_id, _fund_name, _pop_msg=true) {
+        try {
+            const response = await axiosInst.get("dt-plans/api/get-fund-history-stat/" + _fund_id)
+            if (response.status === 200) {
+                let _temp_arr_objs = await response.data;
+                fundHistoryStatMap.value[_fund_id] = _temp_arr_objs
+                if (_pop_msg) {
+                    alert(_fund_name + " 的购入和卖出历史是:<br><br>" + JSON.stringify(fundHistoryStatMap.value[_fund_id], null, 0))
+                }
+            } else {
+                console.error("axios get fund history stat failed: ", response)
+                fundHistoryStatMap.value[_fund_id] = null
+            }
+        } catch (error) {
+            console.log("axios get fund history stat failed: ", error)
+            fundHistoryStatMap.value[_fund_id] = null
+        }        
+    }
+
+    async function removeFundHistoryStat(_fund_id, _fund_name, _target_date) {
+        try {
+            const response = await axiosInst.post("dt-plans/api/remove-fund-history-stat", {
+                'fund_id': _fund_id,
+                'fund_name': _fund_name,
+                'target_date': _target_date
+            })
+            if (response.status === 200) {
+                useApiStore().pop_alert_msg("设置权重成功: " + _fund_name)
+                await getFundHistoryStat(_fund_id, _fund_name, false)
+                alert("删除特定日期之前的历史买卖数据，成功！后续需要运行probe funds才能得到更新后的数据。")
+            } else {
+                console.error("axios remove fund history stat failed: ", response)
+            }
+        } catch (error) {
+            console.log("axios remove fund history stat failed: ", error)
+        }
+    }
+
     return {
         dynRecordObjs,
         dynRecordObjs_full,
@@ -944,6 +1025,7 @@ export const useReportStore = defineStore('report-store', () => {
         latest_sold_stat_obj,
         fundBuyWeight,
         fundBuyWeightTest,
+        fundHistoryStatMap,
         getRecordsAndRates,
         getRecordsAndRatesFromWorker,
         getRetroFunds,
@@ -957,6 +1039,8 @@ export const useReportStore = defineStore('report-store', () => {
         getRemovedDate4Report,
         syncServerData,
         getFundBuyWeight,
-        setFundBuyWeight
+        setFundBuyWeight,
+        getFundHistoryStat,
+        removeFundHistoryStat
     }
 });

@@ -105,7 +105,7 @@
                     <span v-if="sortFieldFlag"><i class="bi bi-arrow-up"></i></span>
                     <span v-else><i class="bi bi-arrow-down"></i></span>
                   </template>
-                  <span style="font-size:0.9rem;">短时</span>
+                  <span style="font-size:0.9rem;">启停</span>
                 </div>
                 <div class="w50_w_br" @click="sortByField('positive')" style="border: none;">
                   <template v-if="sortFieldName === 'positive'">
@@ -115,12 +115,21 @@
                   <span style="font-size:0.9rem;">高点</span>
                 </div>
               </div>             
-              <div class="w33_w_br" @click="sortByField('negative')">
-                <template v-if="sortFieldName === 'negative'">
+              <div class="w33_w_br">
+                <div class="w50_w_br" @click="sortByField('negative')">
+                  <template v-if="sortFieldName === 'negative'">
+                    <span v-if="sortFieldFlag"><i class="bi bi-arrow-up"></i></span>
+                    <span v-else><i class="bi bi-arrow-down"></i></span>
+                  </template>
+                  <span style="font-size:0.9rem;">低点</span>
+                </div>
+                <div class="w50_w_br" @click="sortByField('fund_weight')" style="border: none;">
+                  <template v-if="sortFieldName === 'fund_weight'">
                   <span v-if="sortFieldFlag"><i class="bi bi-arrow-up"></i></span>
                   <span v-else><i class="bi bi-arrow-down"></i></span>
-                </template>
-                <span>低点</span>
+                  </template>
+                  <span style="font-size:0.9rem;">权重</span>
+                </div>
               </div>
               <div class="w33_w_br" @click="sortByField('wav_rate')" style="border: none;">
                 <template v-if="sortFieldName === 'wav_rate'">
@@ -312,8 +321,33 @@
                   </template>
                 </div>
                 <template v-if="noteObjs[oneRow['fund_id']] && noteObjs[oneRow['fund_id']]['full_comments'] && noteObjs[oneRow['fund_id']]['full_comments'].length > 0">
-                  <div style="position: relative;--tooltip-left:0rem;--tooltip-top:1.5rem;"
-                       v-bind:data-title="noteObjs[oneRow['fund_id']]['full_comments']" data-float-no-pos-sm="">{{ oneRow.fund_name }}
+                  <div style="position: relative;--tooltip-left:0rem;--tooltip-top:1.5rem;word-break:keep-all;word-wrap:break-word;line-break:auto;"
+                       v-bind:data-title="noteObjs[oneRow['fund_id']]['full_comments']" data-float-no-pos-sm="">
+                    {{ oneRow.fund_name }}
+                    <template v-if="fundBuyWeight && fundBuyWeight[oneRow['fund_id']]">
+                        <span style="font-weight:bold;color:red;line-height:0.5;position:relative;"
+                          :style="{
+                          'font-size': (osTypeObj && osTypeObj.isPc)? '1.2rem': '1.3rem',
+                          'letter-spacing': (osTypeObj && osTypeObj.isPc)? '-2px': '-1px',
+                          'top': (osTypeObj && osTypeObj.isPc)? '2px': '2px'
+                          }">
+                            <template v-if="fundBuyWeight[oneRow['fund_id']] >= 1000">
+                            &hearts;&hearts;&hearts;&hearts;&hearts;
+                            </template>
+                            <template v-else-if="fundBuyWeight[oneRow['fund_id']] >= 800">
+                            &hearts;&hearts;&hearts;&hearts;
+                            </template>
+                            <template v-else-if="fundBuyWeight[oneRow['fund_id']] >= 500">
+                            &hearts;&hearts;&hearts;
+                            </template> 
+                            <template v-else-if="fundBuyWeight[oneRow['fund_id']] >= 300">
+                            &hearts;&hearts;
+                            </template> 
+                            <template v-else-if="fundBuyWeight[oneRow['fund_id']] > 100">
+                            &hearts;
+                            </template>
+                        </span>
+                    </template>                       
                     <template v-if="noteObjs && noteObjs[oneRow['fund_id']] && noteObjs[oneRow['fund_id']]['note_objs'] && noteObjs[oneRow['fund_id']]['note_objs'].length > 0">
                         <span style="font-weight:bold;color:red;border:solid 1px red;border-radius:5px; padding:0 5px 0 3px;font-size:0.9rem;margin-left:0.2rem;margin-right:0.2rem;">
                         {{noteObjs[oneRow['fund_id']]['note_objs'].length}}
@@ -331,7 +365,32 @@
                   </div>
                 </template>
                 <template v-else>
-                  <div>{{ oneRow.fund_name }}&nbsp;
+                  <div style="position:relative;word-break:keep-all;word-wrap:break-word;line-break:auto;">
+                    {{ oneRow.fund_name }}
+                    <template v-if="fundBuyWeight && fundBuyWeight[oneRow['fund_id']]">
+                        <span style="font-weight:bold;color:red;line-height:0.5;position:relative;"
+                          :style="{
+                          'font-size': (osTypeObj && osTypeObj.isPc)? '1.2rem': '1.3rem',
+                          'letter-spacing': (osTypeObj && osTypeObj.isPc)? '-2px': '-1px',
+                          'top': (osTypeObj && osTypeObj.isPc)? '2px': '2px'
+                          }">
+                            <template v-if="fundBuyWeight[oneRow['fund_id']] >= 1000">
+                            &hearts;&hearts;&hearts;&hearts;&hearts;
+                            </template>
+                            <template v-else-if="fundBuyWeight[oneRow['fund_id']] >= 800">
+                            &hearts;&hearts;&hearts;&hearts;
+                            </template>
+                            <template v-else-if="fundBuyWeight[oneRow['fund_id']] >= 500">
+                            &hearts;&hearts;&hearts;
+                            </template> 
+                            <template v-else-if="fundBuyWeight[oneRow['fund_id']] >= 300">
+                            &hearts;&hearts;
+                            </template> 
+                            <template v-else-if="fundBuyWeight[oneRow['fund_id']] > 100">
+                            &hearts;
+                            </template>
+                        </span>
+                    </template>                   
                     <template v-if="oneRow['last_sold_date']">
                       <a v-bind:href="baseUrl4Report + oneRow['fund_id']" _target="blank" style="text-decoration: none" title="看走势">
                         <span style="color:red;font-weight: bold;font-size:1.1rem;">售:&nbsp;{{ oneRow['last_sold_date'] }}
@@ -789,8 +848,33 @@
                   </template>
                 </div>
                 <template v-if="noteObjs[oneRow['fund_id']] && noteObjs[oneRow['fund_id']]['full_comments'] && noteObjs[oneRow['fund_id']]['full_comments'].length > 0">
-                  <div style="position: relative;--tooltip-left:0rem;--tooltip-top:1.5rem;"
-                       v-bind:data-title="noteObjs[oneRow['fund_id']]['full_comments']" data-float-no-pos-sm="">{{ oneRow.fund_name }}
+                  <div style="position: relative;--tooltip-left:0rem;--tooltip-top:1.5rem;word-break:keep-all;word-wrap:break-word;line-break:auto;"
+                       v-bind:data-title="noteObjs[oneRow['fund_id']]['full_comments']" data-float-no-pos-sm="">
+                       {{ oneRow.fund_name }}
+                    <template v-if="fundBuyWeight && fundBuyWeight[oneRow['fund_id']]">
+                      <span style="font-weight:bold;color:red;line-height:0.5;position:relative;"
+                      :style="{
+                          'font-size': (osTypeObj && osTypeObj.isPc)? '1.2rem': '1.3rem',
+                          'letter-spacing': (osTypeObj && osTypeObj.isPc)? '-2px': '-1px',
+                          'top': (osTypeObj && osTypeObj.isPc)? '2px': '2px'
+                          }">
+                          <template v-if="fundBuyWeight[oneRow['fund_id']] >= 1000">
+                          &hearts;&hearts;&hearts;&hearts;&hearts;
+                          </template>
+                          <template v-else-if="fundBuyWeight[oneRow['fund_id']] >= 800">
+                          &hearts;&hearts;&hearts;&hearts;
+                          </template>
+                          <template v-else-if="fundBuyWeight[oneRow['fund_id']] >= 500">
+                          &hearts;&hearts;&hearts;
+                          </template> 
+                          <template v-else-if="fundBuyWeight[oneRow['fund_id']] >= 300">
+                          &hearts;&hearts;
+                          </template> 
+                          <template v-else-if="fundBuyWeight[oneRow['fund_id']] > 100">
+                          &hearts;
+                          </template>
+                      </span>
+                    </template> 
                     <template v-if="noteObjs && noteObjs[oneRow['fund_id']] && noteObjs[oneRow['fund_id']]['note_objs'] && noteObjs[oneRow['fund_id']]['note_objs'].length > 0">
                         <span style="font-weight:bold;color:red;border:solid 1px red;border-radius:5px; padding:0 5px 0 3px;font-size:0.9rem;margin-left:0.2rem;margin-right:0.2rem;">
                         {{noteObjs[oneRow['fund_id']]['note_objs'].length}}
@@ -813,7 +897,32 @@
                   </div>
                 </template>
                 <template v-else>
-                  <div>{{ oneRow.fund_name }}&nbsp;
+                  <div style="position:relative;word-break:keep-all;word-wrap:break-word;line-break:auto;">
+                    {{ oneRow.fund_name }}
+                    <template v-if="fundBuyWeight && fundBuyWeight[oneRow['fund_id']]">
+                        <span style="font-weight:bold;color:red;line-height:0.5;position:relative;"
+                        :style="{
+                          'font-size': (osTypeObj && osTypeObj.isPc)? '1.2rem': '1.3rem',
+                          'letter-spacing': (osTypeObj && osTypeObj.isPc)? '-2px': '-1px',
+                          'top': (osTypeObj && osTypeObj.isPc)? '2px': '2px'
+                          }">
+                            <template v-if="fundBuyWeight[oneRow['fund_id']] >= 1000">
+                            &hearts;&hearts;&hearts;&hearts;&hearts;
+                            </template>
+                            <template v-else-if="fundBuyWeight[oneRow['fund_id']] >= 800">
+                            &hearts;&hearts;&hearts;&hearts;
+                            </template>
+                            <template v-else-if="fundBuyWeight[oneRow['fund_id']] >= 500">
+                            &hearts;&hearts;&hearts;
+                            </template> 
+                            <template v-else-if="fundBuyWeight[oneRow['fund_id']] >= 300">
+                            &hearts;&hearts;
+                            </template> 
+                            <template v-else-if="fundBuyWeight[oneRow['fund_id']] > 100">
+                            &hearts;
+                            </template>
+                        </span>
+                    </template>
                     <template v-if="oneRow['kbObj']">
                       <span style="font-size: 1rem; font-style: italic;text-decoration: underline;">
                         {{ oneRow.kbObj?.statistics?.fund_perc_len }}
@@ -1740,7 +1849,9 @@ import {
   getPosColor,
   getNegColor,
   getHitStyle,
-  get_suggestion_by_wav, getTodayStr
+  get_suggestion_by_wav,
+  getTodayStr,
+  osTypeObj
 } from "../lib/commonUtils.js"
 import {onMounted, computed, ref, watch, nextTick, onUnmounted, onActivated, onDeactivated} from "vue";
 import { storeToRefs } from 'pinia'
@@ -1761,7 +1872,7 @@ const { getAllBuyoutRecords, soldComposeFixedHold, buyOutFixedFund, calculatePla
 const zskbStore = useZskbStore()
 const { zskbObjs } = storeToRefs(zskbStore)
 const reportStore = useReportStore()
-const { latest_sold_stat_obj } = storeToRefs(reportStore)
+const { latest_sold_stat_obj, fundBuyWeight } = storeToRefs(reportStore)
 
 const buy_in_from_plan = [
   { 'source_name': '全部', 'source_val': 'all' },
@@ -2911,7 +3022,7 @@ function sortByField(_field) {
     sortFieldFlag.value = true
   }
 
-if (_field === 'day_xxx_thres') {
+  if (_field === 'day_xxx_thres') {
     if (sortFieldFlag.value) {
       composeViewObjs.value.sort((a, b) => {
         let a_val = 999;
@@ -3002,25 +3113,53 @@ if (_field === 'day_xxx_thres') {
       composeViewObjs.value.sort((a, b) => {
         let _a_val = -9999
         let _b_val = -9999
-        if (a.hasOwnProperty('quant_obj') && a['quant_obj'] && a['quant_obj'].hasOwnProperty('histo') && a['quant_obj']['histo']) {
-          _a_val = a['quant_obj']['histo']['max_hitted_times'] - a['quant_obj']['histo']['min_hitted_times'] 
+        if (a['quant_obj'] && a['quant_obj']['histo']) {
+          _a_val = a['quant_obj']['histo']['max_hitted_times']
         }
-        if (b.hasOwnProperty('quant_obj') && b['quant_obj'] && b['quant_obj'].hasOwnProperty('histo') && b['quant_obj']['histo']) {
-          _b_val = b['quant_obj']['histo']['max_hitted_times'] - b['quant_obj']['histo']['min_hitted_times'] 
+        if (b['quant_obj'] && b['quant_obj']['histo']) {
+          _b_val = b['quant_obj']['histo']['max_hitted_times']
         }
-        return _a_val - _b_val 
+        if (_a_val != _b_val) {
+          return _a_val - _b_val
+        }
+
+        if (a['quant_obj'] && a['quant_obj']['histo']) {
+          _a_val = a['quant_obj']['histo']['min_hitted_times']
+        }
+        if (b['quant_obj'] && b['quant_obj']['histo']) {
+          _b_val = b['quant_obj']['histo']['min_hitted_times']
+        }
+        if (_a_val != _b_val) {
+          return _b_val - _a_val
+        }
+
+        return 0
       });
     } else {
       composeViewObjs.value.sort((a, b) => {
         let _a_val = -9999
         let _b_val = -9999
-        if (a.hasOwnProperty('quant_obj') && a['quant_obj'] && a['quant_obj'].hasOwnProperty('histo') && a['quant_obj']['histo']) {
-          _a_val = a['quant_obj']['histo']['max_hitted_times'] - a['quant_obj']['histo']['min_hitted_times'] 
+        if (a['quant_obj'] && a['quant_obj']['histo']) {
+          _a_val = a['quant_obj']['histo']['max_hitted_times']
         }
-        if (b.hasOwnProperty('quant_obj') && b['quant_obj'] && b['quant_obj'].hasOwnProperty('histo') && b['quant_obj']['histo']) {
-          _b_val = b['quant_obj']['histo']['max_hitted_times'] - b['quant_obj']['histo']['min_hitted_times'] 
+        if (b['quant_obj'] && b['quant_obj']['histo']) {
+          _b_val = b['quant_obj']['histo']['max_hitted_times']
         }
-        return _b_val - _a_val
+        if (_a_val != _b_val) {
+          return _b_val - _a_val
+        }
+
+        if (a['quant_obj'] && a['quant_obj']['histo']) {
+          _a_val = a['quant_obj']['histo']['min_hitted_times']
+        }
+        if (b['quant_obj'] && b['quant_obj']['histo']) {
+          _b_val = b['quant_obj']['histo']['min_hitted_times']
+        }
+        if (_a_val != _b_val) {
+          return _a_val - _b_val
+        }
+
+        return 0
       });
     }
   } else if (_field === 'positive') {
@@ -3091,6 +3230,32 @@ if (_field === 'day_xxx_thres') {
         }
       });
     }
+  } else if (_field === 'fund_weight') {
+    if (sortFieldFlag.value) {
+      composeViewObjs.value.sort((a, b) => {
+        let _a_val = 100
+        let _b_val = 100
+        if (fundBuyWeight.value && fundBuyWeight.value[a['fund_id']]) {
+          _a_val = fundBuyWeight.value[a['fund_id']]
+        }
+        if (fundBuyWeight.value && fundBuyWeight.value[b['fund_id']]) {
+          _b_val = fundBuyWeight.value[b['fund_id']]
+        }
+        return _a_val - _b_val        
+      });
+    } else {
+      composeViewObjs.value.sort((a, b) => {
+        let _a_val = 100
+        let _b_val = 100
+        if (fundBuyWeight.value && fundBuyWeight.value[a['fund_id']]) {
+          _a_val = fundBuyWeight.value[a['fund_id']]
+        }
+        if (fundBuyWeight.value && fundBuyWeight.value[b['fund_id']]) {
+          _b_val = fundBuyWeight.value[b['fund_id']]
+        }
+        return _b_val - _a_val
+      });
+    }  
   } else if (_field === 'wav_rate') {
     if (sortFieldFlag.value) {
       composeViewObjs.value.sort((a, b) => {

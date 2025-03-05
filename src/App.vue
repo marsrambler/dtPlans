@@ -11,6 +11,7 @@ import {useComposeStore} from "./store/composeStore.js";
 import {useReportStore} from "./store/reportStore.js";
 import { useAggressiveStore } from "./store/aggressiveStore";
 import {useBuyInOutStore} from "./store/buyInOutStore.js";
+import { get_os_type } from "./lib/commonUtils.js"
 
 const apiStore = useApiStore()
 const {requestMsgObjs, errorMsgObjs, isApiInProgress, isAlertVisible, alertMsg} = storeToRefs(apiStore)
@@ -69,6 +70,7 @@ getBuyOrSoldNote()
 getFundAndBuyRatioConfig()
 getBulkSetMode()
 getComposeTips()
+get_os_type()
 </script>
 
 <template>
