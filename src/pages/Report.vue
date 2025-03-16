@@ -486,9 +486,9 @@
             </td>
             <td style="text-align: center; padding-top: 0 !important; padding-bottom: 0 !important;" 
             v-bind:class="{ sel_row: oneRow['currSelected'] }">
-              <div class="flex_col" style="align-items:end !important;row-gap:5px;"> <!-- style="height: 9rem;" -->
+              <div class="flex_col" style="align-items:end !important;row-gap:6px;padding-right:0.6rem;"> <!-- style="height: 9rem;" -->
                 <button type="button" class="btn btn-primary" @click="genReport(oneRow)">
-                  报告
+                  详情报告
                 </button>
                 <!--
                 <button type="button" class="btn btn-secondary" @click="addFundId4UpdateDynValue(oneRow['fund_id'])">
@@ -504,7 +504,7 @@
                 </button>
                 -->
                 <button type="button" class="btn btn-secondary" @click="getFundHistoryStat(oneRow.fund_id, oneRow.fund_name)">
-                  读历史
+                  买卖历史
                 </button>
                 <template v-if="fundHistoryStatMap[oneRow.fund_id] && 
                 (
@@ -517,16 +517,26 @@
                   fundHistoryStatMap[oneRow.fund_id]['sold_date_list'] && 
                   fundHistoryStatMap[oneRow.fund_id]['sold_date_list'].length > 0                  
                   )
+                ) && 
+                (
+                  currDynValue && currDynValue['fund_id'] && 
+                  currDynValue['fund_id'] == oneRow.fund_id
                 )">
                   <input type="text" class=""
-                         style="border-radius:5px;border-width:1px;outline:none;width:90%;"
+                         style="border-radius:5px;border-width:1px;outline:none;width:6.5rem;"
                          v-model="fundHistoryStatMap[oneRow.fund_id]['target_date_str']">
 
                   <template v-if="fundHistoryStatMap[oneRow.fund_id]['target_date_str'] && fundHistoryStatMap[oneRow.fund_id]['target_date_str'].trim() != ''">
-                    <button type="button" class="btn btn-warning" 
-                    @click="removeFundHistoryStatUI(oneRow.fund_id, oneRow.fund_name, fundHistoryStatMap[oneRow.fund_id]['target_date_str'].trim())">
-                      清除历史
-                    </button>                  
+                    <div style="display:flex;flex-wrap:nowrap;text-wrap:nowrap;column-gap:5px;">
+                    <button type="button" class="btn btn-warning" style="padding-left:6px !important;padding-right:6px !important;"
+                    @click="removeFundHistoryStatUI(oneRow.fund_id, oneRow.fund_name, fundHistoryStatMap[oneRow.fund_id]['target_date_str'].trim(), 'buy')">
+                      删买
+                    </button>
+                    <button type="button" class="btn btn-warning" style="padding-left:6px !important;padding-right:6px !important;"
+                    @click="removeFundHistoryStatUI(oneRow.fund_id, oneRow.fund_name, fundHistoryStatMap[oneRow.fund_id]['target_date_str'].trim(), 'sold')">
+                      删卖
+                    </button>                    
+                    </div>                  
                   </template>
                 </template>                
               </div>
@@ -2520,14 +2530,25 @@ function setFundWeightFromUI(oneRowObj, _op_type, _weight) {
   }, function() {})
 }
 
-function removeFundHistoryStatUI(_fund_id, _fund_name, _target_date) {
+function removeFundHistoryStatUI(_fund_id, _fund_name, _target_date, _buy_or_sold) {
   if (isNaN(_target_date) && !isNaN(Date.parse(_target_date))) {
   } else {
     alert("目标日期值非法: " + _target_date)
     return
   }
-  confirm("要清除 " + _target_date + " 之前的历史买卖数据吗?", function() {
-    removeFundHistoryStat(_fund_id, _fund_name, _target_date)
+  if (_buy_or_sold != 'buy' && _buy_or_sold != 'sold') {
+    alert("删除类型非法: " + _buy_or_sold)
+    return  
+  }
+  var _tips = ""
+  if (_buy_or_sold === 'buy') {
+    _tips = "要清除 " + _target_date + " 之前的 买入 历史买卖数据吗?"
+  } else if (_buy_or_sold === 'sold') {
+    _tips = "要清除 " + _target_date + " 之前的 卖出 历史买卖数据吗?"
+  }
+
+  confirm(_tips, function() {
+    removeFundHistoryStat(_fund_id, _fund_name, _target_date, _buy_or_sold)
   }, function() {})
 }
 

@@ -977,7 +977,8 @@ export const useReportStore = defineStore('report-store', () => {
                 let _temp_arr_objs = await response.data;
                 fundHistoryStatMap.value[_fund_id] = _temp_arr_objs
                 if (_pop_msg) {
-                    alert(_fund_name + " 的购入和卖出历史是:<br><br>" + JSON.stringify(fundHistoryStatMap.value[_fund_id], null, 0))
+                    alert(_fund_name + " 的购入和卖出历史是:<br><br>" + JSON.stringify(fundHistoryStatMap.value[_fund_id], null, 0),
+                        '买卖历史数据', null, false)
                 }
             } else {
                 console.error("axios get fund history stat failed: ", response)
@@ -989,15 +990,16 @@ export const useReportStore = defineStore('report-store', () => {
         }        
     }
 
-    async function removeFundHistoryStat(_fund_id, _fund_name, _target_date) {
+    async function removeFundHistoryStat(_fund_id, _fund_name, _target_date, _buy_or_sold) {
         try {
             const response = await axiosInst.post("dt-plans/api/remove-fund-history-stat", {
                 'fund_id': _fund_id,
                 'fund_name': _fund_name,
-                'target_date': _target_date
+                'target_date': _target_date,
+                'buy_or_sold': _buy_or_sold
             })
             if (response.status === 200) {
-                useApiStore().pop_alert_msg("设置权重成功: " + _fund_name)
+                useApiStore().pop_alert_msg("删除历史数据成功: " + _fund_name)
                 await getFundHistoryStat(_fund_id, _fund_name, false)
                 alert("删除特定日期之前的历史买卖数据，成功！后续需要运行probe funds才能得到更新后的数据。")
             } else {

@@ -23,6 +23,7 @@ export const useComposeStore = defineStore('compose-store', () => {
     const noteObjs = ref([])
     const noteReportObjs = ref([])
     const composeTipsMapObj = ref({})
+    const buyBottomObj = ref({})
 
     // action
     async function getAllCompose() {
@@ -52,6 +53,7 @@ export const useComposeStore = defineStore('compose-store', () => {
                 // await response.data
                 useApiStore().pop_alert_msg("加入/移除组合成功: " + _fund_name)
                 await getAllCompose()
+                await getBuyBottomObjs()
             } else {
                 console.error("axios add/remove compose failed: ", response)
             }
@@ -60,7 +62,7 @@ export const useComposeStore = defineStore('compose-store', () => {
         }
     }
 
-    async function setComposeProperty(_fund_id, _fund_name, _compose_name, _money, _buyin_source, _loss_flag, _fixed_buyin_date) {
+    async function setComposeProperty(_fund_id, _fund_name, _compose_name, _money, _buyin_source, _loss_flag, _fixed_buyin_date, _to_give_up) {
         try {
             const response = await axiosInst.post("dt-plans/api/compose/set-compose-prop", {
                 'fund_id': _fund_id,
@@ -70,12 +72,14 @@ export const useComposeStore = defineStore('compose-store', () => {
                 'buyin_source': _buyin_source,
                 'set_sold_date': 'F',
                 'loss_flag': _loss_flag? 'T': 'F',
-                'fixed_buyin_date': _fixed_buyin_date
+                'fixed_buyin_date': _fixed_buyin_date,
+                'to_give_up': _to_give_up
             })
             if (response.status == 200) {
                 // await response.data
                 useApiStore().pop_alert_msg("更改组合成功: " + _fund_name)
                 await getAllCompose()
+                await getBuyBottomObjs()
             } else {
                 console.error("axios set compose property failed: ", response)
             }
@@ -84,7 +88,7 @@ export const useComposeStore = defineStore('compose-store', () => {
         }
     }
 
-    async function setComposeSoldDate(_fund_id, _fund_name, _compose_name, _money, _buyin_source) {
+    async function setComposeSoldDate(_fund_id, _fund_name, _compose_name, _money, _buyin_source, _loss_flag, _fixed_buyin_date, _to_give_up) {
         try {
             const response = await axiosInst.post("dt-plans/api/compose/set-compose-prop", {
                 'fund_id': _fund_id,
@@ -92,12 +96,16 @@ export const useComposeStore = defineStore('compose-store', () => {
                 'compose_name': _compose_name,
                 'money': _money,
                 'buyin_source': _buyin_source,
-                'set_sold_date': 'T'
+                'set_sold_date': 'T',
+                'loss_flag': _loss_flag? 'T': 'F',
+                'fixed_buyin_date': _fixed_buyin_date,
+                'to_give_up': _to_give_up
             })
             if (response.status == 200) {
                 // await response.data
                 useApiStore().pop_alert_msg("设置组合卖出成功: " + _fund_name)
                 await getAllCompose()
+                await getBuyBottomObjs()
             } else {
                 console.error("axios set compose sold date failed: ", response)
             }
@@ -286,6 +294,39 @@ export const useComposeStore = defineStore('compose-store', () => {
         }
     }
 
+
+    // action
+    async function getBuyBottomObjs() {
+        try {
+            const response = await axiosInst.get("api/get-buy-bottom-objs")
+            if (response.status == 200) {
+                let _tmp_obj = await response.data;
+                buyBottomObj.value = _tmp_obj
+            } else {
+                buyBottomObj.value = new Object
+                console.error("axios get buy bottom objs failed: ", response) 
+            }
+        } catch (error) {
+            buyBottomObj.value = new Object
+            console.log("axios get buy bottom objs error: ", error)
+        }
+    }
+
+    function fund_in_should(_fund_id) {
+        if (!buyBottomObj.value['should_map'] || !buyBottomObj.value['should_map'][_fund_id]) {
+            return false
+        }
+        return true
+    }
+
+    function fund_in_progress(_fund_id) {
+        if (!buyBottomObj.value['progress_map'] || !buyBottomObj.value['progress_map'][_fund_id]) {
+            return false
+        }
+        return true     
+    }
+ 
+
     return {
         composeObjs,
         fixedHoldObjs,
@@ -303,6 +344,7 @@ export const useComposeStore = defineStore('compose-store', () => {
         noteObjs,
         noteReportObjs,
         composeTipsMapObj,
+        buyBottomObj,
         getAllCompose,
         addOrRemoveCompose,
         setComposeProperty,
@@ -313,6 +355,9 @@ export const useComposeStore = defineStore('compose-store', () => {
         getFundNotes4Report,
         updateFundNotes,
         removeFundNotes,
-        getComposeTips
+        getComposeTips,
+        getBuyBottomObjs,
+        fund_in_should,
+        fund_in_progress
     }
 });

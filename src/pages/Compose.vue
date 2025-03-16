@@ -407,12 +407,14 @@
                 </template>
                 <template v-if="oneRow.hasOwnProperty('show_enable_loss_btn') && oneRow['show_enable_loss_btn']">
                   <button type="button" class="btn btn-danger" style="font-size: 0.8rem;padding-left:5px;padding-right:5px;margin-right:0.5rem;"
-                        @click.stop="setComposeProperty_wrapper(oneRow['fund_id'], oneRow['fund_name'], oneRow['compose_name'], -2, oneRow['buyin_source'], true, oneRow['fixed_buyin_date'])">
+                        @click.stop="setComposeProperty_wrapper(oneRow['fund_id'], oneRow['fund_name'], oneRow['compose_name'], 
+                        -2, oneRow['buyin_source'], true, oneRow['fixed_buyin_date'], oneRow['to_give_up'])">
                         设止损</button>
                 </template>
                 <template v-if="oneRow.hasOwnProperty('show_disable_loss_btn') && oneRow['show_disable_loss_btn']">
                   <button type="button" class="btn btn-secondary" style="font-size: 0.8rem;padding-left:5px;padding-right:5px;"
-                        @click.stop="setComposeProperty_wrapper(oneRow['fund_id'], oneRow['fund_name'], oneRow['compose_name'], -1, oneRow['buyin_source'], false, oneRow['fixed_buyin_date'])">
+                        @click.stop="setComposeProperty_wrapper(oneRow['fund_id'], oneRow['fund_name'], oneRow['compose_name'], 
+                        -1, oneRow['buyin_source'], false, oneRow['fixed_buyin_date'], oneRow['to_give_up'])">
                         去止损</button>
                 </template>
               </td>
@@ -545,11 +547,18 @@
                   </select>
                 </div>
                 <div style="height:0.5rem;"></div>                
-                <div>
+                <div style="display:flex;flex-wrap:nowrap;align-items:center;text-wrap:nowrap;">
                   当前:&nbsp;
-                  <input type="number" style="width: 4rem; border-radius: 5px;" v-model="oneRow['money']" @click.stop>
+                  <input type="number" style="width: 3.2rem; border-radius: 5px;letter-spacing:-2px;" v-model="oneRow['money']" @click.stop>
+                  <div style="display: inline-flex; align-items: center; margin-left: 5px; position: relative;">
+                    <input class="form-check-input" style="position:relative;top:-2px;" type="checkbox" v-model="oneRow['to_give_up']" 
+                    v-bind:id="'give_up_chk_ctl_' + oneRow['fund_id']">
+                    <label class="form-check-label" style="margin-left:2px;letter-spacing:-2px;" :for="'give_up_chk_ctl_' + oneRow['fund_id']">
+                    放弃
+                    </label>
+                  </div>                
                 </div>
-                <div>
+                <div sytle="margin-bottom:5px;">
                   决策:&nbsp;&nbsp;{{ oneRow['adjust_money'] }}
                   <template v-if="oneRow['adjust_money']">
                     <span class="red_card less_height" v-if="oneRow['money'] - oneRow['adjust_money'] >= 5">&nbsp;</span><!--
@@ -593,28 +602,29 @@
                     <div style="margin-top: 5px;">
                       <span style="font-size:0.8rem;">设:</span>
                       <template v-if="oneRow['last_adjust_money_date_set'] && oneRow['last_adjust_money_date_set'] == today_date_str">
-                        <span style="font-size: 0.9rem; font-style: italic;text-decoration: underline;">{{
+                        <span style="font-size: 0.9rem; font-style: italic;text-decoration: underline;letter-spacing:-1px;">{{
                           oneRow['last_adjust_money_date_set'] }}</span>&nbsp;                  
                       </template>
                       <template v-else-if="oneRow['last_adjust_money_date_set']">
-                        <span style="font-size: 0.9rem;font-weight: bold;color:hotpink;">{{
+                        <span style="font-size: 0.9rem;font-weight: bold;color:hotpink;letter-spacing:-1px;">{{
                           oneRow['last_adjust_money_date_set'] }}</span>&nbsp;                      
                       </template>
                     </div>                    
                     <div style="margin-top: 5px;">
                       <span style="font-size:0.8rem;">调:</span>
                       <template v-if="oneRow['last_adjust_money_date'] && oneRow['last_adjust_money_date'] == today_date_str">
-                        <span style="font-size: 0.9rem; font-style: italic;text-decoration: underline;">{{
+                        <span style="font-size: 0.9rem; font-style: italic;text-decoration: underline;letter-spacing:-1px;">{{
                           oneRow['last_adjust_money_date'] }}</span>&nbsp;                  
                       </template>
                       <template v-else-if="oneRow['last_adjust_money_date']">
-                        <span style="font-size: 0.9rem;font-weight: bold;color:hotpink;">{{
+                        <span style="font-size: 0.9rem;font-weight: bold;color:hotpink;letter-spacing:-1px;">{{
                           oneRow['last_adjust_money_date'] }}</span>&nbsp;                      
                       </template>
                     </div>
                   </div>
                   <input class="btn btn-outline-danger btn-sm" style="margin-left: 0.5rem;" type="button" value="保存"
-                    @click.stop="setComposeProperty_wrapper(oneRow['fund_id'], oneRow['fund_name'], oneRow['compose_name'], parseInt(oneRow['money']), oneRow['buyin_source'], oneRow['lossFlag'], oneRow['fixed_buyin_date'])">
+                    @click.stop="setComposeProperty_wrapper(oneRow['fund_id'], oneRow['fund_name'], oneRow['compose_name'], 
+                    parseInt(oneRow['money']), oneRow['buyin_source'], oneRow['lossFlag'], oneRow['fixed_buyin_date'], oneRow['to_give_up'])">
                 </div>
               </td>
               <td style="text-align: center;" v-bind:class="{ sel_row: oneRow['currSelected'] }">
@@ -952,12 +962,14 @@
                   </template>
                   <template v-if="oneRow.hasOwnProperty('show_enable_loss_btn') && oneRow['show_enable_loss_btn']">
                     <button type="button" class="btn btn-danger" style="font-size: 0.8rem;padding-left:5px;padding-right:5px;margin-right:0.5rem;"
-                          @click.stop="setComposeProperty_wrapper(oneRow['fund_id'], oneRow['fund_name'], oneRow['compose_name'], -2, oneRow['buyin_source'], true, oneRow['fixed_buyin_date'])">
+                          @click.stop="setComposeProperty_wrapper(oneRow['fund_id'], oneRow['fund_name'], oneRow['compose_name'], 
+                          -2, oneRow['buyin_source'], true, oneRow['fixed_buyin_date'], oneRow['to_give_up'])">
                           设止损</button>
                   </template>
                   <template v-if="oneRow.hasOwnProperty('show_disable_loss_btn') && oneRow['show_disable_loss_btn']">
                     <button type="button" class="btn btn-secondary" style="font-size: 0.8rem;padding-left:5px;padding-right:5px;"
-                          @click.stop="setComposeProperty_wrapper(oneRow['fund_id'], oneRow['fund_name'], oneRow['compose_name'], -1, oneRow['buyin_source'], false, oneRow['fixed_buyin_date'])">
+                          @click.stop="setComposeProperty_wrapper(oneRow['fund_id'], oneRow['fund_name'], oneRow['compose_name'], 
+                          -1, oneRow['buyin_source'], false, oneRow['fixed_buyin_date'], oneRow['to_give_up'])">
                           去止损</button>
                   </template>                  
                 </div>
@@ -1339,11 +1351,18 @@
                 <template v-else>
                   <div style="height:0.5rem;"></div>  
                 </template>
-                <div style="height: 1.8rem;">
+                <div style="height: 1.8rem;display:flex;flex-wrap:nowrap;align-items:center;text-wrap:nowrap;">
                   当前:&nbsp;
-                  <input type="number" style="width: 4rem; border-radius: 5px;" v-model="oneRow['money']" @click.stop>
+                  <input type="number" style="width: 3.2rem; border-radius: 5px;letter-spacing:-2px;" v-model="oneRow['money']" @click.stop>
+                  <div style="display: inline-flex; align-items: center; margin-left: 5px; position: relative;">
+                    <input class="form-check-input" style="position:relative;top:-2px;" type="checkbox" v-model="oneRow['to_give_up']"
+                    v-bind:id="'give_up_chk_ctl_' + oneRow['fund_id']">
+                    <label class="form-check-label" style="margin-left:2px;letter-spacing:-2px;" :for="'give_up_chk_ctl_' + oneRow['fund_id']">
+                    放弃
+                    </label>
+                  </div>                  
                 </div>
-                <div style="height: 1.8rem;">
+                <div style="height: 1.8rem;margin-bottom:5px;">
                   决策:&nbsp;&nbsp;{{ oneRow['adjust_money'] }}
                   <template v-if="oneRow['adjust_money']">
                     <span class="red_card less_height" v-if="oneRow['money'] - oneRow['adjust_money'] >= 5">&nbsp;</span><!--
@@ -1387,28 +1406,29 @@
                     <div style="margin-top: 5px;">
                       <span style="font-size:0.8rem;">设:</span>
                       <template v-if="oneRow['last_adjust_money_date_set'] && oneRow['last_adjust_money_date_set'] == today_date_str">
-                        <span style="font-size: 0.9rem; font-style: italic;text-decoration: underline;">{{
+                        <span style="font-size: 0.9rem; font-style: italic;text-decoration: underline;letter-spacing:-1px;">{{
                           oneRow['last_adjust_money_date_set'] }}</span>&nbsp;
                       </template>
                       <template v-else-if="oneRow['last_adjust_money_date_set']">
-                        <span style="font-size: 0.9rem;font-weight: bold;color:hotpink;">{{
+                        <span style="font-size: 0.9rem;font-weight: bold;color:hotpink;letter-spacing:-1px;">{{
                           oneRow['last_adjust_money_date_set'] }}</span>&nbsp;
                       </template>
                     </div>
                     <div style="margin-top: 5px;">
                       <span style="font-size:0.8rem;">调:</span>
                       <template v-if="oneRow['last_adjust_money_date'] && oneRow['last_adjust_money_date'] == today_date_str">
-                        <span style="font-size: 0.9rem; font-style: italic;text-decoration: underline;">{{
+                        <span style="font-size: 0.9rem; font-style: italic;text-decoration: underline;letter-spacing:-1px;">{{
                           oneRow['last_adjust_money_date'] }}</span>&nbsp;
                       </template>
                       <template v-else-if="oneRow['last_adjust_money_date']">
-                        <span style="font-size: 0.9rem;font-weight: bold;color:hotpink;">{{
+                        <span style="font-size: 0.9rem;font-weight: bold;color:hotpink;letter-spacing:-1px;">{{
                           oneRow['last_adjust_money_date'] }}</span>&nbsp;
                       </template>
                     </div>
                   </div>                  
                   <input class="btn btn-outline-danger btn-sm" style="margin-left: 0.5rem;" type="button" value="保存"
-                    @click.stop="setComposeProperty_wrapper(oneRow['fund_id'], oneRow['fund_name'], oneRow['compose_name'], parseInt(oneRow['money']), oneRow['buyin_source'], oneRow['lossFlag'], oneRow['fixed_buyin_date'])">
+                    @click.stop="setComposeProperty_wrapper(oneRow['fund_id'], oneRow['fund_name'], oneRow['compose_name'], 
+                    parseInt(oneRow['money']), oneRow['buyin_source'], oneRow['lossFlag'], oneRow['fixed_buyin_date'], oneRow['to_give_up'])">
                 </div>
               </td>
               <td style="text-align: center;" v-bind:class="{ sel_row: oneRow['currSelected'] }">
@@ -1864,8 +1884,10 @@ import { useRoute } from 'vue-router'
 
 const route = useRoute()
 const composeStore = useComposeStore()
-const { composeObjs, compose_name, fixedHoldObjs, fixedHoldObjs_full, totMoney, totPositiveNum, totPoleNum, totEarnMoney, totEarnRate, totSetBuy, totPlanBuy, diffBuySet, totInitBuy, noteObjs, composeTipsMapObj } = storeToRefs(composeStore)
-const { getAllCompose, setComposeProperty, setComposeSoldDate, getComposeFixedHold, addOrRemoveCompose, getFundNotes4Edit, updateFundNotes, removeFundNotes, getComposeTips } = composeStore
+const { composeObjs, compose_name, fixedHoldObjs, fixedHoldObjs_full, totMoney, totPositiveNum, totPoleNum, totEarnMoney, totEarnRate, 
+totSetBuy, totPlanBuy, diffBuySet, totInitBuy, noteObjs, composeTipsMapObj, buyBottomObj } = storeToRefs(composeStore)
+const { getAllCompose, setComposeProperty, setComposeSoldDate, getComposeFixedHold, addOrRemoveCompose, getFundNotes4Edit, 
+updateFundNotes, removeFundNotes, getComposeTips, fund_in_should, fund_in_progress } = composeStore
 const buyInOutStore = useBuyInOutStore()
 const { buyoutRecords, wav_reports, buyout_future_objs, contStartStopObj, buyOrSoldObj, fund_buy_ratio_config, curr_compose_name} = storeToRefs(buyInOutStore)
 const { getAllBuyoutRecords, soldComposeFixedHold, buyOutFixedFund, calculatePlanMoney, buyOutFixedFundOfToday, getAllBuyoutFutureRecords, addBuyOrSoldNote, getBuyOrSoldNote } = buyInOutStore
@@ -1883,6 +1905,15 @@ const buy_in_from_plan = [
   { 'source_name': '三叉戟', 'source_val': 'trident' },
   { 'source_name': '金毛羊', 'source_val': 'gdngoat' }
 ]
+
+const disp_compose_map = {
+  'ovtree': '橄榄树',
+  'flyhorse': '飞马',
+  'medusa': '美杜莎',
+  'dolphin': '海豚',
+  'trident': '三叉戟',
+  'gdngoat': '金毛羊'
+}
 
 const buy_in_sources_options = [
   { 'source_name': '支付宝', 'source_val': 'zfb' },
@@ -1979,7 +2010,29 @@ const pop_up_warn_times = ref(0)
 const pop_up_warn_period = ref(1000)
 const page_is_displayed = ref(true)
 
-function processLossFlag4Elem(elem) {
+function process_Bottom_Loss_Flag_4_Elem(elem) {
+  elem['show_popup_msg'] = false
+  elem['popup_msg'] = ''
+
+  if (!elem['to_give_up']) {
+    if (fund_in_should(elem['fund_id']) && !fund_in_progress(elem['fund_id'])) {
+      elem['show_popup_msg'] = true
+      elem['popup_msg'] = disp_compose_map[elem['compose_name']] + " " +  elem['fund_id'] + elem['fund_name'] + "," + " 启动信号 -> 当前定投'基础量'应'大于'0 [启动抄底 高优先级]"
+      console.warn("$$$$ ", elem['popup_msg'])
+      elem['popup_msg'] += "<br>"
+    } else if (fund_in_should(elem['fund_id']) && fund_in_progress(elem['fund_id'])) {
+      console.warn("already put this should buy bottom fund into progress: ", elem['fund_id'], ' ', elem['fund_name'])
+    } else if (!fund_in_should(elem['fund_id']) && !fund_in_progress(elem['fund_id'])) {      
+    } else if (!fund_in_should(elem['fund_id']) && fund_in_progress(elem['fund_id'])) {
+      let _progress_obj = buyBottomObj.value['progress_map'][elem['fund_id']]
+      if (_progress_obj['buy_bottom_days'] >= 21) {
+        elem['show_popup_msg'] = true
+        elem['popup_msg'] = disp_compose_map[elem['compose_name']] + " " +  elem['fund_id'] + elem['fund_name'] + "," + " 停止信号 -> 当前定投停止 [停止抄底 高优先级]"
+        console.warn("$$$$ ", elem['popup_msg'])
+        elem['popup_msg'] += "<br>"
+      }
+    }
+  }
   if (!fund_buy_ratio_config.value) {
     return
   }
@@ -1993,8 +2046,7 @@ function processLossFlag4Elem(elem) {
 
   elem['show_enable_loss_btn'] = false
   elem['show_disable_loss_btn'] = false
-  elem['show_popup_msg'] = false
-  elem['popup_msg'] = ''
+
   //oneRow['fixedHoldObj'] && oneRow['fixedHoldObj']['hold_objs'] && oneRow['fixedHoldObj']['hold_objs'].length > 0
   if (!elem['fixedHoldObj'] || !elem['fixedHoldObj']['hold_objs'] || elem['fixedHoldObj']['hold_objs'].length === 0) {
     return;
@@ -2007,13 +2059,25 @@ function processLossFlag4Elem(elem) {
     || (_accu_money < _lossSetting['money_l'] && _accu_money >= 200 && _accu_pure_profit <= _lossSetting['rate_0'])) {
     // 达到 设止损 程度
     if (elem['lossFlag']) {
-      // 已经 有止损标志 了，什么都不做
-      console.warn(elem['compose_name'] + " " +  elem['fund_id'] + elem['fund_name'] + " already has lossFalg, do nothing")
+      // 已经 有止损标志 了
+      if (fund_in_should(elem['fund_id']) || fund_in_progress(elem['fund_id'])) {
+        // 去止损
+        elem['show_disable_loss_btn'] = true
+        elem['show_popup_msg'] = true
+        elem['popup_msg'] += disp_compose_map[elem['compose_name']] + " " +  elem['fund_id'] + elem['fund_name'] + "," + " 进行抄底，需要 '去止损'"
+        console.warn("$$$$ ", elem['popup_msg'])
+      } else {
+        console.warn(elem['compose_name'] + " " +  elem['fund_id'] + elem['fund_name'] + " already has lossFlag, do nothing")
+      }
     } else {
-      elem['show_enable_loss_btn'] = true
-      elem['show_popup_msg'] = true
-      elem['popup_msg'] = elem['compose_name'] + " " +  elem['fund_id'] + elem['fund_name'] + "," + "需要 '设止损'，定投金额需要置 '-2'"
-      console.warn("$$$$ ", elem['popup_msg'])
+      // 没有止损标志 了
+      if (fund_in_should(elem['fund_id']) || fund_in_progress(elem['fund_id'])) {
+      } else {
+        elem['show_enable_loss_btn'] = true
+        elem['show_popup_msg'] = true
+        elem['popup_msg'] += disp_compose_map[elem['compose_name']] + " " +  elem['fund_id'] + elem['fund_name'] + "," + " 需要 '设止损'，定投金额需要置 '-2'"
+        console.warn("$$$$ ", elem['popup_msg'])
+      }
     }
   } else {
     // 达到 去止损 程度
@@ -2023,7 +2087,7 @@ function processLossFlag4Elem(elem) {
     } else {
       elem['show_disable_loss_btn'] = true
       elem['show_popup_msg'] = true
-      elem['popup_msg'] = elem['compose_name'] + " " +  elem['fund_id'] + elem['fund_name'] + "," + "需要 '去止损'，定投金额需要置 '-1'"
+      elem['popup_msg'] += disp_compose_map[elem['compose_name']] + " " +  elem['fund_id'] + elem['fund_name'] + "," + " 需要 '去止损'，定投金额需要置 '-1'"
       console.warn("$$$$ ", elem['popup_msg'])
     }
   }
@@ -2227,67 +2291,67 @@ watch([composeObjs, compose_name, fixedHoldObjs, buyoutRecords, noteObjs, show4S
       if (elem['compose_name'] === 'gdngoat') {
         if (!elem.hasOwnProperty('plan_buyin_money')) {
           console.error("elem in gdngoat has no plan_buyin_money: ", elem['fund_id']);
-        } else if (elem['money'] > -2 && elem['plan_buyin_money'] > 0) {
+        } else if (elem['money'] > -2 && elem['plan_buyin_money'] > 0 && !elem['to_give_up']) {
           _tot_plan_money_gdngoat += elem['plan_buyin_money']
         }
         if (!elem.hasOwnProperty('adjust_money')) {
           console.log("elem in gdngoat has no adjust_money: ", elem['fund_id']);
-        } else if (elem['money'] > -2 && elem['adjust_money'] > 0) {
+        } else if (elem['money'] > -2 && elem['adjust_money'] > 0 && !elem['to_give_up']) {
           _tot_adj_money_gdngoat += elem['adjust_money']
         }        
       } else if (elem['compose_name'] === 'ovtree') {
         if (!elem.hasOwnProperty('plan_buyin_money')) {
           console.error("elem in ovtree has no plan_buyin_money: ", elem['fund_id']);
-        } else if (elem['money'] > -2 && elem['plan_buyin_money'] > 0) {
+        } else if (elem['money'] > -2 && elem['plan_buyin_money'] > 0 && !elem['to_give_up']) {
           _tot_plan_money_ovtree += elem['plan_buyin_money']
         }
         if (!elem.hasOwnProperty('adjust_money')) {
           console.log("elem in ovtree has no adjust_money: ", elem['fund_id']);
-        } else if (elem['money'] > -2 && elem['adjust_money'] > 0) {
+        } else if (elem['money'] > -2 && elem['adjust_money'] > 0 && !elem['to_give_up']) {
           _tot_adj_money_ovtree += elem['adjust_money']
         }        
       } else if (elem['compose_name'] === 'flyhorse') {
         if (!elem.hasOwnProperty('plan_buyin_money')) {
           console.error("elem in flyhorse has no plan_buyin_money: ", elem['fund_id']);
-        } else if (elem['money'] > -2 && elem['plan_buyin_money'] > 0) {
+        } else if (elem['money'] > -2 && elem['plan_buyin_money'] > 0 && !elem['to_give_up']) {
           _tot_plan_money_flyhorse += elem['plan_buyin_money']
         }
         if (!elem.hasOwnProperty('adjust_money')) {
           console.log("elem in flyhorse has no adjust_money: ", elem['fund_id']);
-        } else if (elem['money'] > -2 && elem['adjust_money'] > 0) {
+        } else if (elem['money'] > -2 && elem['adjust_money'] > 0 && !elem['to_give_up']) {
           _tot_adj_money_flyhorse += elem['adjust_money']
         }        
       } else if (elem['compose_name'] === 'medusa') {
         if (!elem.hasOwnProperty('plan_buyin_money')) {
           console.error("elem in medusa has no plan_buyin_money: ", elem['fund_id']);
-        } else if (elem['money'] > -2 && elem['plan_buyin_money'] > 0) {
+        } else if (elem['money'] > -2 && elem['plan_buyin_money'] > 0 && !elem['to_give_up']) {
           _tot_plan_money_medusa += elem['plan_buyin_money']
         }
         if (!elem.hasOwnProperty('adjust_money')) {
           console.log("elem in medusa has no adjust_money: ", elem['fund_id']);
-        } else if (elem['money'] > -2 && elem['adjust_money'] > 0) {
+        } else if (elem['money'] > -2 && elem['adjust_money'] > 0 && !elem['to_give_up']) {
           _tot_adj_money_medusa += elem['adjust_money']
         }        
       } else if (elem['compose_name'] === 'dolphin') {
         if (!elem.hasOwnProperty('plan_buyin_money')) {
           console.error("elem in dolphin has no plan_buyin_money: ", elem['fund_id']);
-        } else if (elem['money'] > -2 && elem['plan_buyin_money'] > 0) {
+        } else if (elem['money'] > -2 && elem['plan_buyin_money'] > 0 && !elem['to_give_up']) {
           _tot_plan_money_dolphin += elem['plan_buyin_money']
         }
         if (!elem.hasOwnProperty('adjust_money')) {
           console.log("elem in dolphin has no adjust_money: ", elem['fund_id']);
-        } else if (elem['money'] > -2 && elem['adjust_money'] > 0) {
+        } else if (elem['money'] > -2 && elem['adjust_money'] > 0 && !elem['to_give_up']) {
           _tot_adj_money_dolphin += elem['adjust_money']
         }        
       } else if (elem['compose_name'] === 'trident') {
         if (!elem.hasOwnProperty('plan_buyin_money')) {
           console.error("elem in trident has no plan_buyin_money: ", elem['fund_id']);
-        } else if (elem['money'] > -2 && elem['plan_buyin_money'] > 0) {
+        } else if (elem['money'] > -2 && elem['plan_buyin_money'] > 0 && !elem['to_give_up']) {
           _tot_plan_money_trident += elem['plan_buyin_money']
         }
         if (!elem.hasOwnProperty('adjust_money')) {
           console.log("elem in trident has no adjust_money: ", elem['fund_id']);
-        } else if (elem['money'] > -2 && elem['adjust_money'] > 0) {
+        } else if (elem['money'] > -2 && elem['adjust_money'] > 0 && !elem['to_give_up']) {
           _tot_adj_money_trident += elem['adjust_money']
         }        
       }
@@ -2309,7 +2373,7 @@ watch([composeObjs, compose_name, fixedHoldObjs, buyoutRecords, noteObjs, show4S
       if (elem['compose_name'] === 'gdngoat') {
         if (!elem.hasOwnProperty('plan_buyin_money')) {
           console.error("elem in gdngoat has no plan_buyin_money: ", elem['fund_id']);
-        } else if (elem['money'] > -2 && elem['plan_buyin_money'] > 0) {
+        } else if (elem['money'] > -2 && elem['plan_buyin_money'] > 0 && !elem['to_give_up']) {
           elem['plan_buyin_money'] = Math.round(elem['plan_buyin_money'] * fund_buy_ratio_config.value['money_probe_buy'] / _tot_plan_money_gdngoat)
         } else {
           elem['plan_buyin_money'] = 0
@@ -2318,7 +2382,7 @@ watch([composeObjs, compose_name, fixedHoldObjs, buyoutRecords, noteObjs, show4S
       && fund_buy_ratio_config.value['trendFactor'] && fund_buy_ratio_config.value['trendFactor'].hasOwnProperty('ovtree')) {
         if (!elem.hasOwnProperty('plan_buyin_money')) {
           console.error("elem in ovtree has no plan_buyin_money: ", elem['fund_id']);
-        } else if (elem['money'] > -2 && elem['plan_buyin_money'] > 0) {
+        } else if (elem['money'] > -2 && elem['plan_buyin_money'] > 0 && !elem['to_give_up']) {
           if (fund_buy_ratio_config.value['trendFactor']['ovtree'] != null) {
             elem['plan_buyin_money'] = Math.round(elem['plan_buyin_money'] * fund_buy_ratio_config.value['max_money_for_B_stock'] * fund_buy_ratio_config.value['trendFactor']['ovtree'] / _tot_plan_money_ovtree)
           } else {
@@ -2331,7 +2395,7 @@ watch([composeObjs, compose_name, fixedHoldObjs, buyoutRecords, noteObjs, show4S
       && fund_buy_ratio_config.value['trendFactor'] && fund_buy_ratio_config.value['trendFactor'].hasOwnProperty('flyhorse')) {
         if (!elem.hasOwnProperty('plan_buyin_money')) {
           console.error("elem in flyhorse has no plan_buyin_money: ", elem['fund_id']);
-        } else if (elem['money'] > -2 && elem['plan_buyin_money'] > 0) {
+        } else if (elem['money'] > -2 && elem['plan_buyin_money'] > 0 && !elem['to_give_up']) {
           if (fund_buy_ratio_config.value['trendFactor']['flyhorse'] != null) {
             elem['plan_buyin_money'] = Math.round(elem['plan_buyin_money'] * fund_buy_ratio_config.value['max_money_for_fut'] * fund_buy_ratio_config.value['trendFactor']['flyhorse'] / _tot_plan_money_flyhorse)
           } else {
@@ -2344,7 +2408,7 @@ watch([composeObjs, compose_name, fixedHoldObjs, buyoutRecords, noteObjs, show4S
       && fund_buy_ratio_config.value['trendFactor'] && fund_buy_ratio_config.value['trendFactor'].hasOwnProperty('medusa')) {
         if (!elem.hasOwnProperty('plan_buyin_money')) {
           console.error("elem in medusa has no plan_buyin_money: ", elem['fund_id']);
-        } else if (elem['money'] > -2 && elem['plan_buyin_money'] > 0) {
+        } else if (elem['money'] > -2 && elem['plan_buyin_money'] > 0 && !elem['to_give_up']) {
           if (fund_buy_ratio_config.value['trendFactor']['medusa'] != null) {
             elem['plan_buyin_money'] = Math.round(elem['plan_buyin_money'] * fund_buy_ratio_config.value['max_money_for_unknow'] * fund_buy_ratio_config.value['trendFactor']['medusa'] / _tot_plan_money_medusa)
           } else {
@@ -2357,7 +2421,7 @@ watch([composeObjs, compose_name, fixedHoldObjs, buyoutRecords, noteObjs, show4S
       && fund_buy_ratio_config.value['trendFactor'] && fund_buy_ratio_config.value['trendFactor'].hasOwnProperty('dolphin')) {
         if (!elem.hasOwnProperty('plan_buyin_money')) {
           console.error("elem in dolphin has no plan_buyin_money: ", elem['fund_id']);
-        } else if (elem['money'] > -2 && elem['plan_buyin_money'] > 0) {
+        } else if (elem['money'] > -2 && elem['plan_buyin_money'] > 0 && !elem['to_give_up']) {
           if (fund_buy_ratio_config.value['trendFactor']['dolphin'] != null) {
             elem['plan_buyin_money'] = Math.round(elem['plan_buyin_money'] * fund_buy_ratio_config.value['max_money_for_A_deb'] * fund_buy_ratio_config.value['trendFactor']['dolphin'] / _tot_plan_money_dolphin)
           } else {
@@ -2370,7 +2434,7 @@ watch([composeObjs, compose_name, fixedHoldObjs, buyoutRecords, noteObjs, show4S
       && fund_buy_ratio_config.value['trendFactor'] && fund_buy_ratio_config.value['trendFactor'].hasOwnProperty('trident')) {
         if (!elem.hasOwnProperty('plan_buyin_money')) {
           console.error("elem in trident has no plan_buyin_money: ", elem['fund_id']);
-        } else if (elem['money'] > -2 && elem['plan_buyin_money'] > 0) {
+        } else if (elem['money'] > -2 && elem['plan_buyin_money'] > 0 && !elem['to_give_up']) {
           if (fund_buy_ratio_config.value['trendFactor']['trident'] != null) {
             elem['plan_buyin_money'] = Math.round(elem['plan_buyin_money'] * fund_buy_ratio_config.value['max_money_for_B_deb'] * fund_buy_ratio_config.value['trendFactor']['trident'] / _tot_plan_money_trident)
           } else {
@@ -2389,7 +2453,7 @@ watch([composeObjs, compose_name, fixedHoldObjs, buyoutRecords, noteObjs, show4S
       if (elem['compose_name'] === 'gdngoat') {
         if (!elem.hasOwnProperty('plan_buyin_money')) {
           console.error("elem in gdngoat has no plan_buyin_money: ", elem['fund_id']);
-        } else if (elem['money'] > -2 && elem['plan_buyin_money'] > 0) {
+        } else if (elem['money'] > -2 && elem['plan_buyin_money'] > 0 && !elem['to_give_up']) {
           tot_plan_money_gdngoat.value += elem['plan_buyin_money']
         }
         if (elem['money'] > 0) {
@@ -2399,7 +2463,7 @@ watch([composeObjs, compose_name, fixedHoldObjs, buyoutRecords, noteObjs, show4S
       && fund_buy_ratio_config.value['trendFactor'] && fund_buy_ratio_config.value['trendFactor'].hasOwnProperty('ovtree')) {
         if (!elem.hasOwnProperty('plan_buyin_money')) {
           console.error("elem in ovtree has no plan_buyin_money: ", elem['fund_id']);
-        } else if (elem['money'] > -2 && elem['plan_buyin_money'] > 0) {
+        } else if (elem['money'] > -2 && elem['plan_buyin_money'] > 0 && !elem['to_give_up']) {
           tot_plan_money_ovtree.value += elem['plan_buyin_money']
         }
         if (elem['money'] > 0) {
@@ -2409,7 +2473,7 @@ watch([composeObjs, compose_name, fixedHoldObjs, buyoutRecords, noteObjs, show4S
       && fund_buy_ratio_config.value['trendFactor'] && fund_buy_ratio_config.value['trendFactor'].hasOwnProperty('flyhorse')) {
         if (!elem.hasOwnProperty('plan_buyin_money')) {
           console.error("elem in flyhorse has no plan_buyin_money: ", elem['fund_id']);
-        } else if (elem['money'] > -2 && elem['plan_buyin_money'] > 0) {
+        } else if (elem['money'] > -2 && elem['plan_buyin_money'] > 0 && !elem['to_give_up']) {
           tot_plan_money_flyhorse.value += elem['plan_buyin_money']
         }
         if (elem['money'] > 0) {
@@ -2419,7 +2483,7 @@ watch([composeObjs, compose_name, fixedHoldObjs, buyoutRecords, noteObjs, show4S
       && fund_buy_ratio_config.value['trendFactor'] && fund_buy_ratio_config.value['trendFactor'].hasOwnProperty('medusa')) {
         if (!elem.hasOwnProperty('plan_buyin_money')) {
           console.error("elem in medusa has no plan_buyin_money: ", elem['fund_id']);
-        } else if (elem['money'] > -2 && elem['plan_buyin_money'] > 0) {
+        } else if (elem['money'] > -2 && elem['plan_buyin_money'] > 0 && !elem['to_give_up']) {
           tot_plan_money_medusa.value += elem['plan_buyin_money']
         }
         if (elem['money'] > 0) {
@@ -2429,7 +2493,7 @@ watch([composeObjs, compose_name, fixedHoldObjs, buyoutRecords, noteObjs, show4S
       && fund_buy_ratio_config.value['trendFactor'] && fund_buy_ratio_config.value['trendFactor'].hasOwnProperty('dolphin')) {
         if (!elem.hasOwnProperty('plan_buyin_money')) {
           console.error("elem in dolphin has no plan_buyin_money: ", elem['fund_id']);
-        } else if (elem['money'] > -2 && elem['plan_buyin_money'] > 0) {
+        } else if (elem['money'] > -2 && elem['plan_buyin_money'] > 0 && !elem['to_give_up']) {
           tot_plan_money_dolphin.value += elem['plan_buyin_money']
         }
         if (elem['money'] > 0) {
@@ -2439,7 +2503,7 @@ watch([composeObjs, compose_name, fixedHoldObjs, buyoutRecords, noteObjs, show4S
       && fund_buy_ratio_config.value['trendFactor'] && fund_buy_ratio_config.value['trendFactor'].hasOwnProperty('trident')) {
         if (!elem.hasOwnProperty('plan_buyin_money')) {
           console.error("elem in trident has no plan_buyin_money: ", elem['fund_id']);
-        } else if (elem['money'] > -2 && elem['plan_buyin_money'] > 0) {
+        } else if (elem['money'] > -2 && elem['plan_buyin_money'] > 0 && !elem['to_give_up']) {
           tot_plan_money_trident.value += elem['plan_buyin_money']
         }
         if (elem['money'] > 0) {
@@ -2466,7 +2530,7 @@ watch([composeObjs, compose_name, fixedHoldObjs, buyoutRecords, noteObjs, show4S
       if (elem['compose_name'] === 'gdngoat') {
         if (!elem.hasOwnProperty('adjust_money') || !elem.hasOwnProperty('last_adjust_money_date')) {
           console.log("elem in gdngoat has no adjust_money or last_adjust_money_date: ", elem['fund_id']);
-        } else if (elem['money'] > -2 && elem['adjust_money'] > 0) {
+        } else if (elem['money'] > -2 && elem['adjust_money'] > 0 && !elem['to_give_up']) {
           if (tot_plan_money_gdngoat.value > 0 && _tot_adj_money_gdngoat > 0 && _today_str_4_adj != elem['last_adjust_money_date']) {
             elem['adjust_money'] = Math.floor(elem['adjust_money'] * tot_plan_money_gdngoat.value / _tot_adj_money_gdngoat)
           }
@@ -2476,7 +2540,7 @@ watch([composeObjs, compose_name, fixedHoldObjs, buyoutRecords, noteObjs, show4S
       } else if (elem['compose_name'] === 'ovtree') {
         if (!elem.hasOwnProperty('adjust_money') || !elem.hasOwnProperty('last_adjust_money_date')) {
           console.log("elem in ovtree has no adjust_money or last_adjust_money_date: ", elem['fund_id']);
-        } else if (elem['money'] > -2 && elem['adjust_money'] > 0) {
+        } else if (elem['money'] > -2 && elem['adjust_money'] > 0 && !elem['to_give_up']) {
           if (tot_plan_money_ovtree.value > 0 && _tot_adj_money_ovtree > 0 && _today_str_4_adj != elem['last_adjust_money_date']) {
             elem['adjust_money'] = Math.floor(elem['adjust_money'] * tot_plan_money_ovtree.value / _tot_adj_money_ovtree)
           }
@@ -2486,7 +2550,7 @@ watch([composeObjs, compose_name, fixedHoldObjs, buyoutRecords, noteObjs, show4S
       } else if (elem['compose_name'] === 'flyhorse') {
         if (!elem.hasOwnProperty('adjust_money') || !elem.hasOwnProperty('last_adjust_money_date')) {
           console.log("elem in flyhorse has no adjust_money or last_adjust_money_date: ", elem['fund_id']);
-        } else if (elem['money'] > -2 && elem['adjust_money'] > 0) {
+        } else if (elem['money'] > -2 && elem['adjust_money'] > 0 && !elem['to_give_up']) {
           if (tot_plan_money_flyhorse.value > 0 && _tot_adj_money_flyhorse > 0 && _today_str_4_adj != elem['last_adjust_money_date']) {
             elem['adjust_money'] = Math.floor(elem['adjust_money'] * tot_plan_money_flyhorse.value / _tot_adj_money_flyhorse)
           }
@@ -2496,7 +2560,7 @@ watch([composeObjs, compose_name, fixedHoldObjs, buyoutRecords, noteObjs, show4S
       } else if (elem['compose_name'] === 'medusa') {
         if (!elem.hasOwnProperty('adjust_money') || !elem.hasOwnProperty('last_adjust_money_date')) {
           console.log("elem in medusa has no adjust_money or last_adjust_money_date: ", elem['fund_id']);
-        } else if (elem['money'] > -2 && elem['adjust_money'] > 0) {
+        } else if (elem['money'] > -2 && elem['adjust_money'] > 0 && !elem['to_give_up']) {
           if (tot_plan_money_medusa.value > 0 && _tot_adj_money_medusa > 0 && _today_str_4_adj != elem['last_adjust_money_date']) {
             elem['adjust_money'] = Math.floor(elem['adjust_money'] * tot_plan_money_medusa.value / _tot_adj_money_medusa)
           }
@@ -2506,7 +2570,7 @@ watch([composeObjs, compose_name, fixedHoldObjs, buyoutRecords, noteObjs, show4S
       } else if (elem['compose_name'] === 'dolphin') {
         if (!elem.hasOwnProperty('adjust_money') || !elem.hasOwnProperty('last_adjust_money_date')) {
           console.log("elem in dolphin has no adjust_money or last_adjust_money_date: ", elem['fund_id']);
-        } else if (elem['money'] > -2 && elem['adjust_money'] > 0) {
+        } else if (elem['money'] > -2 && elem['adjust_money'] > 0 && !elem['to_give_up']) {
           if (tot_plan_money_dolphin.value > 0 && _tot_adj_money_dolphin > 0 && _today_str_4_adj != elem['last_adjust_money_date']) {
             elem['adjust_money'] = Math.floor(elem['adjust_money'] * tot_plan_money_dolphin.value / _tot_adj_money_dolphin)
           }
@@ -2516,7 +2580,7 @@ watch([composeObjs, compose_name, fixedHoldObjs, buyoutRecords, noteObjs, show4S
       } else if (elem['compose_name'] === 'trident') {
         if (!elem.hasOwnProperty('adjust_money') || !elem.hasOwnProperty('last_adjust_money_date')) {
           console.log("elem in trident has no adjust_money or last_adjust_money_date: ", elem['fund_id']);
-        } else if (elem['money'] > -2 && elem['adjust_money'] > 0) {
+        } else if (elem['money'] > -2 && elem['adjust_money'] > 0 && !elem['to_give_up']) {
           if (tot_plan_money_trident.value > 0 && _tot_adj_money_trident > 0 && _today_str_4_adj != elem['last_adjust_money_date']) {
             elem['adjust_money'] = Math.floor(elem['adjust_money'] * tot_plan_money_trident.value / _tot_adj_money_trident)
           }
@@ -2528,7 +2592,7 @@ watch([composeObjs, compose_name, fixedHoldObjs, buyoutRecords, noteObjs, show4S
 
     // 处理 设止损 和 去止损 逻辑
     composeViewObjs.value.forEach(elem => {
-      processLossFlag4Elem(elem, fund_buy_ratio_config);
+      process_Bottom_Loss_Flag_4_Elem(elem, fund_buy_ratio_config);
     })
   }
 
@@ -2959,7 +3023,8 @@ async function soldFixedFundByBulkUi(_fund_id, _fund_name, _one_hold_obj_end, _h
 async function soldFixedFundByBulk() {
   dlgController.value.soldDlg.hide()
   await soldComposeFixedHold(fund_id_sold.value, fund_name_sold.value, one_hold_obj_end.value, hold_objs.value)
-  await setComposeSoldDate(fund_one_row_obj.value['fund_id'], fund_one_row_obj.value['fund_name'], fund_one_row_obj.value['compose_name'], -1, fund_one_row_obj.value['buyin_source'])
+  await setComposeSoldDate(fund_one_row_obj.value['fund_id'], fund_one_row_obj.value['fund_name'], fund_one_row_obj.value['compose_name'], 
+    -1, fund_one_row_obj.value['buyin_source'], fund_one_row_obj.value['lossFlag'], fund_one_row_obj.value['fixed_buyin_date'], fund_one_row_obj.value['to_give_up'])
 }
 
 const fund_id_remove = ref('')
@@ -2983,7 +3048,8 @@ async function removeFixedFund() {
     dlgController.value.removeDlg.hide()
   } else if (fixed_remove_type.value == 'remove today') {
     await buyOutFixedFundOfToday(fund_id_remove.value, fund_name_remove.value);
-    await setComposeProperty(fund_obj_remove.value['fund_id'], fund_obj_remove.value['fund_name'], fund_obj_remove.value['compose_name'], -1, fund_obj_remove.value['buyin_source'], fund_obj_remove.value['lossFlag'], fund_obj_remove.value['fixed_buyin_date']);
+    await setComposeProperty(fund_obj_remove.value['fund_id'], fund_obj_remove.value['fund_name'], fund_obj_remove.value['compose_name'], 
+      -1, fund_obj_remove.value['buyin_source'], fund_obj_remove.value['lossFlag'], fund_obj_remove.value['fixed_buyin_date'], fund_obj_remove.value['to_give_up']);
     dlgController.value.removeDlg.hide()
   } else {
     console.error("internal error as remove fund type does not match.")
@@ -3913,14 +3979,24 @@ function cancelCustAddCompose() {
   custAddError.value = ''
 }
 
-async function setComposeProperty_wrapper(_fund_id, _fund_name, _compose_name, _money, _buyin_source, _loss_flag, _fixed_buyin_date) {
+const saveProperty_inprogress = ref(false)
+
+async function setComposeProperty_wrapper(_fund_id, _fund_name, _compose_name, _money, _buyin_source, _loss_flag, _fixed_buyin_date, _to_give_up) {
+
+  if (saveProperty_inprogress.value) {
+    alert("保存正在进行中，稍后再试")
+    return
+  }
+  
+  saveProperty_inprogress.value = true
+
   let _show4SoldOnly  = show4SoldOnly.value
   let _showPauseOnly  = showPauseOnly.value
   let _showAdjustOnly = showAdjustOnly.value
   let _showPoleOnly   = showPoleOnly.value
   let _showNoteOnly   = showNoteOnly.value
 
-  await setComposeProperty(_fund_id, _fund_name, _compose_name, _money, _buyin_source, _loss_flag, _fixed_buyin_date);
+  await setComposeProperty(_fund_id, _fund_name, _compose_name, _money, _buyin_source, _loss_flag, _fixed_buyin_date, _to_give_up);
 
   show4SoldOnly.value = false
   showPauseOnly.value = false
@@ -3935,6 +4011,8 @@ async function setComposeProperty_wrapper(_fund_id, _fund_name, _compose_name, _
     showPoleOnly.value   = _showPoleOnly
     showNoteOnly.value   = _showNoteOnly
   }, 1500)
+
+  saveProperty_inprogress.value = false
 }
 
 </script>

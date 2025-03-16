@@ -20,7 +20,7 @@ const {getZsRepo, getZsRepoHides, getZsRepoExclude, getRepoBase, getRepoRecycles
 const zskbStore = useZskbStore()
 const {getRtRates, getZskb} = zskbStore
 const composeStore = useComposeStore()
-const {getAllCompose, getComposeFixedHold, getComposeTips} = composeStore
+const {getAllCompose, getComposeFixedHold, getComposeTips, getBuyBottomObjs} = composeStore
 const reportStore = useReportStore()
 const {getRecordsAndRates, getRetroFunds, getFixedFunds, getAllComposeFixedHold, getBigPoolFixedHold, getRemovedDate4Report, getFundBuyWeight, setFundBuyWeight} = reportStore
 const aggressiveStore = useAggressiveStore()
@@ -70,6 +70,7 @@ getBuyOrSoldNote()
 getFundAndBuyRatioConfig()
 getBulkSetMode()
 getComposeTips()
+getBuyBottomObjs()
 get_os_type()
 </script>
 
